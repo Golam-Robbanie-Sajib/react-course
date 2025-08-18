@@ -6,72 +6,78 @@ import { FiX, FiBookOpen } from 'react-icons/fi';
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const getPhaseColor = (phase) => {
     const colors = {
-      'JavaScript Fundamentals': 'bg-emerald-500 text-white',
-      'Advanced JavaScript': 'bg-orange-500 text-white', 
-      'React Fundamentals': 'bg-cyan-500 text-white',
-      'Advanced React': 'bg-purple-500 text-white',
-      'Production Ready': 'bg-rose-500 text-white'
+      'JavaScript Fundamentals': 'bg-emerald-400 text-white shadow-emerald-200',
+      'Advanced JavaScript': 'bg-orange-400 text-white shadow-orange-200', 
+      'React Fundamentals': 'bg-sky-400 text-white shadow-sky-200',
+      'Advanced React': 'bg-violet-400 text-white shadow-violet-200',
+      'Production Ready': 'bg-rose-400 text-white shadow-rose-200'
     };
-    return colors[phase] || 'bg-gray-500 text-white';
+    return colors[phase] || 'bg-gray-400 text-white shadow-gray-200';
   };
 
   return (
     <>
-      {/* Overlay */}
       <div 
-        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-20 transition-opacity md:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 bg-black/20 z-20 transition-opacity md:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setIsOpen(false)}
       />
       
-      <aside className={`fixed top-0 left-0 h-full w-72 bg-gray-900 text-white transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0 z-30 flex flex-col shadow-2xl`}>
+      <aside className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-out md:relative md:translate-x-0 z-30 flex flex-col border-r border-gray-100`}>
         
         {/* Header */}
-        <div className="p-6 flex justify-between items-center border-b border-gray-700 bg-gradient-to-r from-blue-600 to-purple-600">
-          <div className="flex items-center gap-3">
-            <FiBookOpen className="text-white" size={24} />
-            <h1 className="text-xl font-bold text-white">React Course</h1>
+        <div className="p-8 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <FiBookOpen size={24} />
+              </div>
+              <h1 className="text-2xl font-bold">React Course</h1>
+            </div>
+            <button onClick={() => setIsOpen(false)} className="md:hidden p-2 hover:bg-white/20 rounded-lg transition-colors">
+              <FiX size={20} />
+            </button>
           </div>
-          <button onClick={() => setIsOpen(false)} className="md:hidden text-white hover:text-gray-200 transition-colors">
-            <FiX size={24} />
-          </button>
+          <p className="text-indigo-100 text-sm font-medium">25-Day Learning Journey</p>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-3 bg-gray-900">
-          <ul className="space-y-2">
-            {courseData.map(({ day, title, phase }) => (
-              <li key={day}>
-                <NavLink
-                  to={`/day/${day}`}
-                  onClick={() => setIsOpen(false)}
-                  className={({ isActive }) => 
-                    `group flex flex-col p-3 rounded-xl transition-all duration-200 ${
-                      isActive 
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg scale-105 border-2 border-blue-400' 
-                        : 'hover:bg-gray-800 hover:shadow-md hover:scale-102'
-                    }`
-                  }
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`px-3 py-1 text-xs font-bold rounded-full ${getPhaseColor(phase)}`}>
-                      Day {day}
-                    </span>
-                  </div>
-                  <span className="font-medium text-sm text-white leading-tight">
-                    {title}
-                  </span>
-                </NavLink>
-              </li>
-            ))}
-          </ul>
+        <nav className="flex-1 overflow-y-auto p-6 space-y-4">
+          {courseData.map(({ day, title, phase }) => (
+            <NavLink
+              key={day}
+              to={`/day/${day}`}
+              onClick={() => setIsOpen(false)}
+              className={({ isActive }) => 
+                `group block p-4 rounded-2xl transition-all duration-200 ${
+                  isActive 
+                    ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg transform scale-102' 
+                    : 'hover:bg-gray-50 hover:shadow-md'
+                }`
+              }
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <span className={`px-3 py-1 text-sm font-bold rounded-full shadow-lg ${getPhaseColor(phase)}`}>
+                  {day}
+                </span>
+              </div>
+              <h3 className="font-semibold text-gray-800 group-hover:text-gray-900 leading-relaxed">
+                {title}
+              </h3>
+              <p className="text-sm text-gray-500 mt-1 font-medium">{phase}</p>
+            </NavLink>
+          ))}
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-700 bg-gray-800">
-          <div className="text-center">
-            <p className="text-xs text-gray-300 mb-2">Progress: 0/25 Days</p>
-            <div className="w-full bg-gray-700 rounded-full h-3">
-              <div className="bg-gradient-to-r from-green-400 to-blue-500 h-3 rounded-full" style={{width: '0%'}}></div>
+        <div className="p-6 bg-gray-50 border-t border-gray-100">
+          <div className="text-center space-y-3">
+            <p className="text-sm text-gray-600 font-medium">Your Progress</p>
+            <div className="flex justify-between items-center text-xs text-gray-500 mb-2">
+              <span>0 days</span>
+              <span>25 days</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div className="bg-gradient-to-r from-emerald-400 to-sky-500 h-3 rounded-full transition-all duration-500" style={{width: '0%'}}></div>
             </div>
           </div>
         </div>
