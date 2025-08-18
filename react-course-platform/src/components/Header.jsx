@@ -1,49 +1,34 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { FiHome, FiMenu, FiBookOpen } from 'react-icons/fi';
+import React from 'react'
+import { Link } from 'react-router-dom'
 
-const Header = ({ isHomePage, onMenuClick }) => {
-  const location = useLocation();
-  const getCurrentDayTitle = () => {
-    const match = location.pathname.match(/\/day\/(\d+)/);
-    if (match) {
-      return `Day ${match[1]}`;
-    }
-    return 'Home';
-  };
-
+const Header = () => {
   return (
-    <header className="bg-white/90 backdrop-blur-md shadow-lg border-b border-slate-200/50 p-4 flex justify-between items-center z-10">
-      <div className="flex items-center gap-4">
-        {!isHomePage && (
-          <Link 
-            to="/" 
-            className="flex items-center gap-2 text-slate-600 hover:text-blue-600 transition-colors group"
-          >
-            <div className="p-2 rounded-lg group-hover:bg-blue-50 transition-colors">
-              <FiHome size={20} />
-            </div>
-            <span className="hidden sm:block font-medium">Home</span>
-          </Link>
-        )}
-        
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm">
-          <FiBookOpen className="text-slate-400" size={16} />
-          <span className="text-slate-600 font-medium">{getCurrentDayTitle()}</span>
+    <header className="bg-white shadow-sm border-b">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center py-4">
+          <div className="flex items-center">
+            <Link to="/" className="text-xl font-bold text-gray-900">
+              React Course Platform
+            </Link>
+          </div>
+          <nav className="flex space-x-4">
+            <Link 
+              to="/" 
+              className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+            >
+              Home
+            </Link>
+            <Link 
+              to="/day/1" 
+              className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+            >
+              Start Course
+            </Link>
+          </nav>
         </div>
       </div>
-
-      <div className="md:hidden">
-        <button 
-          onClick={onMenuClick} 
-          className="p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-        >
-          <FiMenu size={24} />
-        </button>
-      </div>
     </header>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header

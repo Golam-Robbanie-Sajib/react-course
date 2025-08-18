@@ -1,141 +1,152 @@
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { courseData } from '../data/courseData';
-import NotFoundPage from './NotFoundPage';
-import Solution from '../components/Solution';
-import { FiClock, FiExternalLink, FiArrowLeft, FiArrowRight } from 'react-icons/fi';
+import React from 'react'
+import { useParams, Link } from 'react-router-dom'
+import { courseData } from '../data/courseData'
+import CodeBlock from '../components/CodeBlock'
+import Solution from '../components/Solution'
 
 const DayPage = () => {
-  const { dayId } = useParams();
-  const dayData = courseData.find(d => d.day === parseInt(dayId));
-  
-  if (!dayData) return <NotFoundPage />;
-  
-  const dayNumber = parseInt(dayId);
-  const isFirstDay = dayNumber === 1;
-  const isLastDay = dayNumber === courseData.length;
+  const { dayNumber } = useParams()
+  const currentDay = parseInt(dayNumber)
+  const dayData = courseData.find(day => day.day === currentDay)
 
-  const getPhaseGradient = (phase) => {
-    const gradients = {
-      'JavaScript Fundamentals': 'from-emerald-400 to-teal-500',
-      'Advanced JavaScript': 'from-orange-400 to-red-500', 
-      'React Fundamentals': 'from-sky-400 to-blue-500',
-      'Advanced React': 'from-violet-400 to-purple-500',
-      'Production Ready': 'from-rose-400 to-pink-500'
-    };
-    return gradients[phase] || 'from-gray-400 to-gray-500';
-  };
+  if (!dayData) {
+    return (
+      <div className="text-center">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">Day Not Found</h1>
+        <Link to="/" className="text-blue-600 hover:text-blue-800">
+          Return to Home
+        </Link>
+      </div>
+    )
+  }
+
+  const prevDay = currentDay > 1 ? currentDay - 1 : null
+  const nextDay = currentDay < courseData.length ? currentDay + 1 : null
 
   return (
-    <div className="max-w-4xl mx-auto space-y-12">
-      {/* Hero Header */}
-      <div className={`bg-gradient-to-r ${getPhaseGradient(dayData.phase)} rounded-3xl p-10 text-white shadow-2xl`}>
-        <div className="max-w-3xl">
-          <div className="flex items-center gap-4 mb-6">
-            <span className="bg-white/20 px-4 py-2 rounded-full text-lg font-bold backdrop-blur-sm">
+    <div className="max-w-4xl mx-auto">
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
               Day {dayData.day}
             </span>
-            <span className="flex items-center gap-2 text-white/90">
-              <FiClock size={18} />
-              {dayData.time || '4 hours'}
+            <span className="bg-purple-100 text-purple-800 text-sm font-medium px-3 py-1 rounded-full">
+              {dayData.phase}
             </span>
           </div>
-          <h1 className="text-4xl lg:text-5xl font-bold mb-4 leading-tight">
-            {dayData.title}
-          </h1>
-          <p className="text-xl text-white/90 font-medium">
-            {dayData.phase}
-          </p>
+          <div className="text-sm text-gray-500">
+            {currentDay} of {courseData.length}
+          </div>
+        </div>
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          {dayData.title}
+        </h1>
+        
+        {/* Topics */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {dayData.topics.map((topic, index) => (
+            <span key={index} className="bg-gray-100 text-gray-700 text-sm px-2 py-1 rounded">
+              {topic}
+            </span>
+          ))}
         </div>
       </div>
 
-      {/* Resources */}
-      {dayData.resources && dayData.resources.length > 0 && (
-        <div className="bg-white rounded-3xl p-8 shadow-lg border border-blue-100">
-          <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-            <span className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-              📚
-            </span>
-            Learning Resources
-          </h3>
-          <div className="grid gap-4">
-            {dayData.resources.map((resource, index) => (
-              <a 
-                key={index}
-                href={resource.url} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="flex items-center gap-4 p-4 bg-blue-50 rounded-2xl border border-blue-200 hover:border-blue-400 hover:shadow-md transition-all group"
-              >
-                <FiExternalLink className="text-blue-600 group-hover:scale-110 transition-transform" size={20} />
-                <span className="text-blue-800 font-semibold text-lg group-hover:text-blue-900">
-                  {resource.name}
-                </span>
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Theory Content */}
-      <div className="bg-white rounded-3xl p-10 shadow-lg border border-gray-100">
-        <div 
-          className="prose prose-xl prose-gray max-w-none prose-headings:font-bold prose-headings:text-gray-800 prose-p:text-gray-700 prose-p:leading-relaxed prose-strong:text-gray-900" 
-          dangerouslySetInnerHTML={{ __html: dayData.theory }} 
-        />
-      </div>
-
-      {/* Exercises */}
       <div className="space-y-8">
-        <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-          <span className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white text-lg">
-            ⚡
-          </span>
-          Practice Exercises
-        </h2>
-        
-        {dayData.exercises.map((ex, index) => (
-          <div key={index} className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
-            <div className="flex gap-6">
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white font-bold text-xl shrink-0">
-                {index + 1}
+        {/* Theory Section */}
+        <section>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+            Theory
+          </h2>
+          <div 
+            className="prose prose-lg max-w-none text-gray-700"
+            dangerouslySetInnerHTML={{ __html: dayData.theory }}
+          />
+        </section>
+
+        {/* Exercises */}
+        <section>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+            Exercises
+          </h2>
+          {dayData.exercises.map((exercise, index) => (
+            <div key={index} className="mb-8 border border-gray-200 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                {exercise.title}
+              </h3>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                <p className="text-gray-800">{exercise.description}</p>
               </div>
-              <div className="flex-1 space-y-4">
-                <h3 className="text-2xl font-bold text-gray-800">{ex.title}</h3>
-                <p className="text-lg text-gray-600 leading-relaxed">{ex.description}</p>
-                <Solution solution={ex.solution} />
+              
+              <div className="mb-4">
+                <h4 className="text-lg font-medium text-gray-900 mb-2">Solution:</h4>
+                <CodeBlock code={exercise.solution.code} />
               </div>
+              
+              {exercise.solution.explanation && (
+                <div className="mt-4">
+                  <h4 className="text-lg font-medium text-gray-900 mb-2">Explanation:</h4>
+                  <div 
+                    className="prose max-w-none text-gray-700"
+                    dangerouslySetInnerHTML={{ __html: exercise.solution.explanation }}
+                  />
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          ))}
+        </section>
+
+        {/* Resources */}
+        {dayData.resources && dayData.resources.length > 0 && (
+          <section>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+              Additional Resources
+            </h2>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <ul className="space-y-2">
+                {dayData.resources.map((resource, index) => (
+                  <li key={index}>
+                    <a 
+                      href={resource.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline"
+                    >
+                      {resource.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        )}
       </div>
 
-      {/* Navigation */}
-      <div className="flex justify-between items-center pt-12 border-t-2 border-gray-100">
-        {isFirstDay ? (
-          <div></div>
-        ) : (
-          <Link 
-            to={`/day/${dayNumber - 1}`} 
-            className="flex items-center gap-3 bg-white px-8 py-4 rounded-2xl border-2 border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all font-semibold text-gray-700 text-lg"
-          >
-            <FiArrowLeft size={20} />
-            Previous Day
-          </Link>
-        )}
-        
-        {!isLastDay && (
-          <Link 
-            to={`/day/${dayNumber + 1}`} 
-            className={`flex items-center gap-3 bg-gradient-to-r ${getPhaseGradient(dayData.phase)} text-white px-8 py-4 rounded-2xl hover:shadow-lg hover:scale-105 transition-all font-semibold text-lg`}
-          >
-            Next Day
-            <FiArrowRight size={20} />
-          </Link>
-        )}
+      <div className="flex justify-between items-center mt-12 pt-8 border-t">
+        <div>
+          {prevDay && (
+            <Link
+              to={`/day/${prevDay}`}
+              className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-md text-sm font-medium"
+            >
+              ← Previous Day
+            </Link>
+          )}
+        </div>
+        <div>
+          {nextDay && (
+            <Link
+              to={`/day/${nextDay}`}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+            >
+              Next Day →
+            </Link>
+          )}
+        </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default DayPage;
+export default DayPage
