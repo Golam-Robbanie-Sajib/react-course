@@ -9,7 +9,7 @@ const Layout = () => {
   const isHomePage = location.pathname === '/';
 
   return (
-    <div className="flex h-screen bg-gray-100 font-sans">
+    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 font-sans">
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setSidebarOpen} />
       
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -17,8 +17,7 @@ const Layout = () => {
           isHomePage={isHomePage} 
           onMenuClick={() => setSidebarOpen(true)} 
         />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-white p-6 md:p-8">
-          {/* This Outlet component is where React Router will render our pages */}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-white/80 backdrop-blur-sm p-6 md:p-8 shadow-inner">
           <Outlet />
         </main>
       </div>
