@@ -1,7 +1,10 @@
+// filepath: components/code-block.tsx
 "use client"
 
 import { useState } from "react"
 import { Copy, Check } from "lucide-react"
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
+import { atomDark } from "react-syntax-highlighter/dist/cjs/styles/prism"
 import { Button } from "@/components/ui/button"
 
 interface CodeBlockProps {
@@ -19,24 +22,6 @@ export function CodeBlock({ code, language = "javascript", title }: CodeBlockPro
     setTimeout(() => setCopied(false), 2000)
   }
 
-  // Simple syntax highlighting for JavaScript/JSX
-  const highlightCode = (code: string) => {
-    return code
-      .replace(/(\/\/.*$)/gm, '<span class="text-green-400">$1</span>') // Comments
-      .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="text-green-400">$1</span>') // Block comments
-      .replace(
-        /\b(const|let|var|function|return|if|else|for|while|class|import|export|from|default|async|await)\b/g,
-        '<span class="text-purple-400">$1</span>',
-      ) // Keywords
-      .replace(/\b(true|false|null|undefined)\b/g, '<span class="text-orange-400">$1</span>') // Literals
-      .replace(/(['"`])((?:(?!\1)[^\\]|\\.)*)(\1)/g, '<span class="text-green-300">$1$2$3</span>') // Strings
-      .replace(/\b(\d+\.?\d*)\b/g, '<span class="text-blue-400">$1</span>') // Numbers
-      .replace(
-        /\b(console|window|document|React|useState|useEffect|props|state)\b/g,
-        '<span class="text-cyan-400">$1</span>',
-      ) // Common objects/hooks
-  }
-
   return (
     <div className="relative group">
       {title && (
@@ -47,15 +32,24 @@ export function CodeBlock({ code, language = "javascript", title }: CodeBlockPro
       )}
 
       <div className="relative">
-        <pre
-          className={`bg-slate-900 text-slate-100 p-4 overflow-x-auto text-sm leading-relaxed ${title ? "rounded-t-none" : ""} rounded-xl`}
+        <SyntaxHighlighter
+          language={language}
+          style={atomDark}
+          customStyle={{
+            margin: 0,
+            padding: "16px",
+            backgroundColor: "#0d1117", // A dark background color
+            borderRadius: title ? "0 0 0.75rem 0.75rem" : "0.75rem",
+          }}
+          codeTagProps={{
+            style: {
+              fontSize: "0.875rem",
+              fontFamily: "var(--font-mono)",
+            },
+          }}
         >
-          <code
-            dangerouslySetInnerHTML={{
-              __html: highlightCode(code),
-            }}
-          />
-        </pre>
+          {code}
+        </SyntaxHighlighter>
 
         <Button
           size="sm"

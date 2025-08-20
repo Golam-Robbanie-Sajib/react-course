@@ -1,4 +1,6 @@
 "use client"
+// filepath: components/progress-tracker.tsx
+"use client"
 
 import { Trophy, Target, Calendar } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"

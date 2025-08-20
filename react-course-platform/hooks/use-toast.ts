@@ -1,4 +1,5 @@
-// filepath: hooks/use-progress.ts
+// hooks/use-progress.ts
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -8,6 +9,7 @@ export function useProgress() {
   const [currentDay, setCurrentDay] = useState<number>(1)
 
   useEffect(() => {
+    // Load progress from localStorage
     const saved = localStorage.getItem("course-progress")
     if (saved) {
       try {
@@ -31,23 +33,14 @@ export function useProgress() {
     setCurrentDay(current)
   }
 
-  const toggleDayCompletion = (day: number) => {
-    const isCurrentlyCompleted = completedDays.includes(day)
-    let newCompleted: number[]
-
-    if (isCurrentlyCompleted) {
-      // If the day is already complete, remove it.
-      newCompleted = completedDays.filter((d) => d !== day)
-    } else {
-      // If the day is not complete, add it and re-sort.
-      newCompleted = [...completedDays, day]
+  const markDayComplete = (day: number) => {
+    const newCompleted = [...completedDays]
+    if (!newCompleted.includes(day)) {
+      newCompleted.push(day)
       newCompleted.sort((a, b) => a - b)
     }
-
-    // Recalculate the current day based on the highest completed day
-    const newCurrent = newCompleted.length > 0 ? Math.max(...newCompleted) + 1 : 1
-    // Ensure the current day doesn't exceed the total number of days
-    saveProgress(newCompleted, Math.min(newCurrent, 25))
+    const newCurrent = Math.max(currentDay, day + 1)
+    saveProgress(newCompleted, newCurrent)
   }
 
   const resetProgress = () => {
@@ -59,7 +52,7 @@ export function useProgress() {
   return {
     completedDays,
     currentDay,
-    toggleDayCompletion, // Use this new function instead of markDayComplete
+    markDayComplete,
     resetProgress,
     isCompleted: (day: number) => completedDays.includes(day),
   }

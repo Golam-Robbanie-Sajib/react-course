@@ -1,3 +1,4 @@
+// filepath: components/day-page.tsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -16,17 +17,17 @@ interface DayPageProps {
 }
 
 export function DayPage({ day }: DayPageProps) {
-  const { markDayComplete, isCompleted } = useProgress()
+  const { toggleDayCompletion, isCompleted } = useProgress()
   const [isLoading, setIsLoading] = useState(true)
   const dayCompleted = isCompleted(day.day)
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 300)
     return () => clearTimeout(timer)
-  }, [])
+  }, [day])
 
-  const handleCompleteDay = () => {
-    markDayComplete(day.day)
+  const handleToggleComplete = () => {
+    toggleDayCompletion(day.day)
   }
 
   if (isLoading) {
@@ -41,16 +42,7 @@ export function DayPage({ day }: DayPageProps) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 p-6">
-      <div className="flex items-center justify-between mb-6">
-        <Button variant="outline" asChild>
-          <Link href="/">
-            <Home className="h-4 w-4 mr-2" />
-            Home
-          </Link>
-        </Button>
-      </div>
-
+    <div className="max-w-4xl mx-auto space-y-8">
       <div className="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -63,19 +55,20 @@ export function DayPage({ day }: DayPageProps) {
               </Badge>
             </div>
 
-            {!dayCompleted && (
-              <Button onClick={handleCompleteDay} size="sm">
+            {/* --- THIS IS THE UPDATED SECTION --- */}
+            {dayCompleted ? (
+              <Button onClick={handleToggleComplete} size="sm" variant="outline" className="text-green-600 border-green-300 hover:bg-green-50 dark:text-green-400 dark:border-green-700 dark:hover:bg-green-900/50">
                 <CheckCircle className="h-4 w-4 mr-2" />
-                Mark Complete
+                Completed (Click to undo)
+              </Button>
+            ) : (
+              <Button onClick={handleToggleComplete} size="sm">
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Mark as Complete
               </Button>
             )}
+            {/* --- END OF UPDATE --- */}
 
-            {dayCompleted && (
-              <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Completed
-              </Badge>
-            )}
           </div>
 
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{day.title}</h1>
@@ -119,7 +112,6 @@ export function DayPage({ day }: DayPageProps) {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Practice Exercises</h2>
         </div>
-
         <div className="grid gap-6">
           {day.exercises.map((exercise, index) => (
             <ExerciseCard key={index} exercise={exercise} index={index} />
@@ -127,7 +119,6 @@ export function DayPage({ day }: DayPageProps) {
         </div>
       </div>
 
-      {/* Resources section */}
       {day.resources.length > 0 && (
         <Card className="border border-gray-200 dark:border-gray-700">
           <CardHeader>
@@ -165,11 +156,6 @@ export function DayPage({ day }: DayPageProps) {
             </Button>
           )}
         </div>
-        <div className="text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Day {day.day} of 25 • {day.phase}
-          </p>
-        </div>
         <div>
           {day.day < 25 && (
             <Button asChild>
@@ -189,7 +175,6 @@ interface ExerciseCardProps {
 
 function ExerciseCard({ exercise, index }: ExerciseCardProps) {
   const [showSolution, setShowSolution] = useState(false)
-
   return (
     <Card className="border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow">
       <CardHeader>
@@ -199,7 +184,6 @@ function ExerciseCard({ exercise, index }: ExerciseCardProps) {
           </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{exercise.title}</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Exercise {index + 1}</p>
           </div>
         </CardTitle>
       </CardHeader>
@@ -209,22 +193,15 @@ function ExerciseCard({ exercise, index }: ExerciseCardProps) {
         </div>
 
         <Button variant="outline" onClick={() => setShowSolution(!showSolution)} className="w-full justify-between">
-          <span className="flex items-center space-x-2">
-            <Lightbulb className="h-4 w-4" />
-            <span>{showSolution ? "Hide" : "Show"} Solution</span>
-          </span>
+          <span>{showSolution ? "Hide" : "Show"} Solution</span>
           {showSolution ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </Button>
 
         {showSolution && (
           <div className="space-y-6">
             <CodeBlock code={exercise.solution.code} language="javascript" title={`Solution: ${exercise.title}`} />
-
             <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
-              <h4 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center space-x-2">
-                <Lightbulb className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                <span>Explanation</span>
-              </h4>
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Explanation</h4>
               <div
                 className="prose prose-gray dark:prose-invert prose-sm max-w-none"
                 dangerouslySetInnerHTML={{ __html: exercise.solution.explanation }}

@@ -1,8 +1,8 @@
+// filepath: components/course-layout.tsx
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Menu, X, Home, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -23,23 +23,27 @@ export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
   const { completedDays, isCompleted } = useProgress()
 
   const currentDayData = currentDay ? courseDays.find((d) => d.day === currentDay) : null
-  const currentPhase = currentDayData ? getPhaseForDay(currentDay) : null
+  const currentPhase = currentDayData ? getPhaseForDay(currentDayData.day) : null
+
+  // Close sidebar on route change
+  useEffect(() => {
+    setSidebarOpen(false)
+  }, [pathname])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 transition-colors duration-300">
-      {/* Mobile sidebar overlay */}
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      {/* Mobile sidebar overlay, now used for all screen sizes */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden animate-in fade-in duration-200"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Always a fixed overlay, controlled by state */}
       <aside
         className={`
         fixed top-0 left-0 z-50 h-full w-80 transform transition-transform duration-300 ease-in-out
-        lg:translate-x-0 lg:static lg:z-auto
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
       `}
       >
@@ -55,7 +59,8 @@ export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
               </div>
               <div className="flex items-center space-x-2">
                 <ThemeToggle />
-                <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setSidebarOpen(false)}>
+                {/* Close button is always visible when sidebar is open */}
+                <Button variant="ghost" size="sm" onClick={() => setSidebarOpen(false)}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>
@@ -85,10 +90,8 @@ export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
             {/* Navigation */}
             <nav className="flex-1 overflow-y-auto p-4">
               <div className="space-y-6">
-                {phases.map((phase, phaseIndex) => {
+                {phases.map((phase) => {
                   const phaseDays = courseDays.filter((day) => day.phase === phase.name)
-                  const startDay = phaseIndex * 5 + 1
-                  const endDay = (phaseIndex + 1) * 5
 
                   return (
                     <div key={phase.name} className="space-y-2">
@@ -104,38 +107,31 @@ export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
                       </div>
 
                       <div className="space-y-1 ml-2">
-                        {Array.from({ length: 5 }, (_, i) => {
-                          const dayNumber = startDay + i
-                          const dayData = courseDays.find((d) => d.day === dayNumber)
+                        {phaseDays.map((dayData) => {
+                          const dayNumber = dayData.day
                           const isActive = currentDay === dayNumber
                           const isDayCompleted = isCompleted(dayNumber)
 
                           return (
                             <Link
                               key={dayNumber}
-                              href={dayData ? `/day/${dayNumber}` : "#"}
+                              href={`/day/${dayNumber}`}
                               className={`
                                 block p-2 rounded-lg text-sm transition-all duration-200 group
                                 ${
                                   isActive
                                     ? `bg-gradient-to-r ${phase.gradient} text-white shadow-lg scale-105`
                                     : isDayCompleted
-                                      ? "bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300 hover:scale-105"
-                                      : dayData
-                                        ? "hover:bg-white/50 dark:hover:bg-white/5 text-foreground hover:scale-105"
-                                        : "text-muted-foreground cursor-not-allowed"
+                                      ? "text-green-700 dark:text-green-300 hover:scale-105 opacity-60"
+                                      : "hover:bg-white/50 dark:hover:bg-white/5 text-foreground hover:scale-105"
                                 }
                               `}
-                              onClick={(e) => {
-                                if (!dayData) e.preventDefault()
-                                setSidebarOpen(false)
-                              }}
                             >
                               <div className="flex items-center justify-between">
                                 <span className="font-medium">Day {dayNumber}</span>
-                                {isDayCompleted && <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />}
+                                {isDayCompleted && <div className="w-2 h-2 bg-green-500 rounded-full" />}
                               </div>
-                              {dayData && <div className="text-xs opacity-75 mt-1 truncate">{dayData.title}</div>}
+                              <div className="text-xs opacity-75 mt-1 truncate">{dayData.title}</div>
                             </Link>
                           )
                         })}
@@ -149,13 +145,14 @@ export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
         </div>
       </aside>
 
-      {/* Main content */}
-      <div className="lg:ml-80 transition-all duration-300">
+      {/* Main content - Takes full width */}
+      <div className="flex-1 transition-all duration-300">
         {/* Header */}
-        <header className="sticky top-0 z-30 glass dark:glass-dark border-b border-white/20 dark:border-white/10 backdrop-blur-xl">
+        <header className="sticky top-0 z-30 bg-white/70 dark:bg-slate-950/70 backdrop-blur-lg border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
+              {/* Hamburger menu - Always visible */}
+              <Button variant="ghost" size="sm" onClick={() => setSidebarOpen(true)}>
                 <Menu className="h-4 w-4" />
               </Button>
 
@@ -193,7 +190,7 @@ export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
                     variant="outline"
                     size="sm"
                     asChild
-                    className="hover:scale-105 transition-transform bg-transparent"
+                    className="hover:scale-105 transition-transform"
                   >
                     <Link href={`/day/${currentDay - 1}`}>Previous</Link>
                   </Button>
@@ -209,7 +206,7 @@ export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
         </header>
 
         {/* Page content */}
-        <main className="p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">{children}</main>
+        <main className="p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">{children}</main>
       </div>
     </div>
   )

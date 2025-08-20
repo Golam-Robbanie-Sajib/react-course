@@ -1,3873 +1,1521 @@
-"use client"
+// lib/course-data.ts
 
-// Course data types
+//"use client"
+
+// 1. ========= DEFINE THE TYPES =========
+export interface Resource {
+  name: string;
+  url: string;
+}
+
+export interface ExerciseSolution {
+  code: string;
+  explanation: string;
+}
+
 export interface Exercise {
-  question: string
-  solution: string
+  title: string;
+  description: string;
+  solution: ExerciseSolution;
 }
 
 export interface CourseDay {
-  day: number
-  title: string
-  phase: string
-  theory: string
-  exercises: Exercise[]
-  resources: string[]
-}
-
-export interface Phase {
-  name: string
-  description: string
-  days: number[]
-  color: string
-  gradient: string
+  day: number;
+  phase: string;
+  title: string;
+  topics: string[];
+  resources: Resource[];
+  theory: string;
+  exercises: Exercise[];
 }
 
 // <CHANGE> Complete course data with all 25 days
+// PASTE THIS INTO lib/course-data.ts AFTER THE TYPES
+
 export const courseData: CourseDay[] = [
+  // =================================================================
+  // PHASE 1: JavaScript Fundamentals (Days 1-7)
+  // =================================================================
   {
     day: 1,
-    title: "Introduction to JavaScript",
     phase: "JavaScript Fundamentals",
+    title: "Variables & Data Types",
+    topics: ["let", "const", "var", "Primitives", "Type Coercion"],
+    resources: [
+      { name: "MDN: Data Structures", url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures" },
+      { name: "JavaScript.info: Variables", url: "https://javascript.info/variables" },
+    ],
     theory: `
-      <h2>Welcome to JavaScript!</h2>
-      <p>JavaScript is a versatile programming language that powers the web. It's used for creating interactive websites, web applications, and even server-side development.</p>
-      
-      <h3>What is JavaScript?</h3>
-      <p>JavaScript is a high-level, interpreted programming language that conforms to the ECMAScript specification. It's characterized by:</p>
+      Welcome to Day 1! Today, we'll cover the absolute basics of JavaScript: how to store and manage information.
+      <br/><br/>
+      In programming, we use <strong>variables</strong> to store data values. JavaScript provides three keywords to declare variables: <code>var</code>, <code>let</code>, and <code>const</code>. <code>let</code> and <code>const</code> are modern (ES6+) and are preferred. Use <code>let</code> for variables that will change, and <code>const</code> for variables that will not.
+      <br/><br/>
+      JavaScript has several primitive <strong>data types</strong>:
       <ul>
-        <li>Dynamic typing</li>
-        <li>First-class functions</li>
-        <li>Prototype-based object-orientation</li>
-        <li>Event-driven programming</li>
+        <li><strong>String:</strong> Text, like "hello world".</li>
+        <li><strong>Number:</strong> Numeric values, like 42 or 3.14.</li>
+        <li><strong>Boolean:</strong> Represents true or false.</li>
+        <li><strong>Null:</strong> Represents the intentional absence of any object value.</li>
+        <li><strong>Undefined:</strong> A variable that has been declared but not assigned a value.</li>
       </ul>
-
-      <h3>JavaScript in the Browser</h3>
-      <p>In web browsers, JavaScript can manipulate the DOM (Document Object Model), handle user events, and communicate with servers.</p>
+      Understanding these building blocks is the first crucial step to mastering JavaScript.
     `,
     exercises: [
       {
-        question: "Write a simple JavaScript program that displays 'Hello, World!' in the console.",
-        solution: `console.log('Hello, World!');`
+        title: "Temperature Converter",
+        description:
+          "Create a function that converts Celsius to Fahrenheit and vice-versa, with basic input validation.",
+        solution: {
+          code: `function convertTemperature(value, unit) {
+  if (typeof value !== 'number') {
+    return "Error: Input value must be a number.";
+  }
+  const upperUnit = unit.toUpperCase();
+  if (upperUnit === 'C') {
+    const fahrenheit = (value * 9/5) + 32;
+    return \`\${value}°C is \${fahrenheit.toFixed(2)}°F\`;
+  } else if (upperUnit === 'F') {
+    const celsius = (value - 32) * 5/9;
+    return \`\${value}°F is \${celsius.toFixed(2)}°C\`;
+  } else {
+    return "Error: Invalid unit. Please use 'C' or 'F'.";
+  }
+}`,
+          explanation: `
+            <ol>
+              <li><strong>Validate Input:</strong> The function first checks if the input <code>value</code> is a number using <code>typeof</code>. If not, it returns an error string immediately.</li>
+              <li><strong>Standardize Unit:</strong> It converts the <code>unit</code> parameter to uppercase. This makes the check case-insensitive, so 'c' and 'C' are treated the same.</li>
+              <li><strong>Conditional Logic:</strong> Using an <code>if...else if</code> block, it checks the value of the standardized unit.</li>
+              <li><strong>Perform Calculation:</strong> If the unit is 'C', it applies the Celsius to Fahrenheit formula. If it's 'F', it applies the Fahrenheit to Celsius formula.</li>
+              <li><strong>Format Output:</strong> The result is rounded to two decimal places using <code>.toFixed(2)</code> and returned inside a user-friendly template literal.</li>
+            </ol>
+          `,
+        },
       },
       {
-        question: "Create a variable to store your name and display it.",
-        solution: `const myName = 'John Doe';
-console.log('My name is:', myName);`
-      }
+        title: "String Manipulation",
+        description:
+          "Write a function that takes a string and returns an object with the original string, the capitalized version, and the character count.",
+        solution: {
+          code: `function analyzeString(text) {
+  if (typeof text !== 'string') {
+    return "Error: Input must be a string.";
+  }
+  const capitalizeWords = (str) => {
+    return str.toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+  return {
+    original: text,
+    capitalized: capitalizeWords(text),
+    charCount: text.length,
+  };
+}`,
+          explanation: `
+            <ol>
+                <li><strong>Input Validation:</strong> The function first ensures the provided <code>text</code> is actually a string.</li>
+                <li><strong>Helper Function:</strong> An inner arrow function <code>capitalizeWords</code> is defined to handle the capitalization logic.</li>
+                <li><strong>Capitalization Logic:</strong> Inside the helper, the string is converted to lowercase, split into an array of words, each word's first letter is capitalized, and then they are joined back into a single string.</li>
+                <li><strong>Return Object:</strong> The function returns a new object with three properties: the original text, the result from the <code>capitalizeWords</code> helper, and the string's length.</li>
+            </ol>
+          `,
+        },
+      },
     ],
-    resources: [
-      "MDN JavaScript Guide",
-      "JavaScript.info",
-      "Eloquent JavaScript (book)"
-    ]
   },
   {
     day: 2,
-    title: "Variables and Data Types",
     phase: "JavaScript Fundamentals",
+    title: "Functions & Scope",
+    topics: ["Function Declarations", "Expressions", "Arrow Functions", "Scope Chain"],
+    resources: [
+      { name: "MDN: Functions Guide", url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Functions" },
+      { name: "JavaScript.info: Function Basics", url: "https://javascript.info/function-basics" },
+    ],
     theory: `
-      <h2>Variables and Data Types</h2>
-      <p>Variables are containers for storing data values. JavaScript has several data types including primitives and objects.</p>
-      
-      <h3>Variable Declarations</h3>
-      <p>JavaScript provides three ways to declare variables:</p>
-      <ul>
-        <li><code>var</code> - Function-scoped or globally-scoped</li>
-        <li><code>let</code> - Block-scoped</li>
-        <li><code>const</code> - Block-scoped, cannot be reassigned</li>
-      </ul>
-
-      <h3>Primitive Data Types</h3>
-      <ul>
-        <li><strong>Number:</strong> Integers and floating-point numbers</li>
-        <li><strong>String:</strong> Text data</li>
-        <li><strong>Boolean:</strong> true or false</li>
-        <li><strong>Undefined:</strong> Variable declared but not assigned</li>
-        <li><strong>Null:</strong> Intentional absence of value</li>
-        <li><strong>Symbol:</strong> Unique identifier</li>
-        <li><strong>BigInt:</strong> Large integers</li>
-      </ul>
+      <strong>Functions</strong> are the primary building blocks of a JavaScript program. They are reusable blocks of code that perform a specific task.
+      <br/><br/>
+      <strong>Scope</strong> determines the accessibility of variables. When a variable is accessed, JavaScript looks for it in the current scope, then in outer scopes up to the global scope. This is the <strong>scope chain</strong>.
     `,
     exercises: [
       {
-        question: "Declare variables of different data types and log their types using typeof.",
-        solution: `let name = 'Alice';
-let age = 25;
-let isStudent = true;
-let score = null;
-let grade;
-
-console.log(typeof name);     // string
-console.log(typeof age);      // number
-console.log(typeof isStudent); // boolean
-console.log(typeof score);    // object (null is object in JS)
-console.log(typeof grade);    // undefined`
+        title: "Password Strength Validator",
+        description:
+          "Create a function that validates a password based on a set of rules (e.g., length, uppercase, lowercase, number, special character).",
+        solution: {
+          code: `function validatePassword(password) {
+  const errors = [];
+  if (password.length < 8) {
+    errors.push("Password must be at least 8 characters long.");
+  }
+  if (!/[a-z]/.test(password)) {
+    errors.push("Password must contain at least one lowercase letter.");
+  }
+  if (!/[A-Z]/.test(password)) {
+    errors.push("Password must contain at least one uppercase letter.");
+  }
+  if (!/[0-9]/.test(password)) {
+    errors.push("Password must contain at least one number.");
+  }
+  if (!/[!@#$%^&*]/.test(password)) {
+    errors.push("Password must contain at least one special character (!@#$%^&*).");
+  }
+  return {
+    isValid: errors.length === 0,
+    errors: errors,
+  };
+}`,
+          explanation: `
+            <ol>
+              <li><strong>Initialize Storage:</strong> An empty array called <code>errors</code> is created to store any validation failure messages.</li>
+              <li><strong>Check Rules Sequentially:</strong> The function checks the password against a series of rules, one by one, using <code>if</code> statements.</li>
+              <li><strong>Use Regular Expressions:</strong> Each rule uses a <strong>Regular Expression</strong> (e.g., <code>/[a-z]/</code>) and the <code>.test()</code> method to see if the password contains the required character type.</li>
+              <li><strong>Collect Errors:</strong> If a rule fails, a descriptive error message is pushed into the <code>errors</code> array.</li>
+              <li><strong>Return Result Object:</strong> Finally, it returns an object. The <code>isValid</code> property is a boolean that is <code>true</code> only if the <code>errors</code> array is empty. The array of error messages is also returned.</li>
+            </ol>
+          `,
+        },
       },
-      {
-        question: "Create a const variable for PI and calculate the area of a circle with radius 5.",
-        solution: `const PI = 3.14159;
-const radius = 5;
-const area = PI * radius * radius;
-console.log('Area of circle:', area);`
-      }
     ],
-    resources: [
-      "MDN Variables Guide",
-      "JavaScript Data Types",
-      "Let vs Const vs Var"
-    ]
   },
   {
     day: 3,
-    title: "Functions and Scope",
     phase: "JavaScript Fundamentals",
+    title: "Objects & Arrays",
+    topics: ["Object Literals", "Array Methods", "Destructuring"],
+    resources: [
+      {
+        name: "MDN: Array Methods",
+        url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array",
+      },
+      { name: "JavaScript.info: Objects", url: "https://javascript.info/object" },
+    ],
     theory: `
-      <h2>Functions and Scope</h2>
-      <p>Functions are reusable blocks of code that perform specific tasks. They help organize code and avoid repetition.</p>
-      
-      <h3>Function Declaration</h3>
-      <p>Functions can be declared in several ways:</p>
-      <ul>
-        <li>Function declarations</li>
-        <li>Function expressions</li>
-        <li>Arrow functions</li>
-      </ul>
-
-      <h3>Scope</h3>
-      <p>Scope determines where variables can be accessed in your code:</p>
-      <ul>
-        <li><strong>Global scope:</strong> Variables accessible everywhere</li>
-        <li><strong>Function scope:</strong> Variables accessible within the function</li>
-        <li><strong>Block scope:</strong> Variables accessible within the block</li>
-      </ul>
+      <strong>Objects</strong> are collections of key-value pairs used to group related data. <strong>Arrays</strong> are ordered lists of values.
+      <br/><br/>
+      JavaScript provides many powerful array methods, such as <code>map()</code>, <code>filter()</code>, and <code>reduce()</code>. <strong>Destructuring</strong> (ES6) is a convenient way to extract data from objects and arrays into variables.
     `,
     exercises: [
       {
-        question: "Write a function that takes two numbers and returns their sum.",
-        solution: `function addNumbers(a, b) {
-  return a + b;
-}
-
-// Arrow function version
-const addNumbersArrow = (a, b) => a + b;
-
-console.log(addNumbers(5, 3)); // 8
-console.log(addNumbersArrow(5, 3)); // 8`
-      },
-      {
-        question: "Create a function that demonstrates different scopes.",
-        solution: `let globalVar = 'I am global';
-
-function demonstrateScope() {
-  let functionVar = 'I am in function scope';
-  
-  if (true) {
-    let blockVar = 'I am in block scope';
-    console.log(globalVar);    // Accessible
-    console.log(functionVar);  // Accessible
-    console.log(blockVar);     // Accessible
+        title: "Student Grade Book",
+        description:
+          "Create an object to act as a grade book. It should have functions to add a student, add a grade, and calculate averages.",
+        solution: {
+          code: `const gradeBook = {
+  students: {},
+  addStudent: function(name) {
+    if (!this.students[name]) {
+      this.students[name] = [];
+    }
+  },
+  addGrade: function(name, grade) {
+    if (this.students[name]) {
+      this.students[name].push(grade);
+    }
+  },
+  getStudentAverage: function(name) {
+    if (this.students[name] && this.students[name].length > 0) {
+      const grades = this.students[name];
+      const sum = grades.reduce((total, grade) => total + grade, 0);
+      return sum / grades.length;
+    }
+    return 0;
+  },
+  getClassAverage: function() {
+    let totalGrades = 0;
+    let gradeCount = 0;
+    for (const student in this.students) {
+      gradeCount += this.students[student].length;
+      totalGrades += this.students[student].reduce((sum, grade) => sum + grade, 0);
+    }
+    return gradeCount > 0 ? totalGrades / gradeCount : 0;
   }
-  
-  console.log(globalVar);      // Accessible
-  console.log(functionVar);    // Accessible
-  // console.log(blockVar);    // Error: not accessible
-}
-
-demonstrateScope();`
-      }
+};`,
+          explanation: `
+            <ol>
+              <li><strong>Data Structure:</strong> The main <code>gradeBook</code> object holds a <code>students</code> object. This inner object will use student names as keys and arrays of their grades as values.</li>
+              <li><strong>Add Student:</strong> The <code>addStudent</code> method creates a new entry in the <code>students</code> object with an empty array for grades.</li>
+              <li><strong>Add Grade:</strong> The <code>addGrade</code> method finds the student by name and pushes the new grade into their corresponding array.</li>
+              <li><strong>Student Average:</strong> <code>getStudentAverage</code> uses the powerful <code>.reduce()</code> array method to sum up a student's grades, then divides by the number of grades to find the average.</li>
+              <li><strong>Class Average:</strong> <code>getClassAverage</code> iterates through all students, summing up all grades and counting them, then calculates the final average.</li>
+            </ol>
+          `,
+        },
+      },
     ],
-    resources: [
-      "MDN Functions",
-      "JavaScript Scope",
-      "Arrow Functions Guide"
-    ]
   },
   {
     day: 4,
-    title: "Control Structures",
     phase: "JavaScript Fundamentals",
+    title: "Control Flow & Loops",
+    topics: ["if/else", "switch", "for", "while", "break/continue"],
+    resources: [
+      {
+        name: "MDN: Control Flow",
+        url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Control_flow_and_error_handling",
+      },
+      { name: "JavaScript.info: Loops", url: "https://javascript.info/while-for" },
+    ],
     theory: `
-      <h2>Control Structures</h2>
-      <p>Control structures allow you to control the flow of your program execution based on conditions and loops.</p>
-      
-      <h3>Conditional Statements</h3>
-      <ul>
-        <li><code>if...else</code> statements</li>
-        <li><code>switch</code> statements</li>
-        <li>Ternary operator</li>
-      </ul>
-
-      <h3>Loops</h3>
-      <ul>
-        <li><code>for</code> loop</li>
-        <li><code>while</code> loop</li>
-        <li><code>do...while</code> loop</li>
-        <li><code>for...in</code> loop</li>
-        <li><code>for...of</code> loop</li>
-      </ul>
+      <strong>Control Flow</strong> is the order in which the computer executes statements. We can control this flow using conditional statements like <code>if...else</code> and <code>switch</code>.
+      <br/><br/>
+      <strong>Loops</strong> (<code>for</code>, <code>while</code>) are used to execute a block of code repeatedly as long as a condition is true.
     `,
     exercises: [
       {
-        question: "Write a program that checks if a number is positive, negative, or zero.",
-        solution: `function checkNumber(num) {
-  if (num > 0) {
-    return 'Positive';
-  } else if (num < 0) {
-    return 'Negative';
-  } else {
-    return 'Zero';
+        title: "Prime Number Generator",
+        description: "Write a function that takes a number `n` and returns an array of all prime numbers up to `n`.",
+        solution: {
+          code: `function isPrime(num) {
+  if (num <= 1) return false;
+  for (let i = 2; i * i <= num; i++) {
+    if (num % i === 0) return false;
   }
+  return true;
 }
-
-// Ternary operator version
-const checkNumberTernary = (num) => 
-  num > 0 ? 'Positive' : num < 0 ? 'Negative' : 'Zero';
-
-console.log(checkNumber(5));   // Positive
-console.log(checkNumber(-3));  // Negative
-console.log(checkNumber(0));   // Zero`
+function generatePrimes(limit) {
+  const primes = [];
+  for (let i = 2; i <= limit; i++) {
+    if (isPrime(i)) {
+      primes.push(i);
+    }
+  }
+  return primes;
+}`,
+          explanation: `
+            <ol>
+              <li><strong>Helper Function:</strong> A separate function <code>isPrime</code> is created to keep the logic clean. It determines if a single number is prime.</li>
+              <li><strong>Prime Check Logic:</strong> The <code>isPrime</code> function iterates from 2 up to the square root of the number. This is a key optimization, because if a number has a divisor larger than its square root, it must also have one smaller.</li>
+              <li><strong>Main Function:</strong> The <code>generatePrimes</code> function initializes an empty <code>primes</code> array.</li>
+              <li><strong>Iteration:</strong> It then loops through every number from 2 up to the given <code>limit</code>.</li>
+              <li><strong>Populate Array:</strong> In each iteration, it calls the <code>isPrime</code> helper. If the helper returns <code>true</code>, the number is added to the <code>primes</code> array.</li>
+              <li><strong>Return Result:</strong> Finally, the array of prime numbers is returned.</li>
+            </ol>
+          `,
+        },
       },
-      {
-        question: "Create a function that prints numbers from 1 to 10 using different loop types.",
-        solution: `// For loop
-console.log('For loop:');
-for (let i = 1; i <= 10; i++) {
-  console.log(i);
-}
-
-// While loop
-console.log('While loop:');
-let j = 1;
-while (j <= 10) {
-  console.log(j);
-  j++;
-}
-
-// Do-while loop
-console.log('Do-while loop:');
-let k = 1;
-do {
-  console.log(k);
-  k++;
-} while (k <= 10);`
-      }
     ],
-    resources: [
-      "MDN Control Flow",
-      "JavaScript Loops",
-      "Conditional Statements"
-    ]
   },
   {
     day: 5,
-    title: "Arrays and Objects",
     phase: "JavaScript Fundamentals",
+    title: "DOM Manipulation",
+    topics: ["Selecting Elements", "Events", "Creating/Modifying DOM"],
+    resources: [
+      {
+        name: "MDN: Intro to the DOM",
+        url: "https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Introduction",
+      },
+      { name: "JavaScript.info: Document", url: "https://javascript.info/document" },
+    ],
     theory: `
-      <h2>Arrays and Objects</h2>
-      <p>Arrays and objects are fundamental data structures in JavaScript for storing and organizing data.</p>
-      
-      <h3>Arrays</h3>
-      <p>Arrays are ordered lists of values. They can store multiple values in a single variable.</p>
-      <ul>
-        <li>Zero-indexed</li>
-        <li>Dynamic size</li>
-        <li>Can store mixed data types</li>
-      </ul>
-
-      <h3>Objects</h3>
-      <p>Objects are collections of key-value pairs. They represent entities with properties and methods.</p>
-      <ul>
-        <li>Properties (key-value pairs)</li>
-        <li>Methods (functions as properties)</li>
-        <li>Dynamic property addition/removal</li>
-      </ul>
+      The <strong>Document Object Model (DOM)</strong> is the browser's representation of your HTML. JavaScript can be used to select, create, and modify these HTML elements to make web pages interactive. We use methods like <code>document.getElementById()</code> to select elements and <code>element.addEventListener()</code> to respond to user actions like clicks.
     `,
     exercises: [
       {
-        question: "Create an array of fruits and demonstrate various array methods.",
-        solution: `const fruits = ['apple', 'banana', 'orange'];
-
-// Adding elements
-fruits.push('grape');        // Add to end
-fruits.unshift('mango');     // Add to beginning
-
-console.log(fruits); // ['mango', 'apple', 'banana', 'orange', 'grape']
-
-// Removing elements
-const lastFruit = fruits.pop();      // Remove from end
-const firstFruit = fruits.shift();   // Remove from beginning
-
-console.log('Removed:', lastFruit, firstFruit);
-console.log('Remaining:', fruits);
-
-// Array methods
-console.log('Length:', fruits.length);
-console.log('Index of banana:', fruits.indexOf('banana'));
-console.log('Includes orange:', fruits.includes('orange'));`
+        title: "Interactive Todo List",
+        description:
+          "Create the JavaScript logic for a simple todo list. Handle adding, completing, and deleting a todo. Assume the basic HTML structure exists.",
+        solution: {
+          code: `// Assumes HTML exists with ids: 'todo-input', 'add-btn', 'todo-list'
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('todo-input');
+  const addButton = document.getElementById('add-btn');
+  const list = document.getElementById('todo-list');
+  const addTodo = () => {
+    const text = input.value.trim();
+    if (text === '') return;
+    const li = document.createElement('li');
+    li.innerHTML = \`
+      <span>\${text}</span>
+      <button class="complete-btn">Complete</button>
+      <button class="delete-btn">Delete</button>
+    \`;
+    list.appendChild(li);
+    input.value = '';
+  };
+  list.addEventListener('click', (e) => {
+    if (e.target.classList.contains('complete-btn')) {
+      e.target.parentElement.querySelector('span').style.textDecoration = 'line-through';
+    }
+    if (e.target.classList.contains('delete-btn')) {
+      e.target.parentElement.remove();
+    }
+  });
+  addButton.addEventListener('click', addTodo);
+});`,
+          explanation: `
+            <ol>
+              <li><strong>Wait for DOM Load:</strong> The entire script is wrapped in a <code>DOMContentLoaded</code> event listener to ensure the HTML is ready before the script runs.</li>
+              <li><strong>Select Elements:</strong> The script gets references to the input field, add button, and the list itself using <code>getElementById</code>.</li>
+              <li><strong>Add Todo Logic:</strong> The <code>addTodo</code> function creates a new <code>&lt;li&gt;</code> element, populates it with HTML for the text and buttons, and appends it to the main list.</li>
+              <li><strong>Event Delegation:</strong> A single click listener is added to the parent <code>&lt;ul&gt;</code>. This is more efficient than adding a listener to every single button.</li>
+              <li><strong>Handle Clicks:</strong> Inside the listener, <code>e.target</code> is used to check *what* was clicked. If it was a complete button, it styles the text. If it was a delete button, it removes the entire parent <code>&lt;li&gt;</code> element.</li>
+            </ol>
+          `,
+        },
       },
-      {
-        question: "Create a person object with properties and methods.",
-        solution: `const person = {
-  name: 'John Doe',
-  age: 30,
-  city: 'New York',
-  hobbies: ['reading', 'swimming', 'coding'],
-  
-  // Method
-  introduce: function() {
-    return \`Hi, I'm \${this.name} and I'm \${this.age} years old.\`;
-  },
-  
-  // Arrow function method (be careful with 'this')
-  getHobbies: () => {
-    return person.hobbies.join(', ');
-  }
-};
-
-console.log(person.introduce());
-console.log('Hobbies:', person.getHobbies());
-
-// Adding new property
-person.email = 'john@example.com';
-console.log('Email:', person.email);
-
-// Accessing properties
-console.log('Name:', person['name']);
-console.log('Age:', person.age);`
-      }
     ],
-    resources: [
-      "MDN Arrays",
-      "MDN Objects",
-      "JavaScript Array Methods"
-    ]
   },
   {
     day: 6,
-    title: "DOM Manipulation",
     phase: "JavaScript Fundamentals",
+    title: "Asynchronous Basics",
+    topics: ["setTimeout", "Callbacks", "Promises", "fetch"],
+    resources: [
+      {
+        name: "MDN: Asynchronous JavaScript",
+        url: "https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous",
+      },
+      { name: "MDN: Fetch API", url: "https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch" },
+    ],
     theory: `
-      <h2>DOM Manipulation</h2>
-      <p>The Document Object Model (DOM) is a programming interface for HTML documents. It represents the page structure as a tree of objects.</p>
-      
-      <h3>Selecting Elements</h3>
-      <ul>
-        <li><code>getElementById()</code></li>
-        <li><code>getElementsByClassName()</code></li>
-        <li><code>getElementsByTagName()</code></li>
-        <li><code>querySelector()</code></li>
-        <li><code>querySelectorAll()</code></li>
-      </ul>
-
-      <h3>Modifying Elements</h3>
-      <ul>
-        <li>Changing content: <code>innerHTML</code>, <code>textContent</code></li>
-        <li>Changing attributes: <code>setAttribute()</code>, <code>getAttribute()</code></li>
-        <li>Changing styles: <code>style</code> property</li>
-        <li>Adding/removing classes: <code>classList</code></li>
-      </ul>
+      JavaScript is single-threaded. <strong>Asynchronous JavaScript</strong> allows us to perform long-running tasks (like fetching data) without blocking the main thread, ensuring the UI remains responsive. This is handled with tools like Callbacks, and more modernly, <strong>Promises</strong> and the <strong>Fetch API</strong>.
     `,
     exercises: [
       {
-        question: "Create HTML elements and manipulate them with JavaScript.",
-        solution: `// HTML structure needed:
-// <div id="container">
-//   <h1 id="title">Original Title</h1>
-//   <p class="description">Original description</p>
-//   <button id="changeBtn">Change Content</button>
-// </div>
-
-// Selecting elements
-const title = document.getElementById('title');
-const description = document.querySelector('.description');
-const button = document.getElementById('changeBtn');
-const container = document.getElementById('container');
-
-// Modifying content
-title.textContent = 'New Title!';
-description.innerHTML = '<strong>Updated description</strong>';
-
-// Changing styles
-title.style.color = 'blue';
-title.style.fontSize = '2em';
-
-// Adding event listener
-button.addEventListener('click', function() {
-  container.style.backgroundColor = 'lightblue';
-  button.textContent = 'Content Changed!';
-});
-
-// Adding new element
-const newParagraph = document.createElement('p');
-newParagraph.textContent = 'This is a new paragraph';
-container.appendChild(newParagraph);`
-      },
-      {
-        question: "Create a simple todo list with add and remove functionality.",
-        solution: `// HTML needed:
-// <div id="todoApp">
-//   <input type="text" id="todoInput" placeholder="Enter a task">
-//   <button id="addBtn">Add Task</button>
-//   <ul id="todoList"></ul>
-// </div>
-
-const todoInput = document.getElementById('todoInput');
-const addBtn = document.getElementById('addBtn');
-const todoList = document.getElementById('todoList');
-
-function addTodo() {
-  const taskText = todoInput.value.trim();
-  
-  if (taskText === '') {
-    alert('Please enter a task!');
-    return;
-  }
-  
-  // Create list item
-  const li = document.createElement('li');
-  li.innerHTML = \`
-    <span>\${taskText}</span>
-    <button onclick="removeTask(this)">Remove</button>
-  \`;
-  
-  todoList.appendChild(li);
-  todoInput.value = ''; // Clear input
-}
-
-function removeTask(button) {
-  const li = button.parentElement;
-  todoList.removeChild(li);
-}
-
-// Event listeners
-addBtn.addEventListener('click', addTodo);
-todoInput.addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') {
-    addTodo();
-  }
-});`
+        title: "Weather App using an API",
+        description: "Use the Fetch API to get data from a placeholder API and display it on the page.",
+        solution: {
+          code: `// Assumes HTML: <div id="weather-info"></div>
+const API_URL = 'https://jsonplaceholder.typicode.com/users/1';
+const weatherDiv = document.getElementById('weather-info');
+function fetchWeather() {
+  weatherDiv.innerHTML = '<p>Loading...</p>';
+  fetch(API_URL)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
       }
+      return response.json();
+    })
+    .then(data => {
+      const weather = { city: data.address.city, temperature: (data.address.geo.lat % 30).toFixed(1) };
+      weatherDiv.innerHTML = \`<h2>Weather in \${weather.city}: \${weather.temperature}°C</h2>\`;
+    })
+    .catch(error => {
+      weatherDiv.innerHTML = \`<p>Error: \${error.message}</p>\`;
+    });
+}
+fetchWeather();`,
+          explanation: `
+            <ol>
+              <li><strong>Initial State:</strong> The function first updates the DOM to show a "Loading..." message so the user knows something is happening.</li>
+              <li><strong>Make Request:</strong> It calls <code>fetch()</code> with the API URL. This returns a Promise.</li>
+              <li><strong>Handle Response:</strong> The first <code>.then()</code> block executes when the server sends a response. It checks if the response was successful (<code>response.ok</code>) and then parses the response body as JSON, which itself returns another promise.</li>
+              <li><strong>Handle Data:</strong> The second <code>.then()</code> block receives the parsed JSON data. It then extracts the needed information, creates a new HTML string, and updates the DOM to display the weather.</li>
+              <li><strong>Handle Errors:</strong> If any part of the process fails (e.g., a network error, an invalid URL), the <code>.catch()</code> block will execute, displaying an error message to the user.</li>
+            </ol>
+          `,
+        },
+      },
     ],
-    resources: [
-      "MDN DOM Introduction",
-      "JavaScript DOM Methods",
-      "Event Handling Guide"
-    ]
   },
   {
     day: 7,
-    title: "Events and Event Handling",
     phase: "JavaScript Fundamentals",
-    theory: `
-      <h2>Events and Event Handling</h2>
-      <p>Events are actions that happen in the browser, such as clicks, key presses, or page loads. Event handling allows you to respond to these actions.</p>
-      
-      <h3>Common Events</h3>
-      <ul>
-        <li><code>click</code> - Mouse click</li>
-        <li><code>keydown/keyup</code> - Keyboard events</li>
-        <li><code>load</code> - Page/image loading</li>
-        <li><code>submit</code> - Form submission</li>
-        <li><code>change</code> - Input value change</li>
-        <li><code>mouseover/mouseout</code> - Mouse hover</li>
-      </ul>
-
-      <h3>Event Handling Methods</h3>
-      <ul>
-        <li>HTML event attributes</li>
-        <li><code>addEventListener()</code></li>
-        <li>Event object properties</li>
-        <li>Event delegation</li>
-      </ul>
-    `,
-    exercises: [
-      {
-        question: "Create a form with validation using event handling.",
-        solution: `// HTML needed:
-// <form id="userForm">
-//   <input type="text" id="username" placeholder="Username" required>
-//   <input type="email" id="email" placeholder="Email" required>
-//   <input type="password" id="password" placeholder="Password" required>
-//   <button type="submit">Submit</button>
-// </form>
-// <div id="message"></div>
-
-const form = document.getElementById('userForm');
-const username = document.getElementById('username');
-const email = document.getElementById('email');
-const password = document.getElementById('password');
-const message = document.getElementById('message');
-
-// Form submission event
-form.addEventListener('submit', function(e) {
-  e.preventDefault(); // Prevent default form submission
-  
-  // Validation
-  if (username.value.length < 3) {
-    showMessage('Username must be at least 3 characters', 'error');
-    return;
-  }
-  
-  if (password.value.length < 6) {
-    showMessage('Password must be at least 6 characters', 'error');
-    return;
-  }
-  
-  showMessage('Form submitted successfully!', 'success');
-});
-
-// Real-time validation
-username.addEventListener('input', function() {
-  if (this.value.length < 3) {
-    this.style.borderColor = 'red';
-  } else {
-    this.style.borderColor = 'green';
-  }
-});
-
-function showMessage(text, type) {
-  message.textContent = text;
-  message.className = type;
-  message.style.color = type === 'error' ? 'red' : 'green';
-}`
-      },
-      {
-        question: "Create an interactive image gallery with keyboard navigation.",
-        solution: `// HTML needed:
-// <div id="gallery">
-//   <img id="currentImage" src="image1.jpg" alt="Gallery Image">
-//   <div id="controls">
-//     <button id="prevBtn">Previous</button>
-//     <button id="nextBtn">Next</button>
-//   </div>
-//   <div id="imageInfo">Image 1 of 5</div>
-// </div>
-
-const images = [
-  'image1.jpg',
-  'image2.jpg', 
-  'image3.jpg',
-  'image4.jpg',
-  'image5.jpg'
-];
-
-let currentIndex = 0;
-const currentImage = document.getElementById('currentImage');
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
-const imageInfo = document.getElementById('imageInfo');
-
-function updateImage() {
-  currentImage.src = images[currentIndex];
-  imageInfo.textContent = \`Image \${currentIndex + 1} of \${images.length}\`;
-  
-  // Update button states
-  prevBtn.disabled = currentIndex === 0;
-  nextBtn.disabled = currentIndex === images.length - 1;
-}
-
-function showPrevious() {
-  if (currentIndex > 0) {
-    currentIndex--;
-    updateImage();
-  }
-}
-
-function showNext() {
-  if (currentIndex < images.length - 1) {
-    currentIndex++;
-    updateImage();
-  }
-}
-
-// Button events
-prevBtn.addEventListener('click', showPrevious);
-nextBtn.addEventListener('click', showNext);
-
-// Keyboard navigation
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'ArrowLeft') {
-    showPrevious();
-  } else if (e.key === 'ArrowRight') {
-    showNext();
-  }
-});
-
-// Initialize
-updateImage();`
-      }
-    ],
-    resources: [
-      "MDN Event Reference",
-      "JavaScript Events Tutorial",
-      "Event Delegation Guide"
-    ]
-  },
-  {
-    day: 8,
     title: "ES6+ Features",
-    phase: "Modern JavaScript",
+    topics: ["Arrow Functions", "Template Literals", "Spread/Rest", "Modules"],
+    resources: [
+      {
+        name: "MDN: Arrow Functions",
+        url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions",
+      },
+      { name: "JavaScript.info: Modules", url: "https://javascript.info/modules" },
+    ],
     theory: `
-      <h2>ES6+ Features</h2>
-      <p>ES6 (ECMAScript 2015) and later versions introduced many powerful features that make JavaScript more expressive and easier to work with.</p>
-      
-      <h3>Key ES6+ Features</h3>
-      <ul>
-        <li>Arrow functions</li>
-        <li>Template literals</li>
-        <li>Destructuring assignment</li>
-        <li>Spread and rest operators</li>
-        <li>Default parameters</li>
-        <li>Classes</li>
-        <li>Modules (import/export)</li>
-        <li>Promises and async/await</li>
-      </ul>
+      ES6 (ECMAScript 2015) and later versions added many features that make JavaScript more powerful and modern. Key features include <strong>Arrow Functions</strong> for a concise syntax, <strong>Template Literals</strong> for easier string formatting, the <strong>Spread/Rest Operator (...)</strong> for working with arrays and objects, and <strong>Modules (import/export)</strong> for organizing code into separate files.
     `,
     exercises: [
       {
-        question: "Demonstrate arrow functions and template literals.",
-        solution: `// Traditional function vs Arrow function
-function traditionalFunction(name) {
-  return 'Hello, ' + name + '!';
-}
-
-const arrowFunction = (name) => \`Hello, \${name}!\`;
-
-// Arrow function variations
-const square = x => x * x;  // Single parameter, no parentheses
-const add = (a, b) => a + b;  // Multiple parameters
-const greet = () => 'Hello World!';  // No parameters
-
-// Template literals
-const name = 'Alice';
-const age = 25;
-const message = \`
-  Name: \${name}
-  Age: \${age}
-  Birth Year: \${new Date().getFullYear() - age}
-\`;
-
-console.log(message);
-
-// Multi-line strings
-const html = \`
-  <div class="user-card">
-    <h2>\${name}</h2>
-    <p>Age: \${age}</p>
-  </div>
-\`;
-
-console.log(html);`
-      },
-      {
-        question: "Use destructuring assignment and spread operator.",
-        solution: `// Array destructuring
-const numbers = [1, 2, 3, 4, 5];
-const [first, second, ...rest] = numbers;
-
-console.log('First:', first);      // 1
-console.log('Second:', second);    // 2
-console.log('Rest:', rest);        // [3, 4, 5]
-
-// Object destructuring
-const person = {
-  name: 'John',
-  age: 30,
-  city: 'New York',
-  country: 'USA'
+        title: "Utility Library with Modules",
+        description:
+          "Create two files. One (`utils.js`) will export several utility functions. The second file (`main.js`) will import and use them. This example shows the code for both files.",
+        solution: {
+          code: `// ============== In utils.js ==============
+export const capitalize = (str) => {
+  if (typeof str !== 'string' || str.length === 0) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+export const sumArray = (arr) => {
+  if (!Array.isArray(arr)) return 0;
+  return arr.reduce((sum, num) => sum + num, 0);
 };
 
-const { name, age, ...address } = person;
-console.log('Name:', name);        // John
-console.log('Age:', age);          // 30
-console.log('Address:', address);  // { city: 'New York', country: 'USA' }
-
-// Destructuring with renaming
-const { name: fullName, city: location } = person;
-console.log('Full Name:', fullName);
-console.log('Location:', location);
-
-// Spread operator with arrays
-const arr1 = [1, 2, 3];
-const arr2 = [4, 5, 6];
-const combined = [...arr1, ...arr2];
-console.log('Combined:', combined); // [1, 2, 3, 4, 5, 6]
-
-// Spread operator with objects
-const defaults = { theme: 'dark', language: 'en' };
-const userPrefs = { language: 'es', fontSize: 14 };
-const settings = { ...defaults, ...userPrefs };
-console.log('Settings:', settings); // { theme: 'dark', language: 'es', fontSize: 14 }`
-      }
+// ============== In main.js ==============
+// import { capitalize, sumArray } from './utils.js';
+// const message = "hello";
+// const numbers = [10, 20, 30];
+// console.log(capitalize(message)); // "Hello"
+// console.log(sumArray(numbers));   // 60`,
+          explanation: `
+            <ol>
+              <li><strong>Create Module:</strong> The <code>utils.js</code> file acts as a module. It contains a set of related functions.</li>
+              <li><strong>Export Logic:</strong> The <code>export</code> keyword is used in front of each function we want to make available to other files.</li>
+              <li><strong>Import Logic:</strong> In <code>main.js</code>, the <code>import</code> keyword is used to bring in the exported functions. The curly braces <code>{...}</code> are used for "named imports," allowing us to specify exactly which pieces we need.</li>
+              <li><strong>Usage:</strong> Once imported, the functions can be used in <code>main.js</code> as if they were defined in the same file. This pattern is the foundation of all modern JavaScript and React development.</li>
+            </ol>
+          `,
+        },
+      },
     ],
-    resources: [
-      "ES6 Features Guide",
-      "MDN Arrow Functions",
-      "Destructuring Assignment"
-    ]
   },
+  // =================================================================
+  // PHASE 2: Advanced JavaScript (Days 8-11)
+  // =================================================================
   {
-    day: 9,
-    title: "Asynchronous JavaScript",
-    phase: "Modern JavaScript",
-    theory: `
-      <h2>Asynchronous JavaScript</h2>
-      <p>Asynchronous programming allows JavaScript to perform long-running operations without blocking the main thread.</p>
-      
-      <h3>Asynchronous Patterns</h3>
-      <ul>
-        <li><strong>Callbacks:</strong> Functions passed as arguments</li>
-        <li><strong>Promises:</strong> Objects representing eventual completion</li>
-        <li><strong>Async/Await:</strong> Syntactic sugar for promises</li>
-      </ul>
-
-      <h3>Common Use Cases</h3>
-      <ul>
-        <li>API calls</li>
-        <li>File operations</li>
-        <li>Timers and delays</li>
-        <li>Database operations</li>
-      </ul>
-    `,
+    day: 8,
+    phase: "Advanced JavaScript",
+    title: "Advanced Functions & Closures",
+    topics: ["Closures", "IIFE", "this", "call/apply/bind"],
+    resources: [
+      { name: "MDN: Closures", url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures" },
+      { name: "JavaScript.info: 'this' keyword", url: "https://javascript.info/object-methods" },
+    ],
+    theory: `A <strong>closure</strong> is a function that remembers the environment in which it was created. This means it has access to variables from its outer (enclosing) function, even after the outer function has finished executing. Closures are a fundamental concept in JavaScript, enabling patterns like data privacy and creating functions with memory.`,
     exercises: [
       {
-        question: "Create examples of callbacks, promises, and async/await.",
-        solution: `// 1. Callbacks
-function fetchDataCallback(callback) {
-  setTimeout(() => {
-    const data = { id: 1, name: 'John' };
-    callback(null, data);  // null for error, data for success
-  }, 1000);
-}
-
-fetchDataCallback((error, data) => {
-  if (error) {
-    console.error('Error:', error);
-  } else {
-    console.log('Callback data:', data);
-  }
-});
-
-// 2. Promises
-function fetchDataPromise() {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const success = Math.random() > 0.3; // 70% success rate
-      
-      if (success) {
-        resolve({ id: 2, name: 'Alice' });
-      } else {
-        reject(new Error('Failed to fetch data'));
-      }
-    }, 1000);
-  });
-}
-
-fetchDataPromise()
-  .then(data => {
-    console.log('Promise data:', data);
-    return data.name.toUpperCase();
-  })
-  .then(upperName => {
-    console.log('Uppercase name:', upperName);
-  })
-  .catch(error => {
-    console.error('Promise error:', error.message);
-  });
-
-// 3. Async/Await
-async function fetchDataAsync() {
-  try {
-    const data = await fetchDataPromise();
-    console.log('Async/await data:', data);
-    
-    const upperName = data.name.toUpperCase();
-    console.log('Async uppercase name:', upperName);
-    
-    return data;
-  } catch (error) {
-    console.error('Async/await error:', error.message);
-    throw error;
-  }
-}
-
-fetchDataAsync();`
+        title: "Debounce Utility",
+        description:
+          "Create a `debounce` function that delays invoking a function until after `wait` milliseconds have elapsed since the last time it was invoked.",
+        solution: {
+          code: `function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}`,
+          explanation: `
+            <ol>
+              <li><strong>Outer Function:</strong> The <code>debounce</code> function takes the function to execute (<code>func</code>) and the wait time (<code>wait</code>) as arguments.</li>
+              <li><strong>Closure Variable:</strong> It declares a <code>timeout</code> variable. This variable persists between calls because of closure.</li>
+              <li><strong>Returned Function:</strong> It returns a new function. This is the function that will actually be called by the event listener.</li>
+              <li><strong>Reset Timer:</strong> Every time the returned function is executed, it first clears any existing timer with <code>clearTimeout(timeout)</code>.</li>
+              <li><strong>Set New Timer:</strong> It then sets a new timer with <code>setTimeout</code>. The original <code>func</code> is scheduled to run after <code>wait</code> milliseconds.</li>
+              <li><strong>Execution:</strong> If the returned function is called again before the timer finishes, the old timer is cleared and a new one is set. The original <code>func</code> only ever runs when the timer is allowed to complete without being cleared.</li>
+            </ol>
+          `,
+        },
       },
-      {
-        question: "Create a function that fetches data from multiple APIs concurrently.",
-        solution: `// Simulate API calls
-function fetchUser(id) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({ id, name: \`User \${id}\`, email: \`user\${id}@example.com\` });
-    }, Math.random() * 1000 + 500);
-  });
-}
-
-function fetchPosts(userId) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        { id: 1, title: 'Post 1', userId },
-        { id: 2, title: 'Post 2', userId }
-      ]);
-    }, Math.random() * 1000 + 500);
-  });
-}
-
-function fetchComments(postId) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        { id: 1, text: 'Great post!', postId },
-        { id: 2, text: 'Thanks for sharing', postId }
-      ]);
-    }, Math.random() * 1000 + 500);
-  });
-}
-
-// Sequential execution (slower)
-async function fetchDataSequential() {
-  console.log('Starting sequential fetch...');
-  const start = Date.now();
-  
-  const user = await fetchUser(1);
-  const posts = await fetchPosts(user.id);
-  const comments = await fetchComments(posts[0].id);
-  
-  const end = Date.now();
-  console.log('Sequential result:', { user, posts, comments });
-  console.log(\`Sequential time: \${end - start}ms\`);
-}
-
-// Concurrent execution (faster)
-async function fetchDataConcurrent() {
-  console.log('Starting concurrent fetch...');
-  const start = Date.now();
-  
-  // Start all requests simultaneously
-  const [user, posts, comments] = await Promise.all([
-    fetchUser(1),
-    fetchPosts(1),
-    fetchComments(1)
-  ]);
-  
-  const end = Date.now();
-  console.log('Concurrent result:', { user, posts, comments });
-  console.log(\`Concurrent time: \${end - start}ms\`);
-}
-
-// Run both examples
-fetchDataSequential();
-fetchDataConcurrent();`
-      }
     ],
+  },
+  // PASTE THIS INTO lib/course-data.ts RIGHT AFTER DAY 8's DATA
+  {
+    day: 9,
+    phase: "Advanced JavaScript",
+    title: "Prototypes & Classes",
+    topics: ["Prototype Chain", "ES6 Classes", "Inheritance"],
     resources: [
-      "MDN Promises",
-      "Async/Await Guide",
-      "JavaScript Asynchronous Programming"
-    ]
+      {
+        name: "MDN: Inheritance and the prototype chain",
+        url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Inheritance_and_the_prototype_chain",
+      },
+      { name: "JavaScript.info: Classes", url: "https://javascript.info/classes" },
+    ],
+    theory: `JavaScript is a prototype-based language. Each object has a link to another object called its <strong>prototype</strong>. That prototype has its own prototype, and so on, until an object with <code>null</code> as its prototype is reached. This is the <strong>prototype chain</strong>.<br/><br/>ES6 introduced the <strong><code>class</code></strong> syntax, which is syntactic sugar over this system. It provides a much cleaner and more familiar syntax for creating objects and handling inheritance.`,
+    exercises: [
+      {
+        title: "Vehicle Hierarchy with Inheritance",
+        description:
+          "Create a base `Vehicle` class and have `Car` and `Motorcycle` classes inherit from it. Add unique properties and methods to each.",
+        solution: {
+          code: `class Vehicle {
+  constructor(make, model) {
+    this.make = make;
+    this.model = model;
+  }
+  getInfo() {
+    return \`\${this.make} \${this.model}\`;
+  }
+}
+class Car extends Vehicle {
+  constructor(make, model, numDoors) {
+    super(make, model); // Call the parent constructor
+    this.numDoors = numDoors;
+  }
+  getInfo() {
+    return \`\${super.getInfo()} with \${this.numDoors} doors.\`;
+  }
+}
+class Motorcycle extends Vehicle {
+  constructor(make, model, engineSize) {
+    super(make, model);
+    this.engineSize = engineSize;
+  }
+}`,
+          explanation: `
+            <ol>
+              <li><strong>Base Class:</strong> A <code>Vehicle</code> class is defined with a <code>constructor</code> to set shared properties and a <code>getInfo</code> method.</li>
+              <li><strong>Child Class:</strong> The <code>Car</code> class is created using the <code>extends Vehicle</code> syntax to establish the inheritance relationship.</li>
+              <li><strong>Calling Parent Constructor:</strong> Inside the <code>Car</code> constructor, <code>super(make, model)</code> is called. This is mandatory in a child class constructor and it calls the constructor of the parent class (<code>Vehicle</code>).</li>
+              <li><strong>Adding New Properties:</strong> The <code>Car</code> class adds its own unique property, <code>this.numDoors</code>.</li>
+              <li><strong>Overriding Methods:</strong> The <code>Car</code> class defines its own <code>getInfo</code> method. It uses <code>super.getInfo()</code> to call the parent's version of the method and then adds its own extra information to the result.</li>
+            </ol>
+          `,
+        },
+      },
+    ],
   },
   {
     day: 10,
-    title: "Modules and Build Tools",
-    phase: "Modern JavaScript",
+    phase: "Advanced JavaScript",
+    title: "Async/Await & Error Handling",
+    topics: ["Promise Chains", "async/await", "try/catch", "Promise.all"],
+    resources: [
+      {
+        name: "MDN: async/await",
+        url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function",
+      },
+      { name: "JavaScript.info: Async/await", url: "https://javascript.info/async-await" },
+    ],
     theory: `
-      <h2>Modules and Build Tools</h2>
-      <p>Modules allow you to organize code into separate files and reuse functionality across your application.</p>
-      
-      <h3>ES6 Modules</h3>
+      <strong>Async/Await</strong> (ES2017) is syntactic sugar built on top of Promises that lets us write asynchronous code that looks synchronous, making it much easier to read.
+      <br/><br/>
       <ul>
-        <li><code>export</code> - Make functions/variables available</li>
-        <li><code>import</code> - Use exported functionality</li>
-        <li>Default exports vs Named exports</li>
-        <li>Dynamic imports</li>
-      </ul>
-
-      <h3>Build Tools</h3>
-      <ul>
-        <li><strong>Webpack:</strong> Module bundler</li>
-        <li><strong>Vite:</strong> Fast build tool</li>
-        <li><strong>Parcel:</strong> Zero-config bundler</li>
-        <li><strong>Rollup:</strong> Module bundler for libraries</li>
+        <li><strong><code>async</code>:</strong> Placed before a function to make it an async function, which always returns a Promise.</li>
+        <li><strong><code>await</code>:</strong> Used inside an <code>async</code> function to pause execution and wait for a Promise to resolve.</li>
+        <li><strong>Error Handling:</strong> Use the familiar <code>try...catch</code> block to handle errors from awaited promises.</li>
       </ul>
     `,
     exercises: [
       {
-        question: "Create a utility module with various export patterns.",
-        solution: `// utils.js - Utility module
-export const PI = 3.14159;
-
-export function calculateArea(radius) {
-  return PI * radius * radius;
-}
-
-export function calculateCircumference(radius) {
-  return 2 * PI * radius;
-}
-
-// Default export
-export default function greet(name) {
-  return \`Hello, \${name}!\`;
-}
-
-// Named export of multiple items
-export { PI as MATH_PI, calculateArea as area };
-
-// Class export
-export class Calculator {
-  add(a, b) {
-    return a + b;
-  }
-  
-  subtract(a, b) {
-    return a - b;
-  }
-  
-  multiply(a, b) {
-    return a * b;
-  }
-  
-  divide(a, b) {
-    if (b === 0) {
-      throw new Error('Division by zero');
+        title: "API Client with Retry Logic",
+        description:
+          "Create an async function that fetches data from an API and retries up to a specified number of times on failure.",
+        solution: {
+          code: `const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+async function fetchWithRetry(url, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(\`HTTP error! \${response.status}\`);
+      return await response.json();
+    } catch (error) {
+      console.error(\`Attempt \${i + 1} failed.\`);
+      if (i < retries - 1) await delay(1000);
+      else throw error; // Rethrow last error
     }
-    return a / b;
   }
-}
-
-// main.js - Using the module
-import greet, { 
-  PI, 
-  calculateArea, 
-  calculateCircumference,
-  Calculator,
-  MATH_PI as MathPI 
-} from './utils.js';
-
-console.log(greet('World'));
-console.log('PI value:', PI);
-console.log('Area of circle (r=5):', calculateArea(5));
-console.log('Circumference (r=5):', calculateCircumference(5));
-
-const calc = new Calculator();
-console.log('Addition:', calc.add(10, 5));
-console.log('Division:', calc.divide(10, 2));
-
-// Dynamic import
-async function loadMathUtils() {
-  try {
-    const mathModule = await import('./utils.js');
-    console.log('Dynamically loaded PI:', mathModule.PI);
-  } catch (error) {
-    console.error('Failed to load module:', error);
-  }
-}
-
-loadMathUtils();`
-      }
+}`,
+          explanation: `
+            <ol>
+              <li><strong>Loop for Retries:</strong> The function uses a <code>for</code> loop to manage the number of retry attempts.</li>
+              <li><strong>Try Block:</strong> Inside the loop, a <code>try...catch</code> block handles the core fetch operation. The <code>await</code> keyword pauses execution until the <code>fetch</code> promise settles.</li>
+              <li><strong>Success Path:</strong> If the response is <code>ok</code>, the JSON is parsed and the data is returned, which immediately exits the function and loop.</li>
+              <li><strong>Failure Path:</strong> If <code>fetch</code> throws an error or the response is not ok, the <code>catch</code> block executes. It saves the error, logs a message, and if it's not the last attempt, it waits for 1 second using the <code>delay</code> helper function.</li>
+              <li><strong>Final Failure:</strong> If the loop finishes without a successful return, it means all retries have failed. The function then throws the last error that was captured.</li>
+            </ol>
+          `,
+        },
+      },
     ],
-    resources: [
-      "MDN Modules",
-      "Webpack Documentation",
-      "Vite Guide"
-    ]
   },
   {
     day: 11,
-    title: "Introduction to React",
-    phase: "React Basics",
-    theory: `
-      <h2>Introduction to React</h2>
-      <p>React is a JavaScript library for building user interfaces, particularly web applications. It was created by Facebook and is now maintained by Meta and the community.</p>
-      
-      <h3>Key Concepts</h3>
-      <ul>
-        <li><strong>Components:</strong> Reusable pieces of UI</li>
-        <li><strong>JSX:</strong> JavaScript XML syntax extension</li>
-        <li><strong>Virtual DOM:</strong> Efficient DOM manipulation</li>
-        <li><strong>Unidirectional Data Flow:</strong> Data flows down, events flow up</li>
-      </ul>
-
-      <h3>Why React?</h3>
-      <ul>
-        <li>Component-based architecture</li>
-        <li>Reusable code</li>
-        <li>Large ecosystem</li>
-        <li>Strong community support</li>
-        <li>Performance optimization</li>
-      </ul>
-    `,
+    phase: "Advanced JavaScript",
+    title: "Advanced DOM & Performance",
+    topics: ["Event Delegation", "Performance Optimization", "Memory Management"],
+    resources: [
+      { name: "JavaScript.info: Event Delegation", url: "https://javascript.info/event-delegation" },
+      { name: "web.dev: Browser Rendering Optimizations", url: "https://web.dev/articles/rendering-performance" },
+    ],
+    theory: `<strong>Event delegation</strong> is a technique where instead of adding an event listener to every single child element, you add one listener to the parent. This listener then uses properties of the event object (like <code>event.target</code>) to determine which child was acted upon. This improves performance, especially for long lists of items.<br/><br/><strong>Performance optimization</strong> in the browser involves minimizing layout thrashing (reading and writing to the DOM in quick succession), debouncing and throttling event handlers, and optimizing rendering.`,
     exercises: [
       {
-        question: "Create your first React component using JSX.",
-        solution: `// App.js
-import React from 'react';
-
-// Functional component
-function Welcome(props) {
-  return <h1>Hello, {props.name}!</h1>;
-}
-
-// Arrow function component
-const Greeting = ({ message }) => {
-  return (
-    <div>
-      <h2>{message}</h2>
-      <p>Welcome to React!</p>
-    </div>
-  );
-};
-
-// Main App component
-function App() {
-  const user = {
-    name: 'Alice',
-    age: 25
-  };
-  
-  return (
-    <div className="app">
-      <Welcome name="World" />
-      <Welcome name={user.name} />
-      <Greeting message="Getting Started with React" />
-      
-      <div>
-        <h3>User Info</h3>
-        <p>Name: {user.name}</p>
-        <p>Age: {user.age}</p>
-        <p>Can Vote: {user.age >= 18 ? 'Yes' : 'No'}</p>
-      </div>
-      
-      {/* Conditional rendering */}
-      {user.age >= 18 && (
-        <p>You are eligible to vote!</p>
-      )}
-      
-      {/* List rendering */}
-      <ul>
-        {['React', 'JavaScript', 'HTML', 'CSS'].map((item, index) => (
-          <li key={index}>{item}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-export default App;`
-      }
+        title: "Drag-and-Drop Sortable List",
+        description: "Implement the JavaScript for a simple drag-and-drop sortable list using DOM events.",
+        solution: {
+          code: `// Assumes HTML: <ul id="sortable-list"> <li draggable="true">...</li> </ul>
+const list = document.getElementById('sortable-list');
+let draggingElement = null;
+list.addEventListener('dragstart', e => {
+    draggingElement = e.target;
+    setTimeout(() => e.target.classList.add('dragging'), 0);
+});
+list.addEventListener('dragend', e => {
+    e.target.classList.remove('dragging');
+});
+list.addEventListener('dragover', e => {
+    e.preventDefault();
+    const afterElement = getDragAfterElement(list, e.clientY);
+    if (afterElement == null) {
+        list.appendChild(draggingElement);
+    } else {
+        list.insertBefore(draggingElement, afterElement);
+    }
+});
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('li:not(.dragging)')];
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}`,
+          explanation: `
+            <ol>
+              <li><strong>Setup:</strong> A global variable <code>draggingElement</code> is used to keep track of the item currently being dragged.</li>
+              <li><strong>Drag Start:</strong> An event listener for <code>dragstart</code> fires when the user begins dragging an item. It sets <code>draggingElement</code> to the target element. A <code>setTimeout</code> is used to add a class *after* the drag image has been created.</li>
+              <li><strong>Drag Over:</strong> The <code>dragover</code> event fires continuously as the element is dragged over a valid drop target. We must call <code>e.preventDefault()</code> to allow a drop.</li>
+              <li><strong>Calculate Position:</strong> Inside <code>dragover</code>, a helper function calculates which element the dragged item should be placed "before" based on the mouse's Y position.</li>
+              <li><strong>Reorder DOM:</strong> The dragged item is then inserted into the list at the newly calculated position using <code>insertBefore</code> or <code>appendChild</code>.</li>
+              <li><strong>Drag End:</strong> The <code>dragend</code> listener simply cleans up by removing the styling class.</li>
+            </ol>
+          `,
+        },
+      },
     ],
-    resources: [
-      "React Official Documentation",
-      "JSX Introduction",
-      "Thinking in React"
-    ]
   },
   {
     day: 12,
-    title: "JSX and Components",
-    phase: "React Basics",
+    phase: "React Fundamentals",
+    title: "React Basics & JSX",
+    topics: ["Components", "JSX Syntax", "Props", "Rendering"],
+    resources: [
+      { name: "React Docs: Your First Component", url: "https://react.dev/learn/your-first-component" },
+      { name: "React Docs: Writing Markup with JSX", url: "https://react.dev/learn/writing-markup-with-jsx" },
+    ],
     theory: `
-      <h2>JSX and Components</h2>
-      <p>JSX is a syntax extension for JavaScript that allows you to write HTML-like code in your JavaScript files. Components are the building blocks of React applications.</p>
-      
-      <h3>JSX Rules</h3>
+      React is a JavaScript library for building user interfaces with <strong>components</strong>. Components are like JavaScript functions that accept inputs (<strong>props</strong>) and return React elements describing what should appear on the screen.
+      <br/><br/>
+      <strong>JSX (JavaScript XML)</strong> is a syntax extension that looks like HTML and is used to write React elements declaratively.
+      <br/><br/>
+      Key JSX Rules:
       <ul>
-        <li>Must return a single parent element</li>
-        <li>Use className instead of class</li>
-        <li>Use camelCase for attributes</li>
-        <li>Self-closing tags must end with /</li>
-        <li>JavaScript expressions in curly braces {}</li>
-      </ul>
-
-      <h3>Component Types</h3>
-      <ul>
-        <li><strong>Functional Components:</strong> Simple functions that return JSX</li>
-        <li><strong>Class Components:</strong> ES6 classes (legacy, but still used)</li>
+        <li>Return a single root element (or use a fragment <code>&lt;&gt;...&lt;/&gt;</code>).</li>
+        <li>HTML attributes like <code>class</code> become <code>className</code>.</li>
+        <li>Embed JavaScript expressions in curly braces <code>{}</code>.</li>
       </ul>
     `,
     exercises: [
       {
-        question: "Create components demonstrating JSX features and best practices.",
-        solution: `// Button.js - Reusable button component
-import React from 'react';
-
-const Button = ({ 
-  children, 
-  onClick, 
-  type = 'button', 
-  variant = 'primary',
-  disabled = false,
-  size = 'medium'
-}) => {
-  const baseClasses = 'btn';
-  const variantClasses = {
-    primary: 'btn-primary',
-    secondary: 'btn-secondary',
-    danger: 'btn-danger'
-  };
-  const sizeClasses = {
-    small: 'btn-small',
-    medium: 'btn-medium',
-    large: 'btn-large'
-  };
-  
-  const className = \`\${baseClasses} \${variantClasses[variant]} \${sizeClasses[size]}\`;
-  
+        title: "Profile Card Component",
+        description:
+          "Create a reusable `ProfileCard` component that accepts props for an image URL, name, and a short bio.",
+        solution: {
+          code: `import React from 'react';
+function ProfileCard({ imageUrl, name, bio }) {
   return (
-    <button
-      type={type}
-      className={className}
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {children}
-    </button>
+    <div style={{
+      border: '1px solid #ccc',
+      borderRadius: '8px',
+      padding: '16px',
+      maxWidth: '300px',
+      textAlign: 'center',
+    }}>
+      <img 
+        src={imageUrl} 
+        alt={\`Profile of \${name}\`}
+        style={{ width: '100px', height: '100px', borderRadius: '50%' }}
+      />
+      <h2>{name}</h2>
+      <p>{bio}</p>
+    </div>
   );
-};
-
-export default Button;`
-      }
+}
+export default ProfileCard;`,
+          explanation: `
+            <ol>
+              <li><strong>Function Component:</strong> The component is defined as a JavaScript function named <code>ProfileCard</code>.</li>
+              <li><strong>Props Destructuring:</strong> It accepts a single argument, the <code>props</code> object. We use destructuring in the function signature <code>({ imageUrl, name, bio })</code> to directly access the properties we need as variables.</li>
+              <li><strong>Return JSX:</strong> The function returns a block of JSX that looks like HTML. This describes the UI for the card.</li>
+              <li><strong>Dynamic Content:</strong> The prop values (<code>imageUrl</code>, <code>name</code>, <code>bio</code>) are embedded directly into the JSX using curly braces <code>{}</code>. This makes the component dynamic and reusable.</li>
+              <li><strong>Styling:</strong> For simplicity, this example uses inline styles, which are passed as a JavaScript object. Note that CSS properties like <code>border-radius</code> become camelCased (<code>borderRadius</code>).</li>
+            </ol>
+          `,
+        },
+      },
     ],
-    resources: [
-      "JSX In Depth",
-      "React Components Guide",
-      "Component Composition"
-    ]
   },
   {
     day: 13,
-    title: "Props and State",
-    phase: "React Basics",
+    phase: "React Fundamentals",
+    title: "State & Event Handling",
+    topics: ["useState Hook", "Event Handling", "Controlled Components"],
+    resources: [
+      { name: "React Docs: State - A Component's Memory", url: "https://react.dev/learn/state-a-components-memory" },
+      { name: "React Docs: Responding to Events", url: "https://react.dev/learn/responding-to-events" },
+    ],
     theory: `
-      <h2>Props and State</h2>
-      <p>Props and state are fundamental concepts in React for managing data and making components interactive.</p>
-      
-      <h3>Props (Properties)</h3>
-      <ul>
-        <li>Data passed from parent to child components</li>
-        <li>Read-only (immutable)</li>
-        <li>Used for component configuration</li>
-        <li>Can be any JavaScript value</li>
-      </ul>
-
-      <h3>State</h3>
-      <ul>
-        <li>Internal component data that can change</li>
-        <li>Managed with useState hook</li>
-        <li>Triggers re-renders when updated</li>
-        <li>Should be treated as immutable</li>
-      </ul>
+      To handle data that changes over time, components use <strong>state</strong>. The <strong><code>useState</code></strong> hook adds state to a functional component. It returns an array containing the current state value and a function to update it. When you call the update function, React re-renders the component.
     `,
     exercises: [
       {
-        question: "Create a counter component demonstrating state management.",
-        solution: `// Counter.js - Basic counter with state
-import { useState } from 'react';
-
-const Counter = ({ initialValue = 0, step = 1, min, max }) => {
-  const [count, setCount] = useState(initialValue);
-  
-  const increment = () => {
-    setCount(prevCount => {
-      const newCount = prevCount + step;
-      return max !== undefined ? Math.min(newCount, max) : newCount;
-    });
-  };
-  
-  const decrement = () => {
-    setCount(prevCount => {
-      const newCount = prevCount - step;
-      return min !== undefined ? Math.max(newCount, min) : newCount;
-    });
-  };
-  
-  const reset = () => {
-    setCount(initialValue);
-  };
-  
-  const isAtMin = min !== undefined && count <= min;
-  const isAtMax = max !== undefined && count >= max;
-  
+        title: "Counter with Increment, Decrement, and Reset",
+        description: "Build a component that displays a count and has buttons to increment, decrement, and reset it.",
+        solution: {
+          code: `import React, { useState } from 'react';
+function Counter() {
+  const [count, setCount] = useState(0);
+  const handleIncrement = () => setCount(prevCount => prevCount + 1);
+  const handleDecrement = () => setCount(prevCount => prevCount - 1);
+  const handleReset = () => setCount(0);
   return (
-    <div className="counter">
-      <h3>Counter</h3>
-      <div className="counter-display">
-        <span className="count-value">{count}</span>
-      </div>
-      
-      <div className="counter-controls">
-        <button 
-          onClick={decrement}
-          disabled={isAtMin}
-          className="btn btn-secondary"
-        >
-          -
-        </button>
-        
-        <button 
-          onClick={reset}
-          className="btn btn-outline"
-        >
-          Reset
-        </button>
-        
-        <button 
-          onClick={increment}
-          disabled={isAtMax}
-          className="btn btn-primary"
-        >
-          +
-        </button>
-      </div>
-      
-      <div className="counter-info">
-        <small>
-          Step: {step}
-          {min !== undefined && \`, Min: \${min}\`}
-          {max !== undefined && \`, Max: \${max}\`}
-        </small>
-      </div>
+    <div>
+      <p style={{ fontSize: '2rem' }}>{count}</p>
+      <button onClick={handleIncrement}>Increment</button>
+      <button onClick={handleDecrement}>Decrement</button>
+      <button onClick={handleReset}>Reset</button>
     </div>
   );
-};
-
-export default Counter;`
-      }
+}
+export default Counter;`,
+          explanation: `
+            <ol>
+              <li><strong>Import Hook:</strong> First, we import the <code>useState</code> hook from React.</li>
+              <li><strong>Initialize State:</strong> Inside the component, we call <code>useState(0)</code>. This declares a state variable named <code>count</code>, initialized to <code>0</code>, and a function to update it, <code>setCount</code>.</li>
+              <li><strong>Define Event Handlers:</strong> We create three functions (<code>handleIncrement</code>, <code>handleDecrement</code>, <code>handleReset</code>) that will be called when the buttons are clicked.</li>
+              <li><strong>Update State Safely:</strong> The increment and decrement handlers use the "functional update" form: <code>setCount(prevCount => prevCount + 1)</code>. This is the safest way to update state that depends on its previous value.</li>
+              <li><strong>Bind Handlers in JSX:</strong> Each button in the returned JSX has an <code>onClick</code> prop. We pass our handler functions to these props. When a button is clicked, the corresponding function executes, calls <code>setCount</code>, and triggers a re-render with the new count value.</li>
+            </ol>
+          `,
+        },
+      },
     ],
-    resources: [
-      "React State and Lifecycle",
-      "Props vs State",
-      "useState Hook Guide"
-    ]
   },
   {
     day: 14,
-    title: "Event Handling in React",
-    phase: "React Basics",
-    theory: `
-      <h2>Event Handling in React</h2>
-      <p>React uses SyntheticEvents, which are wrappers around native DOM events that provide consistent behavior across different browsers.</p>
-      
-      <h3>Key Concepts</h3>
-      <ul>
-        <li><strong>SyntheticEvent:</strong> React's event wrapper</li>
-        <li><strong>Event Delegation:</strong> React uses a single event listener</li>
-        <li><strong>Event Object:</strong> Contains event information</li>
-        <li><strong>Preventing Default:</strong> e.preventDefault()</li>
-      </ul>
-
-      <h3>Common Event Types</h3>
-      <ul>
-        <li>onClick, onSubmit, onChange</li>
-        <li>onMouseEnter, onMouseLeave</li>
-        <li>onKeyDown, onKeyUp, onKeyPress</li>
-        <li>onFocus, onBlur</li>
-      </ul>
-    `,
-    exercises: [
-      {
-        question: "Create an interactive form with various event handlers.",
-        solution: `// InteractiveForm.js - Comprehensive event handling example
-import React, { useState } from 'react';
-
-const InteractiveForm = () => {
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    age: '',
-    country: '',
-    interests: [],
-    newsletter: false,
-    terms: false
-  });
-  
-  const [errors, setErrors] = useState({});
-  const [touched, setTouched] = useState({});
-  const [showPassword, setShowPassword] = useState(false);
-  const [submitCount, setSubmitCount] = useState(0);
-  
-  const countries = ['USA', 'Canada', 'UK', 'Germany', 'France', 'Japan', 'Australia'];
-  const interestOptions = ['Technology', 'Sports', 'Music', 'Travel', 'Cooking', 'Reading'];
-  
-  // Handle input changes
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-    
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
-  };
-  
-  // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSubmitCount(prev => prev + 1);
-    
-    // Validation logic here
-    console.log('Form submitted:', formData);
-  };
-  
-  return (
-    <div className="interactive-form">
-      <h2>Registration Form</h2>
-      <p>Submit attempts: {submitCount}</p>
-      
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="username">Username *</label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            value={formData.username}
-            onChange={handleInputChange}
-            className={errors.username ? 'error' : ''}
-            placeholder="Enter username"
-          />
-          {errors.username && touched.username && (
-            <span className="error-message">{errors.username}</span>
-          )}
-        </div>
-        
-        <button type="submit" className="btn btn-primary btn-large">
-          Register
-        </button>
-      </form>
-    </div>
-  );
-};
-
-export default InteractiveForm;`
-      }
-    ],
+    phase: "React Fundamentals",
+    title: "Effects & Lifecycle",
+    topics: ["useEffect Hook", "Cleanup", "Dependency Array"],
     resources: [
-      "React Events Guide",
-      "SyntheticEvent Documentation",
-      "Event Handling Best Practices"
-    ]
-  },
-  {
-    day: 15,
-    title: "Lists and Keys",
-    phase: "React Basics",
-    theory: `
-      <h2>Lists and Keys in React</h2>
-      <p>Rendering lists of data is a common requirement in React applications. Keys help React identify which items have changed, been added, or removed.</p>
-      
-      <h3>Key Concepts</h3>
-      <ul>
-        <li><strong>Keys:</strong> Unique identifiers for list items</li>
-        <li><strong>Reconciliation:</strong> How React updates the DOM efficiently</li>
-        <li><strong>Index as Key:</strong> When and why to avoid it</li>
-        <li><strong>Stable Keys:</strong> Keys that don't change between renders</li>
-      </ul>
-
-      <h3>Best Practices</h3>
-      <ul>
-        <li>Use unique, stable identifiers as keys</li>
-        <li>Avoid using array indices as keys when list can change</li>
-        <li>Keys should be unique among siblings</li>
-        <li>Don't generate keys during render</li>
-      </ul>
-    `,
-    exercises: [
-      {
-        question: "Create a todo list demonstrating proper key usage and list manipulation.",
-        solution: `// TodoList.js - Comprehensive list management example
-import React, { useState } from 'react';
-
-const TodoList = () => {
-  const [todos, setTodos] = useState([
-    { id: 1, text: 'Learn React', completed: false, priority: 'high', createdAt: new Date('2024-01-01') },
-    { id: 2, text: 'Build a project', completed: false, priority: 'medium', createdAt: new Date('2024-01-02') },
-    { id: 3, text: 'Deploy to production', completed: true, priority: 'low', createdAt: new Date('2024-01-03') }
-  ]);
-  
-  const [newTodo, setNewTodo] = useState('');
-  const [filter, setFilter] = useState('all');
-  
-  // Add new todo
-  const addTodo = (e) => {
-    e.preventDefault();
-    if (!newTodo.trim()) return;
-    
-    const newTodoItem = {
-      id: Date.now(),
-      text: newTodo.trim(),
-      completed: false,
-      priority: 'medium',
-      createdAt: new Date()
-    };
-    
-    setTodos(prev => [...prev, newTodoItem]);
-    setNewTodo('');
-  };
-  
-  // Toggle todo completion
-  const toggleTodo = (id) => {
-    setTodos(prev =>
-      prev.map(todo =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
-  };
-  
-  // Delete todo
-  const deleteTodo = (id) => {
-    setTodos(prev => prev.filter(todo => todo.id !== id));
-  };
-  
-  // Filter todos
-  const filteredTodos = todos.filter(todo => {
-    switch (filter) {
-      case 'active':
-        return !todo.completed;
-      case 'completed':
-        return todo.completed;
-      default:
-        return true;
-    }
-  });
-  
-  return (
-    <div className="todo-app">
-      <h1>Todo List</h1>
-      
-      <form onSubmit={addTodo}>
-        <input
-          type="text"
-          value={newTodo}
-          onChange={(e) => setNewTodo(e.target.value)}
-          placeholder="Add a new todo..."
-        />
-        <button type="submit">Add Todo</button>
-      </form>
-      
-      <div className="filters">
-        <button onClick={() => setFilter('all')}>All</button>
-        <button onClick={() => setFilter('active')}>Active</button>
-        <button onClick={() => setFilter('completed')}>Completed</button>
-      </div>
-      
-      <ul className="todos">
-        {filteredTodos.map(todo => (
-          <li key={todo.id} className={\`todo-item \${todo.completed ? 'completed' : ''}\`}>
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => toggleTodo(todo.id)}
-            />
-            <span>{todo.text}</span>
-            <button onClick={() => deleteTodo(todo.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
-export default TodoList;`
-      }
+      { name: "React Docs: Synchronizing with Effects", url: "https://react.dev/learn/synchronizing-with-effects" },
+      { name: "React Docs: You Might Not Need an Effect", url: "https://react.dev/learn/you-might-not-need-an-effect" },
     ],
-    resources: [
-      "React Lists and Keys",
-      "Reconciliation in React",
-      "Performance Optimization"
-    ]
-  },
-  {
-    day: 16,
-    title: "Conditional Rendering",
-    phase: "React Intermediate",
     theory: `
-      <h2>Conditional Rendering</h2>
-      <p>Conditional rendering in React allows you to render different components or elements based on certain conditions, similar to how conditions work in JavaScript.</p>
-      
-      <h3>Conditional Rendering Techniques</h3>
-      <ul>
-        <li><strong>if/else statements:</strong> Traditional conditional logic</li>
-        <li><strong>Ternary operator:</strong> Inline conditional rendering</li>
-        <li><strong>Logical AND (&&):</strong> Render or nothing</li>
-        <li><strong>Switch statements:</strong> Multiple conditions</li>
-        <li><strong>Immediately Invoked Function Expressions (IIFE):</strong> Complex logic</li>
-      </ul>
-
-      <h3>Best Practices</h3>
-      <ul>
-        <li>Keep conditions simple and readable</li>
-        <li>Extract complex logic into functions</li>
-        <li>Use meaningful variable names for conditions</li>
-        <li>Consider performance implications</li>
-      </ul>
+      The <strong><code>useEffect</code></strong> hook lets you perform "side effects" in functional components. Side effects are operations that interact with the outside world, like fetching data from an API, setting up subscriptions, or manually changing the DOM. The hook's dependency array controls when the effect is re-run.
     `,
     exercises: [
       {
-        question: "Create a user dashboard with different views based on user roles and authentication status.",
-        solution: `// UserDashboard.js - Comprehensive conditional rendering example
-import React, { useState, useEffect } from 'react';
-
-const UserDashboard = () => {
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  
-  // Simulate authentication check
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        setIsLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        const scenarios = [
-          null, // Not logged in
-          { id: 1, name: 'John Doe', role: 'user', isVerified: true, subscription: 'free' },
-          { id: 2, name: 'Jane Admin', role: 'admin', isVerified: true, subscription: 'premium' }
-        ];
-        
-        const randomUser = scenarios[Math.floor(Math.random() * scenarios.length)];
-        setUser(randomUser);
-      } catch (err) {
-        setError('Failed to load user data');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    checkAuth();
-  }, []);
-  
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="dashboard-loading">
-        <div className="loading-spinner"></div>
-        <p>Loading dashboard...</p>
-      </div>
-    );
-  }
-  
-  // Error state
-  if (error) {
-    return (
-      <div className="dashboard-error">
-        <h2>Oops! Something went wrong</h2>
-        <p>{error}</p>
-        <button onClick={() => window.location.reload()}>Try Again</button>
-      </div>
-    );
-  }
-  
-  // Not authenticated
-  if (!user) {
-    return (
-      <div className="login-prompt">
-        <h2>Welcome to Dashboard</h2>
-        <p>Please log in to access your dashboard</p>
-        <button onClick={() => setUser({ id: 1, name: 'Demo User', role: 'user' })}>
-          Log In
-        </button>
-      </div>
-    );
-  }
-  
-  // User verification check
-  const isVerified = user.isVerified;
-  const isAdmin = user.role === 'admin';
-  const isPremium = user.subscription === 'premium';
-  
-  return (
-    <div className="user-dashboard">
-      <header className="dashboard-header">
-        <h1>Dashboard</h1>
-        <span>{user.name} ({user.role})</span>
-      </header>
-      
-      {/* Verification Banner */}
-      {!isVerified && (
-        <div className="verification-banner">
-          <span>⚠️ Your account is not verified. Some features may be limited.</span>
-          <button>Verify Now</button>
-        </div>
-      )}
-      
-      <main className="dashboard-content">
-        <div className="welcome-section">
-          <h2>Welcome back, {user.name}!</h2>
-          
-          {/* Conditional features based on subscription */}
-          {isPremium ? (
-            <div className="premium-features">
-              <h3>Premium Features</h3>
-              <ul>
-                <li>✅ Advanced Analytics</li>
-                <li>✅ Priority Support</li>
-                <li>✅ Custom Themes</li>
-              </ul>
-            </div>
-          ) : (
-            <div className="upgrade-prompt">
-              <h3>Upgrade to Premium</h3>
-              <p>Unlock advanced features</p>
-              <button>Upgrade Now</button>
-            </div>
-          )}
-        </div>
-        
-        {/* Admin-only section */}
-        {isAdmin && (
-          <div className="admin-section">
-            <h3>Admin Panel</h3>
-            <div className="admin-actions">
-              <button>Manage Users</button>
-              <button>System Settings</button>
-              <button>View Analytics</button>
-            </div>
-          </div>
-        )}
-      </main>
-    </div>
-  );
-};
-
-export default UserDashboard;`
-      }
-    ],
-    resources: [
-      "Conditional Rendering Guide",
-      "React Patterns",
-      "Component Design Patterns"
-    ]
-  },
-  {
-    day: 17,
-    title: "React Hooks - useState and useEffect",
-    phase: "React Intermediate",
-    theory: `
-      <h2>React Hooks - useState and useEffect</h2>
-      <p>Hooks are functions that let you use state and other React features in functional components. useState and useEffect are the most commonly used hooks.</p>
-      
-      <h3>useState Hook</h3>
-      <ul>
-        <li><strong>Purpose:</strong> Add state to functional components</li>
-        <li><strong>Returns:</strong> Array with current state and setter function</li>
-        <li><strong>Updates:</strong> Trigger re-renders when state changes</li>
-        <li><strong>Batching:</strong> Multiple setState calls are batched</li>
-      </ul>
-
-      <h3>useEffect Hook</h3>
-      <ul>
-        <li><strong>Purpose:</strong> Perform side effects in functional components</li>
-        <li><strong>Timing:</strong> Runs after render (by default)</li>
-        <li><strong>Dependencies:</strong> Control when effect runs</li>
-        <li><strong>Cleanup:</strong> Return function for cleanup</li>
-      </ul>
-    `,
-    exercises: [
-      {
-        question: "Create a comprehensive example demonstrating various useState patterns.",
-        solution: `// StateExamples.js - Comprehensive useState patterns
-import React, { useState } from 'react';
-
-const StateExamples = () => {
-  // Basic state
-  const [count, setCount] = useState(0);
-  
-  // Object state
-  const [user, setUser] = useState({
-    name: '',
-    email: '',
-    age: 0,
-    preferences: {
-      theme: 'light',
-      notifications: true
-    }
-  });
-  
-  // Array state
-  const [items, setItems] = useState([
-    { id: 1, text: 'Learn React', completed: false },
-    { id: 2, text: 'Build projects', completed: false }
-  ]);
-  
-  // Basic counter operations
-  const increment = () => setCount(prev => prev + 1);
-  const decrement = () => setCount(prev => prev - 1);
-  const reset = () => setCount(0);
-  
-  // Object state updates (immutable)
-  const updateUserName = (name) => {
-    setUser(prevUser => ({
-      ...prevUser,
-      name
-    }));
-  };
-  
-  // Array state operations
-  const addItem = () => {
-    const newItem = {
-      id: Date.now(),
-      text: \`New item \${items.length + 1}\`,
-      completed: false
-    };
-    setItems(prevItems => [...prevItems, newItem]);
-  };
-  
-  const toggleItem = (id) => {
-    setItems(prevItems =>
-      prevItems.map(item =>
-        item.id === id ? { ...item, completed: !item.completed } : item
-      )
-    );
-  };
-  
-  return (
-    <div className="state-examples">
-      <h1>useState Hook Examples</h1>
-      
-      {/* Basic Counter */}
-      <section>
-        <h2>Basic Counter State</h2>
-        <p>Count: <strong>{count}</strong></p>
-        <button onClick={decrement}>-</button>
-        <button onClick={reset}>Reset</button>
-        <button onClick={increment}>+</button>
-      </section>
-      
-      {/* Object State */}
-      <section>
-        <h2>Object State Management</h2>
-        <input
-          type="text"
-          value={user.name}
-          onChange={(e) => updateUserName(e.target.value)}
-          placeholder="Enter name"
-        />
-        <p>Name: {user.name}</p>
-      </section>
-      
-      {/* Array State */}
-      <section>
-        <h2>Array State Operations</h2>
-        <button onClick={addItem}>Add Item</button>
-        <ul>
-          {items.map(item => (
-            <li key={item.id}>
-              <input
-                type="checkbox"
-                checked={item.completed}
-                onChange={() => toggleItem(item.id)}
-              />
-              <span>{item.text}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-    </div>
-  );
-};
-
-export default StateExamples;`
-      }
-    ],
-    resources: [
-      "React State and Lifecycle",
-      "Props vs State",
-      "useState Hook Guide"
-    ]
-  },
-  {
-    day: 18,
-    title: "Custom Hooks",
-    phase: "React Intermediate",
-    theory: `
-      <h2>Custom Hooks</h2>
-      <p>Custom hooks are JavaScript functions that start with "use" and can call other hooks. They allow you to extract component logic into reusable functions.</p>
-      
-      <h3>Benefits of Custom Hooks</h3>
-      <ul>
-        <li><strong>Reusability:</strong> Share logic between components</li>
-        <li><strong>Separation of Concerns:</strong> Keep components clean</li>
-        <li><strong>Testability:</strong> Easier to test isolated logic</li>
-        <li><strong>Composition:</strong> Combine multiple hooks</li>
-      </ul>
-
-      <h3>Common Custom Hook Patterns</h3>
-      <ul>
-        <li>Data fetching hooks</li>
-        <li>Form handling hooks</li>
-        <li>Local storage hooks</li>
-        <li>Timer and interval hooks</li>
-      </ul>
-    `,
-    exercises: [
-      {
-        question: "Create various custom hooks for common use cases.",
-        solution: `// hooks/useLocalStorage.js
-import { useState, useEffect } from 'react';
-
-export const useLocalStorage = (key, initialValue) => {
-  // Get value from localStorage or use initial value
-  const [storedValue, setStoredValue] = useState(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      console.error(\`Error reading localStorage key "\${key}":, error\`);
-      return initialValue;
-    }
-  });
-  
-  // Update localStorage when state changes
-  const setValue = (value) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(\`Error setting localStorage key "\${key}":, error\`);
-    }
-  };
-  
-  return [storedValue, setValue];
-};
-
-// hooks/useFetch.js
-import { useState, useEffect } from 'react';
-
-export const useFetch = (url, options = {}) => {
-  const [data, setData] = useState(null);
+        title: "Data Fetching with Loading States",
+        description:
+          "Create a component that fetches a list of users, showing a 'Loading...' message while fetching and an error message on failure.",
+        solution: {
+          code: `import React, { useState, useEffect } from 'react';
+const API_URL = 'https://jsonplaceholder.typicode.com/users';
+function UserList() {
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchUsers = async () => {
       try {
-        setLoading(true);
-        setError(null);
-        
-        const response = await fetch(url, options);
-        
-        if (!response.ok) {
-          throw new Error(\`HTTP error! status: \${response.status}\`);
-        }
-        
-        const result = await response.json();
-        setData(result);
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error('Failed to fetch data');
+        const data = await response.json();
+        setUsers(data);
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-    
-    if (url) {
-      fetchData();
-    }
-  }, [url, JSON.stringify(options)]);
-  
-  const refetch = () => {
-    if (url) {
-      fetchData();
-    }
-  };
-  
-  return { data, loading, error, refetch };
-};
-
-// hooks/useCounter.js
-import { useState } from 'react';
-
-export const useCounter = (initialValue = 0, step = 1) => {
-  const [count, setCount] = useState(initialValue);
-  
-  const increment = () => setCount(prev => prev + step);
-  const decrement = () => setCount(prev => prev - step);
-  const reset = () => setCount(initialValue);
-  const setValue = (value) => setCount(value);
-  
-  return {
-    count,
-    increment,
-    decrement,
-    reset,
-    setValue
-  };
-};
-
-// Example usage component
-import React from 'react';
-import { useLocalStorage, useFetch, useCounter } from './hooks';
-
-const CustomHooksExample = () => {
-  // Using custom hooks
-  const [name, setName] = useLocalStorage('userName', '');
-  const { data: posts, loading, error, refetch } = useFetch('https://jsonplaceholder.typicode.com/posts?_limit=5');
-  const { count, increment, decrement, reset } = useCounter(0, 1);
-  
+    fetchUsers();
+  }, []); // Empty array = run once
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
   return (
-    <div className="custom-hooks-example">
-      <h1>Custom Hooks Example</h1>
-      
-      {/* Local Storage Hook */}
-      <section>
-        <h2>useLocalStorage Hook</h2>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Enter your name (saved to localStorage)"
-        />
-        <p>Stored name: {name}</p>
-      </section>
-      
-      {/* Counter Hook */}
-      <section>
-        <h2>useCounter Hook</h2>
-        <p>Count: {count}</p>
-        <button onClick={decrement}>-</button>
-        <button onClick={reset}>Reset</button>
-        <button onClick={increment}>+</button>
-      </section>
-      
-      {/* Fetch Hook */}
-      <section>
-        <h2>useFetch Hook</h2>
-        <button onClick={refetch} disabled={loading}>
-          {loading ? 'Loading...' : 'Refetch Posts'}
-        </button>
-        
-        {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-        
-        {posts && (
-          <ul>
-            {posts.map(post => (
-              <li key={post.id}>
-                <h4>{post.title}</h4>
-                <p>{post.body.substring(0, 100)}...</p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+    <div>
+      <h1>User List</h1>
+      <ul>{users.map(user => <li key={user.id}>{user.name}</li>)}</ul>
     </div>
   );
-};
-
-export default CustomHooksExample;`
-      }
+}
+export default UserList;`,
+          explanation: `
+            <ol>
+              <li><strong>Initialize States:</strong> We set up three state variables: <code>users</code> to hold the API data, <code>loading</code> to track the fetch status (initially true), and <code>error</code> to store any error messages.</li>
+              <li><strong>Define Effect:</strong> We use the <code>useEffect</code> hook to perform the data fetch. The logic is placed inside this hook.</li>
+              <li><strong>Run Once:</strong> We provide an empty dependency array <code>[]</code> as the second argument to <code>useEffect</code>. This tells React to run the effect function only *once*, after the component first renders.</li>
+              <li><strong>Fetch Logic:</strong> Inside the effect, an <code>async</code> function handles the <code>fetch</code> call within a <code>try...catch...finally</code> block to gracefully manage success, error, and loading states.</li>
+              <li><strong>Conditional Rendering:</strong> Before rendering the final list, the component checks the <code>loading</code> and <code>error</code> states. It returns the appropriate UI (a loading message, an error message, or the user list) based on these states.</li>
+            </ol>
+          `,
+        },
+      },
     ],
-    resources: [
-      "Building Your Own Hooks",
-      "Custom Hook Patterns",
-      "Hook Rules and Best Practices"
-    ]
   },
   {
-    day: 19,
-    title: "Context API",
-    phase: "React Intermediate",
+    day: 15,
+    phase: "React Fundamentals",
+    title: "Lists & Keys",
+    topics: ["Rendering Lists", "Keys", "Dynamic Content"],
+    resources: [
+      { name: "React Docs: Rendering Lists", url: "https://react.dev/learn/rendering-lists" },
+      {
+        name: "React Docs: Keeping List Items in Order with key",
+        url: "https://react.dev/learn/rendering-lists#keeping-list-items-in-order-with-key",
+      },
+    ],
     theory: `
-      <h2>Context API</h2>
-      <p>The Context API provides a way to pass data through the component tree without having to pass props down manually at every level.</p>
-      
-      <h3>When to Use Context</h3>
-      <ul>
-        <li><strong>Global State:</strong> Data needed by many components</li>
-        <li><strong>Theme Information:</strong> UI themes, language preferences</li>
-        <li><strong>User Authentication:</strong> Current user data</li>
-        <li><strong>Avoiding Prop Drilling:</strong> Deep component hierarchies</li>
-      </ul>
-
-      <h3>Context Components</h3>
-      <ul>
-        <li><strong>createContext:</strong> Creates a context object</li>
-        <li><strong>Provider:</strong> Provides context value to children</li>
-        <li><strong>useContext:</strong> Consumes context in functional components</li>
-      </ul>
+      We use array methods like <strong><code>map()</code></strong> to transform an array of data into an array of React elements. When rendering a list, you must provide a unique and stable <code>key</code> prop to each item.
+      <code>{items.map(item => <li key={item.id}>{item.name}</li>)}</code>
+      <br/><br/>
+      Keys help React identify which items have changed, are added, or are removed. This allows React to efficiently update the UI. The best keys are unique IDs from your data.
     `,
     exercises: [
       {
-        question: "Create a theme context and authentication context system.",
-        solution: `// contexts/ThemeContext.js
-import React, { createContext, useContext, useState } from 'react';
-
-const ThemeContext = createContext();
-
-export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
-};
-
-export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState('light');
-  
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+        title: "Dynamic Todo List with CRUD Operations",
+        description:
+          "Build a todo list where todos are managed in React state. Implement Add, Update (toggling completion), and Delete functionality.",
+        solution: {
+          code: `import React, { useState } from 'react';
+function TodoList() {
+  const [todos, setTodos] = useState([]);
+  const [inputText, setInputText] = useState('');
+  const handleAddTodo = (e) => {
+    e.preventDefault();
+    if (!inputText.trim()) return;
+    const newTodo = { id: Date.now(), text: inputText, completed: false };
+    setTodos([...todos, newTodo]);
+    setInputText('');
   };
-  
-  const value = {
-    theme,
-    toggleTheme,
-    colors: {
-      light: {
-        background: '#ffffff',
-        text: '#000000',
-        primary: '#007bff'
+  const handleToggle = (id) => {
+    setTodos(
+      todos.map(t => t.id === id ? { ...t, completed: !t.completed } : t)
+    );
+  };
+  const handleDelete = (id) => {
+    setTodos(todos.filter(t => t.id !== id));
+  };
+  return (
+    <div>
+      <form onSubmit={handleAddTodo}>
+        <input value={inputText} onChange={e => setInputText(e.target.value)} />
+        <button type="submit">Add</button>
+      </form>
+      <ul>
+        {todos.map(todo => (
+          <li key={todo.id}>
+            <span
+              style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}
+              onClick={() => handleToggle(todo.id)}
+            >
+              {todo.text}
+            </span>
+            <button onClick={() => handleDelete(todo.id)}>X</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+export default TodoList;`,
+          explanation: `
+            <ol>
+              <li><strong>State Management:</strong> Two state variables are used: <code>todos</code> to hold the array of todo items, and <code>inputText</code> for the controlled input field.</li>
+              <li><strong>Add Todo:</strong> The <code>handleAddTodo</code> function creates a new todo object with a unique <code>id</code> (using <code>Date.now()</code>), the current input text, and a <code>completed</code> status of false. It then adds this new object to the end of the todos array.</li>
+              <li><strong>Toggle Completion:</strong> <code>handleToggle</code> maps over the existing todos. If a todo's <code>id</code> matches the one that was clicked, it creates a new object for that todo with the <code>completed</code> property flipped. Otherwise, it returns the original todo. This creates a new array without mutating the original state.</li>
+              <li><strong>Delete Todo:</strong> <code>handleDelete</code> uses the <code>.filter()</code> method to create a new array that includes every todo *except* the one whose <code>id</code> matches the one passed to the function.</li>
+              <li><strong>Keys:</strong> In the JSX, the <code>todo.id</code> is used as the <code>key</code> prop for each <code>&lt;li&gt;</code>, ensuring React can efficiently track each item.</li>
+            </ol>
+          `,
+        },
       },
-      dark: {
-        background: '#1a1a1a',
-        text: '#ffffff',
-        primary: '#0d6efd'
-      }
+    ],
+  },
+  {
+    day: 16,
+    phase: "React Fundamentals",
+    title: "Forms & Validation",
+    topics: ["Controlled/Uncontrolled Inputs", "Validation Patterns"],
+    resources: [
+      {
+        name: "React Docs: Sharing State Between Components",
+        url: "https://react.dev/learn/sharing-state-between-components",
+      },
+      { name: "React Hook Form Docs", url: "https://react-hook-form.com/" },
+    ],
+    theory: `In React, a <strong>controlled component</strong> is a form input whose value is controlled by React state. The state is the "single source of truth." The input's <code>value</code> prop is bound to a state variable, and an <code>onChange</code> handler updates that state variable. This makes it easy to implement instant validation, conditional logic, and have full control over the form's data.`,
+    exercises: [
+      {
+        title: "Registration Form with Validation",
+        description:
+          "Create a registration form with email and password fields that provides real-time validation feedback to the user.",
+        solution: {
+          code: `import React, { useState } from 'react';
+function RegistrationForm() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState({});
+  const validate = () => {
+    const newErrors = {};
+    if (!email) newErrors.email = 'Email is required';
+    else if (!/\\S+@\\S+\\.\\S+/.test(email)) newErrors.email = 'Email is invalid';
+    if (!password) newErrors.password = 'Password is required';
+    else if (password.length < 8) newErrors.password = 'Password must be at least 8 characters';
+    return newErrors;
+  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const formErrors = validate();
+    if (Object.keys(formErrors).length === 0) {
+      alert('Form submitted successfully!');
+      setEmail('');
+      setPassword('');
+      setErrors({});
+    } else {
+      setErrors(formErrors);
     }
   };
-  
   return (
-    <ThemeContext.Provider value={value}>
-      <div style={{
-        backgroundColor: value.colors[theme].background,
-        color: value.colors[theme].text,
-        minHeight: '100vh',
-        transition: 'all 0.3s ease'
-      }}>
-        {children}
+    <form onSubmit={handleSubmit}>
+      <div>
+        <label>Email</label>
+        <input type="text" value={email} onChange={e => setEmail(e.target.value)} />
+        {errors.email && <p style={{color: 'red'}}>{errors.email}</p>}
       </div>
-    </ThemeContext.Provider>
+      <div>
+        <label>Password</label>
+        <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
+        {errors.password && <p style={{color: 'red'}}>{errors.password}</p>}
+      </div>
+      <button type="submit">Register</button>
+    </form>
   );
-};
-
-// contexts/AuthContext.js
-import React, { createContext, useContext, useState, useEffect } from 'react';
-
-const AuthContext = createContext();
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+}`,
+          explanation: `
+            <ol>
+              <li><strong>Controlled Inputs:</strong> The component controls the <code>email</code> and <code>password</code> inputs using <code>useState</code>. The input's <code>value</code> is tied to the state, and its <code>onChange</code> updates the state.</li>
+              <li><strong>Error State:</strong> A separate state variable, <code>errors</code>, is an object used to hold any validation error messages.</li>
+              <li><strong>Validation Logic:</strong> A <code>validate</code> function contains all the business logic. It checks the current <code>email</code> and <code>password</code> state and returns a new object containing any error messages.</li>
+              <li><strong>Submit Handler:</strong> When the form is submitted, <code>handleSubmit</code> prevents the default form submission, calls the <code>validate</code> function, and checks if the returned errors object is empty.</li>
+              <li><strong>Conditional Rendering of Errors:</strong> If there are errors, the <code>errors</code> state is updated, which causes the component to re-render. The JSX includes a check like <code>{errors.email && ...}</code> to conditionally display the error message for each field right below the input.</li>
+            </ol>
+          `,
+        },
+      },
+    ],
+  },
+  // PASTE THIS INTO lib/course-data.ts AT THE VERY END
+  {
+    day: 17,
+    phase: "Advanced React",
+    title: "Advanced Hooks",
+    topics: ["useReducer", "useRef", "useMemo", "useCallback"],
+    resources: [
+      { name: "React Docs: Escape Hatches (useRef, etc.)", url: "https://react.dev/learn/escape-hatches" },
+      { name: "React Docs: useReducer", url: "https://react.dev/reference/react/useReducer" },
+    ],
+    theory: `Beyond the basics, React offers more specialized hooks:<br/><ul><li><strong><code>useReducer</code></strong>: An alternative to <code>useState</code> for managing complex state logic.</li><li><strong><code>useRef</code></strong>: Returns a mutable ref object whose <code>.current</code> property can be changed without re-rendering. Used for accessing DOM nodes or persisting values across renders.</li><li><strong><code>useMemo</code></strong>: Memoizes a value, recomputing it only when its dependencies change. Used for expensive calculations.</li><li><strong><code>useCallback</code></strong>: Memoizes a function, returning the same function instance if dependencies haven't changed. Prevents unnecessary re-renders of child components.</li></ul>`,
+    exercises: [
+      {
+        title: "Shopping Cart with useReducer",
+        description:
+          "Manage a shopping cart's state using `useReducer`. Implement actions for adding, removing, and updating item quantities.",
+        solution: {
+          code: `import React, { useReducer } from 'react';
+const cartReducer = (state, action) => {
+  switch (action.type) {
+    case 'ADD_ITEM':
+      return { ...state, items: [...state.items, action.payload] };
+    case 'REMOVE_ITEM':
+      return { ...state, items: state.items.filter(i => i.id !== action.payload.id) };
+    // other cases like 'UPDATE_QUANTITY' could be added here
+    default:
+      return state;
   }
-  return context;
 };
-
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+function ShoppingCart() {
+  const [cart, dispatch] = useReducer(cartReducer, { items: [] });
+  const handleAddItem = () => {
+    const newItem = { id: Date.now(), name: 'Product ' + (cart.items.length + 1) };
+    dispatch({ type: 'ADD_ITEM', payload: newItem });
+  };
+  return (
+    <div>
+      <button onClick={handleAddItem}>Add Item</button>
+      <ul>{cart.items.map(item => <li key={item.id}>{item.name}</li>)}</ul>
+    </div>
+  );
+}`,
+          explanation: `
+            <ol>
+              <li><strong>Reducer Function:</strong> A <code>cartReducer</code> function is defined outside the component. It takes the current <code>state</code> and an <code>action</code> object as arguments and returns the *new* state. A <code>switch</code> statement handles the different action types.</li>
+              <li><strong>Initialize Reducer:</strong> Inside the component, <code>useReducer</code> is called with the reducer function and the initial state (<code>{ items: [] }</code>). It returns the current state (<code>cart</code>) and a <code>dispatch</code> function.</li>
+              <li><strong>Dispatching Actions:</strong> Instead of calling multiple state update functions (like <code>setItems</code>, <code>setTotal</code>), we call the single <code>dispatch</code> function. We pass it an "action object" which has a <code>type</code> describing the action and an optional <code>payload</code> with the data needed for the update.</li>
+              <li><strong>Centralized Logic:</strong> This pattern is powerful because it centralizes all state transition logic into one place (the reducer), making the component's code cleaner and the state changes more predictable.</li>
+            </ol>
+          `,
+        },
+      },
+    ],
+  },
+  {
+    day: 18,
+    phase: "Advanced React",
+    title: "Context & Global State",
+    topics: ["Context API", "prop drilling solutions", "state management patterns"],
+    resources: [
+      {
+        name: "React Docs: Passing Data Deeply with Context",
+        url: "https://react.dev/learn/passing-data-deeply-with-context",
+      },
+      {
+        name: "React Docs: Scaling Up with Reducer and Context",
+        url: "https://react.dev/learn/scaling-up-with-reducer-and-context",
+      },
+    ],
+    theory: `The <strong>Context API</strong> provides a way to pass data through the component tree without having to pass props down manually at every level. This is the solution to "prop drilling."<br/><br/>You create a Context object using <code>React.createContext()</code>. Then you use a <code>Provider</code> component to wrap a part of your tree and make the data available. Any component inside that tree can then consume the data using the <code>useContext</code> hook.`,
+    exercises: [
+      {
+        title: "Theme System with Context",
+        description:
+          "Implement a light/dark mode theme switcher that can be accessed by any component in the application without passing props.",
+        solution: {
+          code: `import React, { useState, useContext, createContext } from 'react';
+// 1. Create the context
+const ThemeContext = createContext();
+// 2. Create the Provider component
+export function ThemeProvider({ children }) {
+  const [theme, setTheme] = useState('light');
+  const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
+  const value = { theme, toggleTheme };
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+}
+// 3. Create a component that uses the context
+function ThemeToggleButton() {
+  const { theme, toggleTheme } = useContext(ThemeContext);
+  return <button onClick={toggleTheme}>Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode</button>;
+}
+// 4. In your main App.js, wrap the app in <ThemeProvider>
+// and then use <ThemeToggleButton /> anywhere inside.`,
+          explanation: `
+            <ol>
+              <li><strong>Create Context:</strong> <code>createContext()</code> is called to create a context object. This object will be used by both the provider and the consumer.</li>
+              <li><strong>Create Provider:</strong> A custom <code>ThemeProvider</code> component is created. It manages the theme state (using <code>useState</code>) and defines the <code>toggleTheme</code> function. It passes both of these down in the <code>value</code> prop of the built-in <code>ThemeContext.Provider</code>.</li>
+              <li><strong>Consume Context:</strong> The <code>ThemeToggleButton</code> component uses the <code>useContext(ThemeContext)</code> hook. React will look up the component tree for the nearest <code>ThemeProvider</code> and give this component access to the <code>value</code> that was passed.</li>
+              <li><strong>Decoupling:</strong> This pattern decouples the consuming component from the provider. The button doesn't need to know *how* the theme is managed; it only needs to know that it can get the current theme and a function to toggle it from the context.</li>
+            </ol>
+          `,
+        },
+      },
+    ],
+  },
+  {
+    day: 19,
+    phase: "Advanced React",
+    title: "Component Patterns",
+    topics: ["HOCs", "Render Props", "Compound Components", "Custom Hooks"],
+    resources: [
+      {
+        name: "React Docs: Reusing Logic with Custom Hooks",
+        url: "https://react.dev/learn/reusing-logic-with-custom-hooks",
+      },
+      { name: "Epic React: Advanced React Patterns", url: "https://epicreact.dev/modules/advanced-react-patterns" },
+    ],
+    theory: `There are several advanced patterns for sharing logic and creating flexible components. The most modern and preferred way is the <strong>Custom Hook</strong> pattern.<br/><br/>A custom hook is a JavaScript function whose name starts with "use" and that can call other hooks (like <code>useState</code> or <code>useEffect</code>). It lets you extract component logic into reusable functions, which can then be used in any component that needs that piece of logic.`,
+    exercises: [
+      {
+        title: "Data Fetching Custom Hook",
+        description:
+          "Create a reusable custom hook `useFetch` that handles the logic for data fetching, including loading and error states.",
+        solution: {
+          code: `import { useState, useEffect } from 'react';
+function useFetch(url) {
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  
-  // Simulate checking for existing session
+  const [error, setError] = useState(null);
   useEffect(() => {
-    const checkAuth = async () => {
+    const fetchData = async () => {
+      setLoading(true);
       try {
-        const savedUser = localStorage.getItem('user');
-        if (savedUser) {
-          setUser(JSON.parse(savedUser));
-        }
-      } catch (error) {
-        console.error('Error checking auth:', error);
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(res.statusText);
+        const json = await res.json();
+        setData(json);
+      } catch (err) {
+        setError(err);
       } finally {
         setLoading(false);
       }
     };
-    
-    checkAuth();
-  }, []);
-  
-  const login = async (email, password) => {
-    setLoading(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const userData = {
-        id: 1,
-        email,
-        name: email.split('@')[0],
-        role: 'user'
-      };
-      
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.message };
-    } finally {
-      setLoading(false);
+    if (url) {
+      fetchData();
     }
-  };
-  
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
-  };
-  
-  const value = {
-    user,
-    login,
-    logout,
-    loading,
-    isAuthenticated: !!user
-  };
-  
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
-// components/Header.js
-import React from 'react';
-import { useTheme } from '../contexts/ThemeContext';
-import { useAuth } from '../contexts/AuthContext';
-
-const Header = () => {
-  const { theme, toggleTheme, colors } = useTheme();
-  const { user, logout, isAuthenticated } = useAuth();
-  
-  return (
-    <header style={{
-      padding: '1rem',
-      borderBottom: \`1px solid \${colors[theme].text}20\`,
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    }}>
-      <h1>My App</h1>
-      
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-        <button
-          onClick={toggleTheme}
-          style={{
-            padding: '0.5rem 1rem',
-            backgroundColor: colors[theme].primary,
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          {theme === 'light' ? '🌙' : '☀️'} Toggle Theme
-        </button>
-        
-        {isAuthenticated ? (
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <span>Welcome, {user.name}!</span>
-            <button
-              onClick={logout}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: 'transparent',
-                color: colors[theme].text,
-                border: \`1px solid \${colors[theme].text}\`,
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              Logout
-            </button>
-          </div>
-        ) : (
-          <span>Not logged in</span>
-        )}
-      </div>
-    </header>
-  );
-};
-
-// components/LoginForm.js
-import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
-
-const LoginForm = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  
-  const { login, loading } = useAuth();
-  const { theme, colors } = useTheme();
-  
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    
-    const result = await login(email, password);
-    if (!result.success) {
-      setError(result.error);
-    }
-  };
-  
-  return (
-    <form onSubmit={handleSubmit} style={{
-      maxWidth: '400px',
-      margin: '2rem auto',
-      padding: '2rem',
-      border: \`1px solid \${colors[theme].text}20\`,
-      borderRadius: '8px'
-    }}>
-      <h2>Login</h2>
-      
-      {error && (
-        <div style={{ color: 'red', marginBottom: '1rem' }}>
-          {error}
-        </div>
-      )}
-      
-      <div style={{ marginBottom: '1rem' }}>
-        <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-          Email:
-        </label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          style={{
-            width: '100%',
-            padding: '0.5rem',
-            backgroundColor: colors[theme].background,
-            color: colors[theme].text,
-            border: \`1px solid \${colors[theme].text}40\`,
-            borderRadius: '4px'
-          }}
-        />
-      </div>
-      
-      <div style={{ marginBottom: '1rem' }}>
-        <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-          Password:
-        </label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={{
-            width: '100%',
-            padding: '0.5rem',
-            backgroundColor: colors[theme].background,
-            color: colors[theme].text,
-            border: \`1px solid \${colors[theme].text}40\`,
-            borderRadius: '4px'
-          }}
-        />
-      </div>
-      
-      <button
-        type="submit"
-        disabled={loading}
-        style={{
-          width: '100%',
-          padding: '0.75rem',
-          backgroundColor: colors[theme].primary,
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: loading ? 'not-allowed' : 'pointer',
-          opacity: loading ? 0.6 : 1
-        }}
-      >
-        {loading ? 'Logging in...' : 'Login'}
-      </button>
-    </form>
-  );
-};
-
-// App.js - Main application
-import React from 'react';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { AuthProvider } from './contexts/AuthContext';
-import Header from './components/Header';
-import LoginForm from './components/LoginForm';
-import { useAuth } from './contexts/AuthContext';
-
-const AppContent = () => {
-  const { isAuthenticated } = useAuth();
-  
-  return (
-    <div>
-      <Header />
-      <main style={{ padding: '2rem' }}>
-        {isAuthenticated ? (
-          <div>
-            <h2>Dashboard</h2>
-            <p>Welcome to your dashboard! You are now logged in.</p>
-          </div>
-        ) : (
-          <LoginForm />
-        )}
-      </main>
-    </div>
-  );
-};
-
-const App = () => {
-  return (
-    <ThemeProvider>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </ThemeProvider>
-  );
-};
-
-export default App;`
-      }
+  }, [url]); // Re-fetch if the URL changes
+  return { data, loading, error };
+}
+// Example usage in a component:
+// function MyComponent() {
+//   const { data, loading, error } = useFetch('api/url');
+//   if (loading) return 'Loading...';
+//   // ...
+// }`,
+          explanation: `
+            <ol>
+              <li><strong>Function Definition:</strong> A function named <code>useFetch</code> is created. The "use" prefix is a mandatory convention for hooks. It takes a <code>url</code> as an argument.</li>
+              <li><strong>Encapsulated State:</strong> All the state related to data fetching (<code>data</code>, <code>loading</code>, <code>error</code>) is managed *inside* the hook using <code>useState</code>.</li>
+              <li><strong>Encapsulated Effect:</strong> All the side effect logic (the actual fetching) is managed *inside* the hook using <code>useEffect</code>. The effect re-runs whenever the <code>url</code> prop changes.</li>
+              <li><strong>Return Values:</strong> The hook returns an object containing the current state values.</li>
+              <li><strong>Reusability:</strong> Any component can now get all of this complex data-fetching capability with a single line of code (e.g., <code>const { data, loading, error } = useFetch(someUrl);</code>). This keeps components clean and the logic highly reusable.</li>
+            </ol>
+          `,
+        },
+      },
     ],
-    resources: [
-      "React Context API",
-      "Context Best Practices",
-      "Avoiding Context Hell"
-    ]
   },
   {
     day: 20,
+    phase: "Advanced React",
     title: "React Router",
-    phase: "React Advanced",
+    topics: ["Routing", "Nested Routes", "Navigation", "Protected Routes"],
+    resources: [
+      { name: "React Router Docs: Main Concepts", url: "https://reactrouter.com/en/main/start/concepts" },
+      { name: "React Router Docs: Tutorial", url: "https://reactrouter.com/en/main/start/tutorial" },
+    ],
     theory: `
-      <h2>React Router</h2>
-      <p>React Router is the standard routing library for React applications. It enables navigation between different components and manages the application's URL.</p>
-      
-      <h3>Core Concepts</h3>
-      <ul>
-        <li><strong>BrowserRouter:</strong> Provides routing functionality</li>
-        <li><strong>Routes & Route:</strong> Define path-component mappings</li>
-        <li><strong>Link & NavLink:</strong> Navigation components</li>
-        <li><strong>useNavigate:</strong> Programmatic navigation</li>
-        <li><strong>useParams:</strong> Access URL parameters</li>
-      </ul>
-
-      <h3>Advanced Features</h3>
-      <ul>
-        <li>Nested routes</li>
-        <li>Protected routes</li>
-        <li>Dynamic routing</li>
-        <li>Route guards</li>
-      </ul>
+      Most web applications have multiple pages or views. <strong>React Router</strong> is the standard library for handling routing in React applications. It allows you to synchronize your UI with the URL in the browser, enabling navigation between different components as if they were separate pages.
     `,
     exercises: [
       {
-        question: "Create a complete routing system with navigation, protected routes, and dynamic routing.",
-        solution: `// App.js - Main routing setup
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import Layout from './components/Layout';
-import Home from './pages/Home';
-import About from './pages/About';
-import Products from './pages/Products';
-import ProductDetail from './pages/ProductDetail';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Profile from './pages/Profile';
-import NotFound from './pages/NotFound';
-import ProtectedRoute from './components/ProtectedRoute';
-
-const App = () => {
+        title: "Multi-page Blog Application",
+        description:
+          "Set up a basic blog with a homepage listing posts and a separate page to view a single post's details.",
+        solution: {
+          code: `import { BrowserRouter, Routes, Route, Link, useParams } from 'react-router-dom';
+// Sample data
+const posts = [
+  { id: 1, title: 'React Router Intro', content: 'This is a post about React Router.' },
+  { id: 2, title: 'State Management', content: 'This is a post about state.' },
+];
+const Home = () => (
+  <div>
+    <h1>Blog Posts</h1>
+    <ul>{posts.map(post => <li key={post.id}><Link to={\`/post/\${post.id}\`}>{post.title}</Link></li>)}</ul>
+  </div>
+);
+const Post = () => {
+  const { postId } = useParams();
+  const post = posts.find(p => p.id === parseInt(postId));
+  if (!post) return <h2>Post not found</h2>;
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            {/* Public routes */}
-            <Route index element={<Home />} />
-            <Route path="about" element={<About />} />
-            <Route path="products" element={<Products />} />
-            <Route path="products/:id" element={<ProductDetail />} />
-            <Route path="login" element={<Login />} />
-            
-            {/* Protected routes */}
-            <Route path="dashboard" element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="profile" element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            } />
-            
-            {/* Catch all route */}
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Routes>
-      </Router>
-    </AuthProvider>
-  );
-};
-
-// components/Layout.js - Main layout with navigation
-import React from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import Navigation from './Navigation';
-
-const Layout = () => {
-  const { isAuthenticated, user } = useAuth();
-  const location = useLocation();
-  
-  return (
-    <div className="app-layout">
-      <Navigation />
-      
-      <main className="main-content">
-        <Outlet />
-      </main>
-      
-      <footer className="footer">
-        <p>&copy; 2024 My App. All rights reserved.</p>
-        <p>Current path: {location.pathname}</p>
-      </footer>
+    <div>
+      <h2>{post.title}</h2>
+      <p>{post.content}</p>
+      <Link to="/">Back to Home</Link>
     </div>
   );
 };
-
-// components/Navigation.js - Navigation component
-import React from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-
-const Navigation = () => {
-  const { isAuthenticated, user, logout } = useAuth();
-  const navigate = useNavigate();
-  
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-  
+function App() {
   return (
-    <nav className="navigation">
-      <div className="nav-brand">
-        <Link to="/">My App</Link>
-      </div>
-      
-      <ul className="nav-links">
-        <li>
-          <NavLink 
-            to="/" 
-            className={({ isActive }) => isActive ? 'active' : ''}
-          >
-            Home
-          </NavLink>
-        </li>
-        <li>
-          <NavLink 
-            to="/about"
-            className={({ isActive }) => isActive ? 'active' : ''}
-          >
-            About
-          </NavLink>
-        </li>
-        <li>
-          <NavLink 
-            to="/products"
-            className={({ isActive }) => isActive ? 'active' : ''}
-          >
-            Products
-          </NavLink>
-        </li>
-        
-        {isAuthenticated ? (
-          <>
-            <li>
-              <NavLink 
-                to="/dashboard"
-                className={({ isActive }) => isActive ? 'active' : ''}
-              >
-                Dashboard
-              </NavLink>
-            </li>
-            <li>
-              <NavLink 
-                to="/profile"
-                className={({ isActive }) => isActive ? 'active' : ''}
-              >
-                Profile
-              </NavLink>
-            </li>
-            <li>
-              <span>Welcome, {user?.name}</span>
-            </li>
-            <li>
-              <button onClick={handleLogout}>Logout</button>
-            </li>
-          </>
-        ) : (
-          <li>
-            <NavLink 
-              to="/login"
-              className={({ isActive }) => isActive ? 'active' : ''}
-            >
-              Login
-            </NavLink>
-          </li>
-        )}
-      </ul>
-    </nav>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/post/:postId" element={<Post />} />
+      </Routes>
+    </BrowserRouter>
   );
-};
-
-// components/ProtectedRoute.js - Route protection
-import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
-  const location = useLocation();
-  
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-  
-  if (!isAuthenticated) {
-    // Redirect to login page with return url
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-  
-  return children;
-};
-
-// pages/Products.js - Products listing with search
-import React, { useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-
-const Products = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [products] = useState([
-    { id: 1, name: 'Laptop', price: 999, category: 'electronics' },
-    { id: 2, name: 'Phone', price: 699, category: 'electronics' },
-    { id: 3, name: 'Book', price: 29, category: 'books' },
-    { id: 4, name: 'Headphones', price: 199, category: 'electronics' }
-  ]);
-  
-  const searchTerm = searchParams.get('search') || '';
-  const category = searchParams.get('category') || '';
-  
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !category || product.category === category;
-    return matchesSearch && matchesCategory;
-  });
-  
-  const handleSearchChange = (e) => {
-    const newSearchParams = new URLSearchParams(searchParams);
-    if (e.target.value) {
-      newSearchParams.set('search', e.target.value);
-    } else {
-      newSearchParams.delete('search');
-    }
-    setSearchParams(newSearchParams);
-  };
-  
-  const handleCategoryChange = (e) => {
-    const newSearchParams = new URLSearchParams(searchParams);
-    if (e.target.value) {
-      newSearchParams.set('category', e.target.value);
-    } else {
-      newSearchParams.delete('category');
-    }
-    setSearchParams(newSearchParams);
-  };
-  
-  return (
-    <div className="products-page">
-      <h1>Products</h1>
-      
-      <div className="filters">
-        <input
-          type="text"
-          placeholder="Search products..."
-          value={searchTerm}
-          onChange={handleSearchChange}
-        />
-        
-        <select value={category} onChange={handleCategoryChange}>
-          <option value="">All Categories</option>
-          <option value="electronics">Electronics</option>
-          <option value="books">Books</option>
-        </select>
-      </div>
-      
-      <div className="products-grid">
-        {filteredProducts.map(product => (
-          <div key={product.id} className="product-card">
-            <h3>{product.name}</h3>
-            <p>\${product.price}</p>
-            <p>Category: {product.category}</p>
-            <Link to={\`/products/\${product.id}\`}>
-              View Details
-            </Link>
-          </div>
-        ))}
-      </div>
-      
-      {filteredProducts.length === 0 && (
-        <p>No products found matching your criteria.</p>
-      )}
-    </div>
-  );
-};
-
-// pages/ProductDetail.js - Dynamic route with params
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-
-const ProductDetail = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    // Simulate API call
-    const fetchProduct = async () => {
-      setLoading(true);
-      
-      // Mock products data
-      const products = {
-        '1': { id: 1, name: 'Laptop', price: 999, category: 'electronics', description: 'High-performance laptop' },
-        '2': { id: 2, name: 'Phone', price: 699, category: 'electronics', description: 'Latest smartphone' },
-        '3': { id: 3, name: 'Book', price: 29, category: 'books', description: 'Interesting book' },
-        '4': { id: 4, name: 'Headphones', price: 199, category: 'electronics', description: 'Noise-canceling headphones' }
-      };
-      
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
-      
-      const foundProduct = products[id];
-      setProduct(foundProduct);
-      setLoading(false);
-    };
-    
-    fetchProduct();
-  }, [id]);
-  
-  if (loading) {
-    return <div>Loading product...</div>;
-  }
-  
-  if (!product) {
-    return (
-      <div>
-        <h1>Product Not Found</h1>
-        <p>The product with ID {id} was not found.</p>
-        <Link to="/products">Back to Products</Link>
-      </div>
-    );
-  }
-  
-  return (
-    <div className="product-detail">
-      <button onClick={() => navigate(-1)}>← Back</button>
-      
-      <h1>{product.name}</h1>
-      <p className="price">\${product.price}</p>
-      <p className="category">Category: {product.category}</p>
-      <p className="description">{product.description}</p>
-      
-      <div className="actions">
-        <button onClick={() => alert('Added to cart!')}>
-          Add to Cart
-        </button>
-        <Link to="/products">View All Products</Link>
-      </div>
-    </div>
-  );
-};
-
-// pages/Login.js - Login with redirect
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-
-const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  
-  const { login, loading } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  
-  const from = location.state?.from?.pathname || '/dashboard';
-  
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    
-    const result = await login(email, password);
-    if (result.success) {
-      navigate(from, { replace: true });
-    } else {
-      setError(result.error);
-    }
-  };
-  
-  return (
-    <div className="login-page">
-      <h1>Login</h1>
-      
-      {location.state?.from && (
-        <p>You need to log in to access {location.state.from.pathname}</p>
-      )}
-      
-      <form onSubmit={handleSubmit}>
-        {error && <div className="error">{error}</div>}
-        
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        
-        <button type="submit" disabled={loading}>
-          {loading ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
-    </div>
-  );
-};
-
-export default App;`
-      }
+}`,
+          explanation: `
+            <ol>
+              <li><strong>Setup Router:</strong> The entire application's routing logic is wrapped in a <code>&lt;BrowserRouter&gt;</code> component.</li>
+              <li><strong>Define Routes:</strong> Inside <code>&lt;Routes&gt;</code>, we define each page with a <code>&lt;Route&gt;</code>. The <code>path</code> prop specifies the URL, and the <code>element</code> prop specifies the component to render.</li>
+              <li><strong>Dynamic Route:</strong> The path <code>"/post/:postId"</code> is a dynamic route. The <code>:postId</code> part is a URL parameter that can change.</li>
+              <li><strong>Navigation:</strong> The <code>Home</code> component uses the <code>&lt;Link&gt;</code> component to create navigation links. This prevents a full page reload and allows React Router to handle the URL change internally.</li>
+              <li><strong>Accessing Parameters:</strong> The <code>Post</code> component uses the <code>useParams</code> hook to get the value of <code>postId</code> from the URL. It then uses this ID to find and display the correct post's data.</li>
+            </ol>
+          `,
+        },
+      },
     ],
-    resources: [
-      "React Router Documentation",
-      "Routing Patterns",
-      "Navigation Best Practices"
-    ]
   },
   {
     day: 21,
-    title: "State Management with Redux",
-    phase: "React Advanced",
-    theory: `
-      <h2>State Management with Redux</h2>
-      <p>Redux is a predictable state container for JavaScript applications. It helps manage application state in a centralized store with a unidirectional data flow.</p>
-      
-      <h3>Core Concepts</h3>
-      <ul>
-        <li><strong>Store:</strong> Single source of truth for application state</li>
-        <li><strong>Actions:</strong> Plain objects describing what happened</li>
-        <li><strong>Reducers:</strong> Pure functions that specify state changes</li>
-        <li><strong>Dispatch:</strong> Method to send actions to the store</li>
-      </ul>
-
-      <h3>Redux Toolkit</h3>
-      <ul>
-        <li>Modern Redux development approach</li>
-        <li>Simplified store setup</li>
-        <li>Built-in best practices</li>
-        <li>Immer integration for immutable updates</li>
-      </ul>
-    `,
+    phase: "Advanced React",
+    title: "State Management Libraries",
+    topics: ["Redux Toolkit", "Zustand", "Global State Patterns"],
+    resources: [
+      { name: "Redux Toolkit Docs: Quick Start", url: "https://redux-toolkit.js.org/tutorials/quick-start" },
+      { name: "Zustand GitHub Repository", url: "https://github.com/pmndrs/zustand" },
+    ],
+    theory: `While Context is great for low-frequency updates, it can cause performance issues if the value changes often. For complex, global state, dedicated libraries are often used.<br/><ul><li><strong>Redux Toolkit</strong>: The official, recommended way to write Redux logic. It simplifies store setup, reduces boilerplate, and is highly scalable.</li><li><strong>Zustand</strong>: A small, fast, and scalable state-management solution using a simple hook-based API. It's often seen as a much simpler alternative to Redux.</li></ul>`,
     exercises: [
       {
-        question: "Create a Redux store with Redux Toolkit for a todo application.",
-        solution: `// store/store.js - Redux store setup
-import { configureStore } from '@reduxjs/toolkit';
-import todosReducer from './slices/todosSlice';
-import userReducer from './slices/userSlice';
-import uiReducer from './slices/uiSlice';
-
-export const store = configureStore({
-  reducer: {
-    todos: todosReducer,
-    user: userReducer,
-    ui: uiReducer
-  },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActions: ['persist/PERSIST']
-      }
-    })
-});
-
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
-
-// store/slices/todosSlice.js - Todos slice
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-
-// Async thunk for fetching todos
-export const fetchTodos = createAsyncThunk(
-  'todos/fetchTodos',
-  async (_, { rejectWithValue }) => {
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      return [
-        { id: 1, text: 'Learn Redux', completed: false, priority: 'high' },
-        { id: 2, text: 'Build React app', completed: true, priority: 'medium' },
-        { id: 3, text: 'Deploy to production', completed: false, priority: 'low' }
-      ];
-    } catch (error) {
-      return rejectWithValue('Failed to fetch todos');
-    }
-  }
-);
-
-// Async thunk for adding todo
-export const addTodoAsync = createAsyncThunk(
-  'todos/addTodo',
-  async (todoText, { rejectWithValue }) => {
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      return {
-        id: Date.now(),
-        text: todoText,
-        completed: false,
-        priority: 'medium',
-        createdAt: new Date().toISOString()
-      };
-    } catch (error) {
-      return rejectWithValue('Failed to add todo');
-    }
-  }
-);
-
-const todosSlice = createSlice({
-  name: 'todos',
-  initialState: {
-    items: [],
-    loading: false,
-    error: null,
-    filter: 'all' // all, active, completed
-  },
-  reducers: {
-    // Synchronous actions
-    toggleTodo: (state, action) => {
-      const todo = state.items.find(todo => todo.id === action.payload);
-      if (todo) {
-        todo.completed = !todo.completed;
-      }
-    },
-    deleteTodo: (state, action) => {
-      state.items = state.items.filter(todo => todo.id !== action.payload);
-    },
-    updateTodo: (state, action) => {
-      const { id, updates } = action.payload;
-      const todo = state.items.find(todo => todo.id === id);
-      if (todo) {
-        Object.assign(todo, updates);
-      }
-    },
-    setFilter: (state, action) => {
-      state.filter = action.payload;
-    },
-    clearCompleted: (state) => {
-      state.items = state.items.filter(todo => !todo.completed);
-    },
-    markAllCompleted: (state) => {
-      state.items.forEach(todo => {
-        todo.completed = true;
-      });
-    }
-  },
-  extraReducers: (builder) => {
-    builder
-      // Fetch todos
-      .addCase(fetchTodos.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchTodos.fulfilled, (state, action) => {
-        state.loading = false;
-        state.items = action.payload;
-      })
-      .addCase(fetchTodos.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      // Add todo
-      .addCase(addTodoAsync.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(addTodoAsync.fulfilled, (state, action) => {
-        state.loading = false;
-        state.items.push(action.payload);
-      })
-      .addCase(addTodoAsync.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
-  }
-});
-
-export const {
-  toggleTodo,
-  deleteTodo,
-  updateTodo,
-  setFilter,
-  clearCompleted,
-  markAllCompleted
-} = todosSlice.actions;
-
-export default todosSlice.reducer;
-
-// Selectors
-export const selectAllTodos = (state) => state.todos.items;
-export const selectTodosLoading = (state) => state.todos.loading;
-export const selectTodosError = (state) => state.todos.error;
-export const selectTodosFilter = (state) => state.todos.filter;
-
-export const selectFilteredTodos = (state) => {
-  const todos = selectAllTodos(state);
-  const filter = selectTodosFilter(state);
-  
-  switch (filter) {
-    case 'active':
-      return todos.filter(todo => !todo.completed);
-    case 'completed':
-      return todos.filter(todo => todo.completed);
-    default:
-      return todos;
-  }
-};
-
-export const selectTodosStats = (state) => {
-  const todos = selectAllTodos(state);
-  return {
-    total: todos.length,
-    completed: todos.filter(todo => todo.completed).length,
-    active: todos.filter(todo => !todo.completed).length
-  };
-};
-
-// hooks/redux.js - Typed hooks
-import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
-import type { RootState, AppDispatch } from '../store/store';
-
-export const useAppDispatch = () => useDispatch<AppDispatch>();
-export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
-
-// components/TodoApp.js - Main todo component
-import React, { useEffect, useState } from 'react';
-import { useAppDispatch, useAppSelector } from '../hooks/redux';
-import {
-  fetchTodos,
-  addTodoAsync,
-  toggleTodo,
-  deleteTodo,
-  updateTodo,
-  setFilter,
-  clearCompleted,
-  markAllCompleted,
-  selectFilteredTodos,
-  selectTodosLoading,
-  selectTodosError,
-  selectTodosStats,
-  selectTodosFilter
-} from '../store/slices/todosSlice';
-
-const TodoApp = () => {
-  const dispatch = useAppDispatch();
-  const todos = useAppSelector(selectFilteredTodos);
-  const loading = useAppSelector(selectTodosLoading);
-  const error = useAppSelector(selectTodosError);
-  const stats = useAppSelector(selectTodosStats);
-  const filter = useAppSelector(selectTodosFilter);
-  
-  const [newTodo, setNewTodo] = useState('');
-  const [editingId, setEditingId] = useState(null);
-  const [editText, setEditText] = useState('');
-  
-  useEffect(() => {
-    dispatch(fetchTodos());
-  }, [dispatch]);
-  
-  const handleAddTodo = async (e) => {
-    e.preventDefault();
-    if (!newTodo.trim()) return;
-    
-    await dispatch(addTodoAsync(newTodo.trim()));
-    setNewTodo('');
-  };
-  
-  const handleToggleTodo = (id) => {
-    dispatch(toggleTodo(id));
-  };
-  
-  const handleDeleteTodo = (id) => {
-    dispatch(deleteTodo(id));
-  };
-  
-  const handleStartEdit = (todo) => {
-    setEditingId(todo.id);
-    setEditText(todo.text);
-  };
-  
-  const handleSaveEdit = () => {
-    if (!editText.trim()) return;
-    
-    dispatch(updateTodo({
-      id: editingId,
-      updates: { text: editText.trim() }
-    }));
-    
-    setEditingId(null);
-    setEditText('');
-  };
-  
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setEditText('');
-  };
-  
-  const handleFilterChange = (newFilter) => {
-    dispatch(setFilter(newFilter));
-  };
-  
-  const handleClearCompleted = () => {
-    dispatch(clearCompleted());
-  };
-  
-  const handleMarkAllCompleted = () => {
-    dispatch(markAllCompleted());
-  };
-  
-  if (loading && todos.length === 0) {
-    return <div className="loading">Loading todos...</div>;
-  }
-  
-  return (
-    <div className="todo-app">
-      <div className="todo-header">
-        <h1>Redux Todo App</h1>
-        
-        {/* Stats */}
-        <div className="todo-stats">
-          <span>Total: {stats.total}</span>
-          <span>Active: {stats.active}</span>
-          <span>Completed: {stats.completed}</span>
-        </div>
-      </div>
-      
-      {/* Add Todo Form */}
-      <form onSubmit={handleAddTodo} className="add-todo-form">
-        <input
-          type="text"
-          value={newTodo}
-          onChange={(e) => setNewTodo(e.target.value)}
-          placeholder="Add a new todo..."
-          disabled={loading}
-        />
-        <button type="submit" disabled={loading || !newTodo.trim()}>
-          {loading ? 'Adding...' : 'Add Todo'}
-        </button>
-      </form>
-      
-      {/* Error Display */}
-      {error && (
-        <div className="error-message">
-          Error: {error}
-          <button onClick={() => dispatch(fetchTodos())}>Retry</button>
-        </div>
-      )}
-      
-      {/* Filters */}
-      <div className="todo-filters">
-        <button
-          onClick={() => handleFilterChange('all')}
-          className={filter === 'all' ? 'active' : ''}
-        >
-          All ({stats.total})
-        </button>
-        <button
-          onClick={() => handleFilterChange('active')}
-          className={filter === 'active' ? 'active' : ''}
-        >
-          Active ({stats.active})
-        </button>
-        <button
-          onClick={() => handleFilterChange('completed')}
-          className={filter === 'completed' ? 'active' : ''}
-        >
-          Completed ({stats.completed})
-        </button>
-      </div>
-      
-      {/* Bulk Actions */}
-      {todos.length > 0 && (
-        <div className="bulk-actions">
-          <button onClick={handleMarkAllCompleted}>
-            Mark All Complete
-          </button>
-          {stats.completed > 0 && (
-            <button onClick={handleClearCompleted}>
-              Clear Completed ({stats.completed})
-            </button>
-          )}
-        </div>
-      )}
-      
-      {/* Todo List */}
-      <div className="todo-list">
-        {todos.length === 0 ? (
-          <div className="empty-state">
-            <p>No todos found.</p>
-            {filter !== 'all' && (
-              <button onClick={() => handleFilterChange('all')}>
-                Show All Todos
-              </button>
-            )}
-          </div>
-        ) : (
-          <ul className="todos">
-            {todos.map(todo => (
-              <li
-                key={todo.id}
-                className={\`todo-item \${todo.completed ? 'completed' : ''}\`}
-              >
-                <div className="todo-content">
-                  <input
-                    type="checkbox"
-                    checked={todo.completed}
-                    onChange={() => handleToggleTodo(todo.id)}
-                  />
-                  
-                  {editingId === todo.id ? (
-                    <div className="edit-mode">
-                      <input
-                        type="text"
-                        value={editText}
-                        onChange={(e) => setEditText(e.target.value)}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') handleSaveEdit();
-                          if (e.key === 'Escape') handleCancelEdit();
-                        }}
-                        autoFocus
-                      />
-                      <button onClick={handleSaveEdit}>Save</button>
-                      <button onClick={handleCancelEdit}>Cancel</button>
-                    </div>
-                  ) : (
-                    <div className="view-mode">
-                      <span
-                        className="todo-text"
-                        onDoubleClick={() => handleStartEdit(todo)}
-                      >
-                        {todo.text}
-                      </span>
-                      <span className={\`priority priority-\${todo.priority}\`}>
-                        {todo.priority}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="todo-actions">
-                  {editingId !== todo.id && (
-                    <>
-                      <button onClick={() => handleStartEdit(todo)}>
-                        Edit
-                      </button>
-                      <button onClick={() => handleDeleteTodo(todo.id)}>
-                        Delete
-                      </button>
-                    </>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// App.js - Provider setup
-import React from 'react';
-import { Provider } from 'react-redux';
-import { store } from './store/store';
-import TodoApp from './components/TodoApp';
-
-const App = () => {
-  return (
-    <Provider store={store}>
-      <div className="app">
-        <TodoApp />
-      </div>
-    </Provider>
-  );
-};
-
-export default App;`
-      }
+        title: "E-commerce Cart with Zustand",
+        description:
+          "Create a global store for a shopping cart using Zustand. Implement functions to add and remove items from anywhere in the app.",
+        solution: {
+          code: `import { create } from 'zustand';
+// 1. Create the store
+const useCartStore = create((set) => ({
+  items: [],
+  addItem: (item) => set((state) => ({ items: [...state.items, item] })),
+  removeItem: (itemId) => set((state) => ({
+    items: state.items.filter((item) => item.id !== itemId)
+  })),
+  clearCart: () => set({ items: [] }),
+}));
+// 2. Use the store in any component
+function AddToCartButton({ product }) {
+  const addItem = useCartStore((state) => state.addItem);
+  return <button onClick={() => addItem(product)}>Add to Cart</button>;
+}
+function CartDisplay() {
+  const items = useCartStore((state) => state.items);
+  return <div>Cart Items: {items.length}</div>;
+}`,
+          explanation: `
+            <ol>
+              <li><strong>Create Store:</strong> Zustand's <code>create</code> function defines the entire store. It takes a setup function that receives a <code>set</code> function as an argument.</li>
+              <li><strong>State and Actions:</strong> This setup function returns an object containing both our state (e.g., the <code>items</code> array) and the actions that can modify that state (e.g., <code>addItem</code>).</li>
+              <li><strong>Updating State:</strong> Actions call the <code>set</code> function to update the state. Zustand handles immutability for you.</li>
+              <li><strong>Using the Store:</strong> In a component, we call our custom hook <code>useCartStore</code>. We pass it a "selector" function (e.g., <code>state => state.addItem</code>) to extract only the specific piece of state or action that component needs.</li>
+              <li><strong>Automatic Re-renders:</strong> When an action updates the state, Zustand will automatically and efficiently re-render only the components that have selected a piece of state that actually changed.</li>
+            </ol>
+          `,
+        },
+      },
     ],
-    resources: [
-      "Redux Toolkit Documentation",
-      "Redux Best Practices",
-      "State Management Patterns"
-    ]
   },
   {
     day: 22,
-    title: "Testing React Applications",
-    phase: "React Advanced",
-    theory: `
-      <h2>Testing React Applications</h2>
-      <p>Testing ensures your React applications work correctly and helps prevent regressions. React applications can be tested at multiple levels.</p>
-      
-      <h3>Testing Levels</h3>
-      <ul>
-        <li><strong>Unit Tests:</strong> Test individual components in isolation</li>
-        <li><strong>Integration Tests:</strong> Test component interactions</li>
-        <li><strong>End-to-End Tests:</strong> Test complete user workflows</li>
-      </ul>
-
-      <h3>Testing Tools</h3>
-      <ul>
-        <li><strong>Jest:</strong> JavaScript testing framework</li>
-        <li><strong>React Testing Library:</strong> Simple and complete testing utilities</li>
-        <li><strong>MSW:</strong> Mock Service Worker for API mocking</li>
-        <li><strong>Cypress/Playwright:</strong> End-to-end testing</li>
-      </ul>
-    `,
+    phase: "Advanced React",
+    title: "Data Fetching & APIs",
+    topics: ["TanStack Query", "SWR", "Caching", "Optimistic Updates"],
+    resources: [
+      { name: "TanStack Query Docs", url: "https://tanstack.com/query/latest/docs/react/overview" },
+      { name: "SWR Docs", url: "https://swr.vercel.app/" },
+    ],
+    theory: `Libraries like <strong>TanStack Query (formerly React Query)</strong> revolutionize data fetching. They are not just fetching libraries; they are server-state management libraries.<br/><br/>They provide out-of-the-box features for caching, automatic refetching, loading/error state management, pagination, optimistic updates, and much more, drastically simplifying your data-fetching logic and improving user experience.`,
     exercises: [
       {
-        question: "Create comprehensive tests for React components using Jest and React Testing Library.",
-        solution: `// components/Counter.js - Component to test
-import React, { useState } from 'react';
-
-const Counter = ({ 
-  initialValue = 0, 
-  step = 1, 
-  min, 
-  max, 
-  onCountChange 
-}) => {
-  const [count, setCount] = useState(initialValue);
-  
-  const increment = () => {
-    const newCount = count + step;
-    const finalCount = max !== undefined ? Math.min(newCount, max) : newCount;
-    setCount(finalCount);
-    onCountChange?.(finalCount);
-  };
-  
-  const decrement = () => {
-    const newCount = count - step;
-    const finalCount = min !== undefined ? Math.max(newCount, min) : newCount;
-    setCount(finalCount);
-    onCountChange?.(finalCount);
-  };
-  
-  const reset = () => {
-    setCount(initialValue);
-    onCountChange?.(initialValue);
-  };
-  
-  const isAtMin = min !== undefined && count <= min;
-  const isAtMax = max !== undefined && count >= max;
-  
+        title: "CRUD with TanStack Query",
+        description:
+          "Show an example of how to use TanStack Query to fetch a list of todos and handle adding a new one.",
+        solution: {
+          code: `import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+// Mock API functions
+const fetchTodos = async () => [{ id: 1, text: 'Learn React Query' }];
+const addTodo = async (newTodo) => newTodo;
+function Todos() {
+  const queryClient = useQueryClient();
+  // Fetching data
+  const { data: todos, isLoading } = useQuery({ queryKey: ['todos'], queryFn: fetchTodos });
+  // Mutating data
+  const mutation = useMutation({
+    mutationFn: addTodo,
+    onSuccess: () => {
+      // Invalidate and refetch the 'todos' query after a successful mutation
+      queryClient.invalidateQueries({ queryKey: ['todos'] });
+    },
+  });
+  if (isLoading) return 'Loading...';
   return (
-    <div data-testid="counter">
-      <div data-testid="count-display">
-        Count: <span data-testid="count-value">{count}</span>
-      </div>
-      
-      <div data-testid="counter-controls">
-        <button
-          data-testid="decrement-btn"
-          onClick={decrement}
-          disabled={isAtMin}
-        >
-          -
-        </button>
-        
-        <button
-          data-testid="reset-btn"
-          onClick={reset}
-        >
-          Reset
-        </button>
-        
-        <button
-          data-testid="increment-btn"
-          onClick={increment}
-          disabled={isAtMax}
-        >
-          +
-        </button>
-      </div>
-      
-      <div data-testid="counter-info">
-        <small>
-          Step: {step}
-          {min !== undefined && \`, Min: \${min}\`}
-          {max !== undefined && \`, Max: \${max}\`}
-        </small>
-      </div>
+    <div>
+      <button onClick={() => mutation.mutate({ id: Date.now(), text: 'New Todo' })}>
+        Add Todo
+      </button>
+      {/* List todos... */}
     </div>
   );
-};
-
-export default Counter;
-
-// __tests__/Counter.test.js - Unit tests
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import Counter from '../components/Counter';
-
-describe('Counter Component', () => {
-  // Basic rendering tests
-  describe('Rendering', () => {
-    test('renders with default props', () => {
-      render(<Counter />);
-      
-      expect(screen.getByTestId('counter')).toBeInTheDocument();
-      expect(screen.getByTestId('count-value')).toHaveTextContent('0');
-      expect(screen.getByTestId('increment-btn')).toBeInTheDocument();
-      expect(screen.getByTestId('decrement-btn')).toBeInTheDocument();
-      expect(screen.getByTestId('reset-btn')).toBeInTheDocument();
-    });
-    
-    test('renders with custom initial value', () => {
-      render(<Counter initialValue={5} />);
-      
-      expect(screen.getByTestId('count-value')).toHaveTextContent('5');
-    });
-    
-    test('displays step information', () => {
-      render(<Counter step={2} min={0} max={10} />);
-      
-      expect(screen.getByTestId('counter-info')).toHaveTextContent('Step: 2, Min: 0, Max: 10');
-    });
-  });
-  
-  // Interaction tests
-  describe('User Interactions', () => {
-    test('increments count when increment button is clicked', async () => {
-      const user = userEvent.setup();
-      render(<Counter />);
-      
-      const incrementBtn = screen.getByTestId('increment-btn');
-      const countValue = screen.getByTestId('count-value');
-      
-      await user.click(incrementBtn);
-      expect(countValue).toHaveTextContent('1');
-      
-      await user.click(incrementBtn);
-      expect(countValue).toHaveTextContent('2');
-    });
-    
-    test('decrements count when decrement button is clicked', async () => {
-      const user = userEvent.setup();
-      render(<Counter initialValue={5} />);
-      
-      const decrementBtn = screen.getByTestId('decrement-btn');
-      const countValue = screen.getByTestId('count-value');
-      
-      await user.click(decrementBtn);
-      expect(countValue).toHaveTextContent('4');
-    });
-    
-    test('resets count when reset button is clicked', async () => {
-      const user = userEvent.setup();
-      render(<Counter initialValue={3} />);
-      
-      const incrementBtn = screen.getByTestId('increment-btn');
-      const resetBtn = screen.getByTestId('reset-btn');
-      const countValue = screen.getByTestId('count-value');
-      
-      // Change the count
-      await user.click(incrementBtn);
-      await user.click(incrementBtn);
-      expect(countValue).toHaveTextContent('5');
-      
-      // Reset
-      await user.click(resetBtn);
-      expect(countValue).toHaveTextContent('3');
-    });
-  });
-  
-  // Props and configuration tests
-  describe('Props and Configuration', () => {
-    test('uses custom step value', async () => {
-      const user = userEvent.setup();
-      render(<Counter step={5} />);
-      
-      const incrementBtn = screen.getByTestId('increment-btn');
-      const countValue = screen.getByTestId('count-value');
-      
-      await user.click(incrementBtn);
-      expect(countValue).toHaveTextContent('5');
-      
-      await user.click(incrementBtn);
-      expect(countValue).toHaveTextContent('10');
-    });
-    
-    test('respects minimum value constraint', async () => {
-      const user = userEvent.setup();
-      render(<Counter initialValue={2} min={0} />);
-      
-      const decrementBtn = screen.getByTestId('decrement-btn');
-      const countValue = screen.getByTestId('count-value');
-      
-      // Decrement to minimum
-      await user.click(decrementBtn);
-      await user.click(decrementBtn);
-      expect(countValue).toHaveTextContent('0');
-      
-      // Try to go below minimum
-      await user.click(decrementBtn);
-      expect(countValue).toHaveTextContent('0');
-      
-      // Button should be disabled at minimum
-      expect(decrementBtn).toBeDisabled();
-    });
-    
-    test('respects maximum value constraint', async () => {
-      const user = userEvent.setup();
-      render(<Counter initialValue={8} max={10} />);
-      
-      const incrementBtn = screen.getByTestId('increment-btn');
-      const countValue = screen.getByTestId('count-value');
-      
-      // Increment to maximum
-      await user.click(incrementBtn);
-      await user.click(incrementBtn);
-      expect(countValue).toHaveTextContent('10');
-      
-      // Try to go above maximum
-      await user.click(incrementBtn);
-      expect(countValue).toHaveTextContent('10');
-      
-      // Button should be disabled at maximum
-      expect(incrementBtn).toBeDisabled();
-    });
-  });
-  
-  // Callback tests
-  describe('Callbacks', () => {
-    test('calls onCountChange when count changes', async () => {
-      const user = userEvent.setup();
-      const mockOnCountChange = jest.fn();
-      
-      render(<Counter onCountChange={mockOnCountChange} />);
-      
-      const incrementBtn = screen.getByTestId('increment-btn');
-      
-      await user.click(incrementBtn);
-      expect(mockOnCountChange).toHaveBeenCalledWith(1);
-      
-      await user.click(incrementBtn);
-      expect(mockOnCountChange).toHaveBeenCalledWith(2);
-      
-      expect(mockOnCountChange).toHaveBeenCalledTimes(2);
-    });
-    
-    test('calls onCountChange when reset', async () => {
-      const user = userEvent.setup();
-      const mockOnCountChange = jest.fn();
-      
-      render(<Counter initialValue={5} onCountChange={mockOnCountChange} />);
-      
-      const incrementBtn = screen.getByTestId('increment-btn');
-      const resetBtn = screen.getByTestId('reset-btn');
-      
-      await user.click(incrementBtn);
-      await user.click(resetBtn);
-      
-      expect(mockOnCountChange).toHaveBeenCalledWith(6);
-      expect(mockOnCountChange).toHaveBeenCalledWith(5);
-    });
-  });
-  
-  // Accessibility tests
-  describe('Accessibility', () => {
-    test('buttons have proper disabled states', () => {
-      render(<Counter initialValue={0} min={0} max={0} />);
-      
-      const incrementBtn = screen.getByTestId('increment-btn');
-      const decrementBtn = screen.getByTestId('decrement-btn');
-      
-      expect(incrementBtn).toBeDisabled();
-      expect(decrementBtn).toBeDisabled();
-    });
-    
-    test('has proper ARIA attributes', () => {
-      render(<Counter />);
-      
-      const counter = screen.getByTestId('counter');
-      expect(counter).toBeInTheDocument();
-      
-      // Check that buttons are focusable
-      const buttons = screen.getAllByRole('button');
-      buttons.forEach(button => {
-        expect(button).not.toHaveAttribute('tabindex', '-1');
-      });
-    });
-  });
-});
-
-// components/TodoList.js - More complex component for integration testing
-import React, { useState } from 'react';
-
-const TodoList = ({ initialTodos = [] }) => {
-  const [todos, setTodos] = useState(initialTodos);
-  const [newTodo, setNewTodo] = useState('');
-  const [filter, setFilter] = useState('all');
-  
-  const addTodo = (e) => {
-    e.preventDefault();
-    if (!newTodo.trim()) return;
-    
-    const todo = {
-      id: Date.now(),
-      text: newTodo.trim(),
-      completed: false
-    };
-    
-    setTodos(prev => [...prev, todo]);
-    setNewTodo('');
-  };
-  
-  const toggleTodo = (id) => {
-    setTodos(prev =>
-      prev.map(todo =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
-  };
-  
-  const deleteTodo = (id) => {
-    setTodos(prev => prev.filter(todo => todo.id !== id));
-  };
-  
-  const filteredTodos = todos.filter(todo => {
-    switch (filter) {
-      case 'active':
-        return !todo.completed;
-      case 'completed':
-        return todo.completed;
-      default:
-        return true;
-    }
-  });
-  
-  return (
-    <div data-testid="todo-list">
-      <form onSubmit={addTodo} data-testid="add-todo-form">
-        <input
-          data-testid="new-todo-input"
-          type="text"
-          value={newTodo}
-          onChange={(e) => setNewTodo(e.target.value)}
-          placeholder="Add a new todo..."
-        />
-        <button type="submit" data-testid="add-todo-btn">
-          Add Todo
-        </button>
-      </form>
-      
-      <div data-testid="filter-buttons">
-        <button
-          data-testid="filter-all"
-          onClick={() => setFilter('all')}
-          className={filter === 'all' ? 'active' : ''}
-        >
-          All
-        </button>
-        <button
-          data-testid="filter-active"
-          onClick={() => setFilter('active')}
-          className={filter === 'active' ? 'active' : ''}
-        >
-          Active
-        </button>
-        <button
-          data-testid="filter-completed"
-          onClick={() => setFilter('completed')}
-          className={filter === 'completed' ? 'active' : ''}
-        >
-          Completed
-        </button>
-      </div>
-      
-      <ul data-testid="todos">
-        {filteredTodos.map(todo => (
-          <li key={todo.id} data-testid={\`todo-\${todo.id}\`}>
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => toggleTodo(todo.id)}
-              data-testid={\`toggle-\${todo.id}\`}
-            />
-            <span
-              className={todo.completed ? 'completed' : ''}
-              data-testid={\`text-\${todo.id}\`}
-            >
-              {todo.text}
-            </span>
-            <button
-              onClick={() => deleteTodo(todo.id)}
-              data-testid={\`delete-\${todo.id}\`}
-            >
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
-      
-      {filteredTodos.length === 0 && (
-        <div data-testid="empty-message">
-          No todos found.
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default TodoList;
-
-// __tests__/TodoList.test.js - Integration tests
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import TodoList from '../components/TodoList';
-
-describe('TodoList Integration Tests', () => {
-  const mockTodos = [
-    { id: 1, text: 'Learn React', completed: false },
-    { id: 2, text: 'Write tests', completed: true },
-    { id: 3, text: 'Deploy app', completed: false }
-  ];
-  
-  describe('Todo Management Workflow', () => {
-    test('complete todo management workflow', async () => {
-      const user = userEvent.setup();
-      render(<TodoList />);
-      
-      // Initially empty
-      expect(screen.getByTestId('empty-message')).toBeInTheDocument();
-      
-      // Add a new todo
-      const input = screen.getByTestId('new-todo-input');
-      const addBtn = screen.getByTestId('add-todo-btn');
-      
-      await user.type(input, 'New todo item');
-      await user.click(addBtn);
-      
-      // Check todo was added
-      expect(screen.queryByTestId('empty-message')).not.toBeInTheDocument();
-      expect(screen.getByText('New todo item')).toBeInTheDocument();
-      expect(input).toHaveValue('');
-      
-      // Toggle todo completion
-      const checkbox = screen.getByRole('checkbox');
-      await user.click(checkbox);
-      
-      expect(checkbox).toBeChecked();
-      
-      // Delete todo
-      const deleteBtn = screen.getByText('Delete');
-      await user.click(deleteBtn);
-      
-      // Should be empty again
-      expect(screen.getByTestId('empty-message')).toBeInTheDocument();
-    });
-  });
-  
-  describe('Filtering Functionality', () => {
-    test('filters todos correctly', async () => {
-      const user = userEvent.setup();
-      render(<TodoList initialTodos={mockTodos} />);
-      
-      // All todos visible initially
-      expect(screen.getAllByRole('listitem')).toHaveLength(3);
-      
-      // Filter to active todos
-      await user.click(screen.getByTestId('filter-active'));
-      expect(screen.getAllByRole('listitem')).toHaveLength(2);
-      expect(screen.getByText('Learn React')).toBeInTheDocument();
-      expect(screen.getByText('Deploy app')).toBeInTheDocument();
-      expect(screen.queryByText('Write tests')).not.toBeInTheDocument();
-      
-      // Filter to completed todos
-      await user.click(screen.getByTestId('filter-completed'));
-      expect(screen.getAllByRole('listitem')).toHaveLength(1);
-      expect(screen.getByText('Write tests')).toBeInTheDocument();
-      expect(screen.queryByText('Learn React')).not.toBeInTheDocument();
-      
-      // Back to all todos
-      await user.click(screen.getByTestId('filter-all'));
-      expect(screen.getAllByRole('listitem')).toHaveLength(3);
-    });
-  });
-  
-  describe('Form Validation', () => {
-    test('prevents adding empty todos', async () => {
-      const user = userEvent.setup();
-      render(<TodoList />);
-      
-      const addBtn = screen.getByTestId('add-todo-btn');
-      
-      // Try to add empty todo
-      await user.click(addBtn);
-      expect(screen.getByTestId('empty-message')).toBeInTheDocument();
-      
-      // Try to add whitespace-only todo
-      const input = screen.getByTestId('new-todo-input');
-      await user.type(input, '   ');
-      await user.click(addBtn);
-      expect(screen.getByTestId('empty-message')).toBeInTheDocument();
-    });
-  });
-  
-  describe('Keyboard Navigation', () => {
-    test('supports keyboard interactions', async () => {
-      const user = userEvent.setup();
-      render(<TodoList />);
-      
-      const input = screen.getByTestId('new-todo-input');
-      
-      // Add todo with Enter key
-      await user.type(input, 'Keyboard todo{enter}');
-      
-      expect(screen.getByText('Keyboard todo')).toBeInTheDocument();
-      expect(input).toHaveValue('');
-    });
-  });
-});
-
-// __tests__/setup.js - Test setup file
-import '@testing-library/jest-dom';
-
-// Mock IntersectionObserver
-global.IntersectionObserver = class IntersectionObserver {
-  constructor() {}
-  disconnect() {}
-  observe() {}
-  unobserve() {}
-};
-
-// Mock window.matchMedia
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: jest.fn().mockImplementation(query => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
-});
-
-// utils/test-utils.js - Custom render function
-import React from 'react';
-import { render } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
-
-// Create a custom render function that includes providers
-export const renderWithProviders = (
-  ui,
-  {
-    preloadedState = {},
-    store = configureStore({
-      reducer: {
-        // Add your reducers here
+}`,
+          explanation: `
+            <ol>
+              <li><strong>Query Client:</strong> A <code>QueryClientProvider</code> must be set up at the top of your app (not shown here). We get access to the client instance with <code>useQueryClient()</code>.</li>
+              <li><strong>Fetching Data:</strong> The <code>useQuery</code> hook is used to fetch data. It requires a unique <code>queryKey</code> (<code>['todos']</code>) to identify this data, and a <code>queryFn</code> that returns a promise (your fetch call). It automatically handles loading, error, and data states.</li>
+              <li><strong>Mutating Data:</strong> The <code>useMutation</code> hook is used for creating, updating, or deleting data. It takes a <code>mutationFn</code> that performs the API call.</li>
+              <li><strong>Invalidation:</strong> The most powerful part is the <code>onSuccess</code> callback. After our mutation succeeds, we don't manually update the local state. Instead, we tell TanStack Query to <code>invalidateQueries</code> with the key <code>['todos']</code>. This marks the existing data as stale, and the library automatically and efficiently refetches it to keep the UI in sync with the server.</li>
+            </ol>
+          `,
+        },
       },
-      preloadedState,
-    }),
-    ...renderOptions
-  } = {}
-) => {
-  function Wrapper({ children }) {
-    return (
-      <Provider store={store}>
-        <BrowserRouter>
-          {children}
-        </BrowserRouter>
-      </Provider>
-    );
-  }
-  
-  return { store, ...render(ui, { wrapper: Wrapper, ...renderOptions }) };
-};
-
-// Re-export everything
-export * from '@testing-library/react';
-
-// Override render method
-export { renderWithProviders as render };`
-      }
     ],
-    resources: [
-      "React Testing Library Documentation",
-      "Jest Testing Framework",
-      "Testing Best Practices"
-    ]
   },
   {
     day: 23,
-    title: "Performance Optimization",
-    phase: "React Advanced",
+    phase: "Production Ready",
+    title: "Testing",
+    topics: ["Jest", "React Testing Library", "Component Testing"],
+    resources: [
+      {
+        name: "React Testing Library Docs: Introduction",
+        url: "https://testing-library.com/docs/react-testing-library/intro/",
+      },
+      { name: "Jest Docs: Getting Started", url: "https://jestjs.io/docs/getting-started" },
+    ],
+    theory: `Testing is crucial for building robust applications. In the React ecosystem, the common stack is <strong>Jest</strong> (a test runner) and <strong>React Testing Library</strong>. The testing library encourages you to write tests that resemble how users interact with your application. Instead of testing implementation details, you test the component's behavior from a user's perspective.`,
+    exercises: [
+      {
+        title: "Component Unit Tests",
+        description:
+          "Write tests for a simple `Button` component to ensure it renders correctly and that its `onClick` handler is called when clicked.",
+        solution: {
+          code: `import { render, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+// Assume a simple Button component exists:
+// const Button = ({ onClick, children }) => <button onClick={onClick}>{children}</button>;
+describe('Button Component', () => {
+  test('renders with the correct text', () => {
+    render(<Button>Click Me</Button>);
+    const buttonElement = screen.getByText(/click me/i);
+    expect(buttonElement).toBeInTheDocument();
+  });
+  test('calls onClick handler when clicked', () => {
+    const handleClick = jest.fn(); // Create a mock function
+    render(<Button onClick={handleClick}>Click Me</Button>);
+    
+    const buttonElement = screen.getByText(/click me/i);
+    fireEvent.click(buttonElement);
+    
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+});`,
+          explanation: `
+            <ol>
+              <li><strong>Arrange:</strong> The first part of a test sets up the necessary conditions. We use the <code>render</code> function from React Testing Library to render our component into a virtual DOM.</li>
+              <li><strong>Act:</strong> The second part involves simulating user interaction. For the click test, we use <code>fireEvent.click()</code> to programmatically click the button element.</li>
+              <li><strong>Assert:</strong> The final part is the assertion, where we check if the outcome was what we expected. We use queries like <code>screen.getByText()</code> to find elements on the "screen." Then, we use <code>expect</code> from Jest with matcher functions (e.g., <code>.toBeInTheDocument()</code>, <code>.toHaveBeenCalledTimes()</code>) to verify the result.</li>
+              <li><strong>Mocking:</strong> <code>jest.fn()</code> creates a "spy" or "mock" function. This allows us to track when and how a function is called without needing its actual implementation.</li>
+            </ol>
+          `,
+        },
+      },
+    ],
+  },
+  {
+    day: 24,
+    phase: "Production Ready",
+    title: "Performance & Build",
+    topics: ["Optimization", "Lazy Loading", "Code Splitting", "Vite/Webpack"],
+    resources: [
+      { name: "React Docs: Performance", url: "https://react.dev/learn/performance" },
+      { name: "React Docs: Code-Splitting", url: "https://react.dev/reference/react/lazy" },
+    ],
+    theory: `React performance optimization focuses on preventing unnecessary re-renders. Techniques include using <code>React.memo</code> for components, and <code>useMemo</code>/<code>useCallback</code> for values and functions.<br/><br/><strong>Code splitting</strong> is a feature supported by bundlers like Vite and Webpack that can create multiple bundles that can be dynamically loaded at runtime. This allows you to "lazy load" parts of your application on demand, which can significantly improve initial load performance. <code>React.lazy</code> and <code>Suspense</code> are the built-in tools for this.`,
+    exercises: [
+      {
+        title: "Route-based Code Splitting",
+        description:
+          "Show how to use `React.lazy` and `Suspense` to code-split a component that is only loaded when a user navigates to a specific route.",
+        solution: {
+          code: `import React, { Suspense, lazy } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+// Lazily import the components
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const HomePage = lazy(() => import('./pages/HomePage'));
+function App() {
+  return (
+    <BrowserRouter>
+      <Suspense fallback={<div>Loading page...</div>}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
+  );
+}`,
+          explanation: `
+            <ol>
+              <li><strong>Lazy Import:</strong> Instead of a standard static <code>import</code>, we use the <code>React.lazy()</code> function. It takes another function as an argument, which must call a dynamic <code>import()</code> expression. This tells the bundler (Vite/Webpack) to put the code for <code>AboutPage</code> into a separate file.</li>
+              <li><strong>Suspense Wrapper:</strong> React needs to show something while it's fetching the lazy-loaded code over the network. The <code>&lt;Suspense&gt;</code> component is used to wrap the lazy components.</li>
+              <li><strong>Fallback UI:</strong> The <code>fallback</code> prop of <code>Suspense</code> accepts any valid React element (like a loading spinner or simple text). This UI will be displayed to the user until the requested component code has finished loading.</li>
+              <li><strong>Usage:</strong> Once wrapped, the lazy components can be used inside the <code>Routes</code> component just like regular, statically imported components. React handles the loading and swapping automatically.</li>
+            </ol>
+          `,
+        },
+      },
+    ],
+  },
+  {
+    day: 25,
+    phase: "Production Ready",
+    title: "Final Project",
+    topics: ["Full Application Integration"],
+    resources: [
+      { name: "React Docs: Thinking in React", url: "https://react.dev/learn/thinking-in-react" },
+      { name: "Vite Docs: Build for Production", url: "https://vitejs.dev/guide/build.html" },
+    ],
     theory: `
-      <h2>Performance Optimization</h2>
-      <p>React applications can become slow as they grow. Understanding performance optimization techniques helps maintain smooth user experiences.</p>
-      
-      <h3>Common Performance Issues</h3>
-      <ul>
-        <li><strong>Unnecessary Re-renders:</strong> Components updating when they don't need to</li>
-        <li><strong>Large Bundle Sizes:</strong> Too much JavaScript to download</li>
-        <li><strong>Expensive Calculations:</strong> Heavy computations on every render</li>
-        <li><strong>Memory Leaks:</strong> Components not cleaning up properly</li>
-      </ul>
-
-      <h3>Optimization Techniques</h3>
-      <ul>
-        <li><strong>React.memo:</strong> Prevent unnecessary re-renders</li>
-        <li><strong>useMemo & useCallback:</strong> Memoize expensive calculations</li>
-        <li><strong>Code Splitting:</strong> Load code on demand</li>
-        <li><strong>Virtualization:</strong> Render only visible items</li>
-      </ul>
+      Congratulations! Today is about combining all the concepts you've learned—components, state, effects, hooks, routing, and state management—to build a complete application.
+      <br/><br/>
+      Focus on building a robust, well-structured application. Think about component reusability, state management strategy, and user experience. This is your chance to solidify your knowledge and create a portfolio-worthy piece.
     `,
     exercises: [
       {
-        question: "Create examples demonstrating various React performance optimization techniques.",
-        solution: `// hooks/usePerformanceMonitor.js - Custom hook for performance monitoring
-import { useEffect, useRef
+        title: "Project: Task Management Platform",
+        description:
+          "Plan and build a task management application (like a simplified Trello). It should allow users to create projects, add tasks, and persist the data to localStorage.",
+        solution: {
+          code: `// This is a high-level architectural example.
+// The code demonstrates how the main files might be structured.
+// --- App.jsx ---
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import DashboardPage from './pages/DashboardPage';
+import ProjectPage from './pages/ProjectPage';
+import { ProjectProvider } from './context/ProjectContext';
+function App() {
+  return (
+    <ProjectProvider> {/* Global state is available to all routes */}
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/project/:projectId" element={<ProjectPage />} />
+        </Routes>
+      </BrowserRouter>
+    </ProjectProvider>
+  );
+}
+// --- context/ProjectContext.js ---
+import { createContext, useState, useEffect } from 'react';
+export const ProjectContext = createContext();
+export const ProjectProvider = ({ children }) => {
+  const [projects, setProjects] = useState(() => {
+    const saved = localStorage.getItem('projects');
+    return saved ? JSON.parse(saved) : [];
+  });
+  useEffect(() => {
+    localStorage.setItem('projects', JSON.stringify(projects));
+  }, [projects]);
+  // Functions to add projects, add tasks, etc. would go here...
+  const value = { projects, setProjects };
+  return (
+    <ProjectContext.Provider value={value}>
+      {children}
+    </ProjectContext.Provider>
+  );
+};`,
+          explanation: `
+            <ol>
+              <li><strong>Component Architecture:</strong> The application is broken down into pages (<code>DashboardPage</code>, <code>ProjectPage</code>) and potentially many smaller reusable components (e.g., <code>TaskList</code>, <code>AddTaskForm</code>).</li>
+              <li><strong>Routing:</strong> <code>React Router</code> is used to handle navigation between the main dashboard (listing all projects) and the view for a single project.</li>
+              <li><strong>Global State Management:</strong> A <code>ProjectContext</code> is created to hold the application's shared state (the list of all projects and tasks). This avoids "prop drilling" and makes the state accessible to any component that needs it.</li>
+              <li><strong>Data Persistence:</strong> A <code>useEffect</code> hook inside the <code>ProjectProvider</code> watches for any changes to the <code>projects</code> state. Whenever the state changes, it automatically saves the updated version to the browser's <code>localStorage</code>.</li>
+              <li><strong>Lazy Initialization:</strong> The initial state for the context is read directly from <code>localStorage</code>. This ensures that when the user refreshes the page, their data is reloaded.</li>
+            </ol>
+          `,
+        },
+      },
+    ],
+  },
+];
+
+
+// 3. ========= ADD HELPER DATA AND FUNCTIONS =========
+export const phases = [
+  { name: "JavaScript Fundamentals", days: "Days 1-7", bgGradient: "from-blue-100", darkBgGradient: "dark:from-blue-900/50", gradient: "from-blue-500 to-sky-500" },
+  { name: "Advanced JavaScript", days: "Days 8-11", bgGradient: "from-purple-100", darkBgGradient: "dark:from-purple-900/50", gradient: "from-purple-500 to-indigo-500" },
+  { name: "React Fundamentals", days: "Days 12-16", bgGradient: "from-green-100", darkBgGradient: "dark:from-green-900/50", gradient: "from-green-500 to-emerald-500" },
+  { name: "Advanced React", days: "Days 17-22", bgGradient: "from-yellow-100", darkBgGradient: "dark:from-yellow-900/50", gradient: "from-yellow-500 to-amber-500" },
+  { name: "Production Ready", days: "Days 23-25", bgGradient: "from-red-100", darkBgGradient: "dark:from-red-900/50", gradient: "from-red-500 to-rose-500" },
+];
+
+export const courseDays = courseData; // Alias for clarity
+
+export function getPhaseForDay(day: number) {
+  const phaseIndex = Math.floor((day - 1) / 5);
+  return phases[phaseIndex] || null;
+}

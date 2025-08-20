@@ -1,3 +1,4 @@
+// file: components/search-dialog.tsx
 "use client"
 
 import { useState, useEffect } from "react"
