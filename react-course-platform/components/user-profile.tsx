@@ -1,12 +1,12 @@
 // filepath: components/user-profile.tsx
 "use client"
 
-import { createClient } from "@/lib/supabase/client" // <-- Use the new client
+import { supabase } from "@/lib/supabase/client"
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { useTheme } from "next-themes"
 import { Button } from "./ui/button"
-import { useProgress } from "@/hooks/use-progress"
+import { useAuth } from "@/components/auth/auth-provider"
 import {
   Dialog,
   DialogContent,
@@ -28,17 +28,14 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 export function UserProfile() {
-  const supabase = createClient() // <-- Create client instance here
   const { resolvedTheme } = useTheme()
-  const { session, isLoading } = useProgress()
+  const { user, isLoading } = useAuth()
   const router = useRouter()
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
-    router.refresh() // Use Next.js router to refresh the page
+    router.refresh()
   }
-
-  const user = session?.user
 
   if (isLoading) {
     return <Button variant="outline" size="sm" disabled>Loading...</Button>
@@ -60,19 +57,13 @@ export function UserProfile() {
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">My Account</p>
-              <p className="text-xs leading-none text-muted-foreground">
-                {user.email}
-              </p>
+              <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <Link href="/profile">Profile</Link>
-          </DropdownMenuItem>
+          <DropdownMenuItem asChild><Link href="/profile">Profile</Link></DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleSignOut}>
-            Sign out
-          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleSignOut}>Sign out</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     )
@@ -86,9 +77,7 @@ export function UserProfile() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Welcome</DialogTitle>
-          <DialogDescription>
-            Sign in to save your progress across devices.
-          </DialogDescription>
+          <DialogDescription>Sign in to save your progress across devices.</DialogDescription>
         </DialogHeader>
         <Auth
           supabaseClient={supabase}

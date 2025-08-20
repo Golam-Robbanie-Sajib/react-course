@@ -17,18 +17,24 @@ export type Database = {
       profiles: {
         Row: {
           completed_days: number[] | null
+          exam_highest_score: number | null
+          exam_last_score: number | null
           id: string
           notes: Json | null
           updated_at: string | null
         }
         Insert: {
           completed_days?: number[] | null
+          exam_highest_score?: number | null
+          exam_last_score?: number | null
           id: string
           notes?: Json | null
           updated_at?: string | null
         }
         Update: {
           completed_days?: number[] | null
+          exam_highest_score?: number | null
+          exam_last_score?: number | null
           id?: string
           notes?: Json | null
           updated_at?: string | null

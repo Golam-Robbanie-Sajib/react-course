@@ -5,6 +5,7 @@ import { CourseLayout } from "@/components/course-layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useProgress } from "@/hooks/use-progress"
+import { useAuth } from "@/components/auth/auth-provider"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +19,16 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export default function ProfilePage() {
-  const { session, resetProgress } = useProgress()
+  const { session } = useAuth()
+  const { resetProgress, isLoading } = useProgress()
+
+  if (isLoading) {
+    return (
+      <CourseLayout>
+        <div className="text-center">Loading profile...</div>
+      </CourseLayout>
+    );
+  }
 
   if (!session) {
     return (
@@ -30,7 +40,6 @@ export default function ProfilePage() {
 
   const handleResetProgress = () => {
     resetProgress()
-    // Optional: show a toast notification here
   }
 
   return (
@@ -64,7 +73,7 @@ export default function ProfilePage() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently delete your course progress. All completed days will be unmarked.
+                    This will permanently delete your course progress. All completed days and notes will be cleared.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
