@@ -2,15 +2,18 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronDown, ChevronUp, ExternalLink, BookOpen, Target, Lightbulb, CheckCircle, Home } from "lucide-react"
+import { ChevronDown, ChevronUp, ExternalLink, BookOpen, Target, Lightbulb, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { CodeBlock } from "@/components/code-block"
-import { LoadingSpinner } from "@/components/loading-spinner"
 import { useProgress } from "@/hooks/use-progress"
 import type { CourseDay } from "@/lib/course-data"
 import Link from "next/link"
+import { Skeleton } from "@/components/ui/skeleton"
+import { motion } from "framer-motion"
+import { NotesSection } from "@/components/notes-section"
+import { QuizSection } from "@/components/quiz-section"
 
 interface DayPageProps {
   day: CourseDay
@@ -18,31 +21,58 @@ interface DayPageProps {
 
 export function DayPage({ day }: DayPageProps) {
   const { toggleDayCompletion, isCompleted } = useProgress()
-  const [isLoading, setIsLoading] = useState(true)
+  const [isClient, setIsClient] = useState(false)
   const dayCompleted = isCompleted(day.day)
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 300)
-    return () => clearTimeout(timer)
-  }, [day])
+    setIsClient(true)
+  }, [])
 
   const handleToggleComplete = () => {
     toggleDayCompletion(day.day)
   }
 
-  if (isLoading) {
+  if (!isClient) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center space-y-4">
-          <LoadingSpinner size="lg" />
-          <p className="text-gray-600 dark:text-gray-400">Loading lesson content...</p>
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* Header Skeleton */}
+        <div className="p-6 border rounded-lg bg-white dark:bg-gray-900 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Skeleton className="h-6 w-16 rounded-full" />
+              <Skeleton className="h-6 w-24 rounded-full" />
+            </div>
+            <Skeleton className="h-9 w-36 rounded-md" />
+          </div>
+          <Skeleton className="h-9 w-3/4 rounded-md" />
+          <div className="flex flex-wrap gap-2">
+            <Skeleton className="h-5 w-20 rounded-full" />
+            <Skeleton className="h-5 w-16 rounded-full" />
+            <Skeleton className="h-5 w-24 rounded-full" />
+          </div>
         </div>
+        {/* Theory Card Skeleton */}
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-7 w-48 rounded-md" />
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Skeleton className="h-4 w-full rounded-md" />
+            <Skeleton className="h-4 w-full rounded-md" />
+            <Skeleton className="h-4 w-5/6 rounded-md" />
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <motion.div
+      className="max-w-4xl mx-auto space-y-8"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       <div className="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -54,12 +84,10 @@ export function DayPage({ day }: DayPageProps) {
                 {day.phase}
               </Badge>
             </div>
-
-            {/* --- THIS IS THE UPDATED SECTION --- */}
             {dayCompleted ? (
               <Button onClick={handleToggleComplete} size="sm" variant="outline" className="text-green-600 border-green-300 hover:bg-green-50 dark:text-green-400 dark:border-green-700 dark:hover:bg-green-900/50">
                 <CheckCircle className="h-4 w-4 mr-2" />
-                Completed (Click to undo)
+                Completed
               </Button>
             ) : (
               <Button onClick={handleToggleComplete} size="sm">
@@ -67,12 +95,8 @@ export function DayPage({ day }: DayPageProps) {
                 Mark as Complete
               </Button>
             )}
-            {/* --- END OF UPDATE --- */}
-
           </div>
-
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{day.title}</h1>
-
           <div className="flex flex-wrap gap-2">
             {day.topics.map((topic) => (
               <Badge key={topic} variant="secondary" className="text-xs">
@@ -80,7 +104,6 @@ export function DayPage({ day }: DayPageProps) {
               </Badge>
             ))}
           </div>
-
           <div className="flex items-start space-x-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
             <Target className="h-4 w-4 mt-0.5 flex-shrink-0" />
             <span>By the end of this lesson, you'll understand {day.topics.join(", ").toLowerCase()}</span>
@@ -118,6 +141,8 @@ export function DayPage({ day }: DayPageProps) {
           ))}
         </div>
       </div>
+      
+      <NotesSection day={day.day} />
 
       {day.resources.length > 0 && (
         <Card className="border border-gray-200 dark:border-gray-700">
@@ -148,6 +173,8 @@ export function DayPage({ day }: DayPageProps) {
         </Card>
       )}
 
+      <QuizSection questions={day.quiz} />
+
       <div className="flex justify-between items-center pt-8 border-t border-gray-200 dark:border-gray-700">
         <div>
           {day.day > 1 && (
@@ -164,7 +191,7 @@ export function DayPage({ day }: DayPageProps) {
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 

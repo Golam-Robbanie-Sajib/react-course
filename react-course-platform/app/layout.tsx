@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "next-themes"
 import { Providers } from "@/components/providers"
+import { Toaster } from "@/components/ui/sonner"
 import "./globals.css"
 
 const inter = Inter({
@@ -14,7 +15,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "React Course Platform - Learn JavaScript to React in 25 Days",
   description: "Master JavaScript and React with our comprehensive 25-day course platform",
-  generator: "v0.app",
+  generator: "React Course Platform",
 }
 
 export default function RootLayout({
@@ -23,10 +24,13 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} antialiased`} suppressHydrationWarning  data-scroll-behavior="smooth">
       <body className="font-sans">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <Providers>{children}</Providers>
+          <Providers>
+            {children}
+            <Toaster richColors /> 
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

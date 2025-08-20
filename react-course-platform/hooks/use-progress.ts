@@ -1,66 +1,110 @@
 // filepath: hooks/use-progress.ts
 "use client"
 
+import { createClient } from "@/lib/supabase/client" // <-- Use the new client
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState, useEffect } from "react"
+import { Session } from "@supabase/supabase-js"
+import { toast } from "sonner"
 
 export function useProgress() {
-  const [completedDays, setCompletedDays] = useState<number[]>([])
-  const [currentDay, setCurrentDay] = useState<number>(1)
+  const [supabase] = useState(() => createClient()) // <-- Create a client instance
+  const [session, setSession] = useState<Session | null>(null)
+  const queryClient = useQueryClient()
 
   useEffect(() => {
-    const saved = localStorage.getItem("course-progress")
-    if (saved) {
-      try {
-        const progress = JSON.parse(saved)
-        setCompletedDays(progress.completedDays || [])
-        setCurrentDay(progress.currentDay || 1)
-      } catch (error) {
-        console.error("Failed to load progress:", error)
-      }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
+    })
+    
+    return () => subscription.unsubscribe()
+  }, [queryClient, supabase])
+
+  const userId = session?.user?.id
+
+  // FETCH user profile (completed_days and notes)
+  const { data: userProfile, isLoading } = useQuery({
+    queryKey: ['profile', userId],
+    queryFn: async () => {
+      if (!userId) return null
+      const { data, error } = await supabase.from('profiles').select('completed_days, notes').eq('id', userId).single()
+      if (error) { console.error("Error fetching profile:", error); return null }
+      return data
+    },
+    enabled: !!userId,
+  })
+
+  const completedDays: number[] = userProfile?.completed_days || []
+  const notes: { [key: number]: string } = (userProfile?.notes as any) || {}
+
+  // ALL MUTATIONS REMAIN THE SAME, BUT USE THE LOCAL SUPABASE INSTANCE
+  const { mutate: toggleDayCompletion } = useMutation({
+    mutationFn: async (day: number) => {
+      if (!userId) throw new Error("User not authenticated")
+      const isCurrentlyCompleted = completedDays.includes(day)
+      const newCompleted = isCurrentlyCompleted ? completedDays.filter((d: number) => d !== day) : [...completedDays, day].sort((a, b) => a - b)
+      const { error } = await supabase.from('profiles').update({ completed_days: newCompleted, updated_at: new Date().toISOString() }).eq('id', userId)
+      if (error) throw new Error(error.message)
+      return { newCompleted, day }
+    },
+    onSuccess: ({ newCompleted, day }) => {
+      const isCompleted = newCompleted.includes(day)
+      toast.success(isCompleted ? `Day ${day} marked complete!` : `Day ${day} progress removed.`)
+      queryClient.invalidateQueries({ queryKey: ['profile', userId] })
+    },
+    onError: (error) => {
+      console.error("Failed to update progress:", error)
+      toast.error("Failed to update progress. Please try again.")
     }
-  }, [])
+  })
 
-  const saveProgress = (completed: number[], current: number) => {
-    const progress = {
-      completedDays: completed,
-      currentDay: current,
-      lastUpdated: new Date().toISOString(),
+  const { mutate: resetProgress } = useMutation({
+    mutationFn: async () => {
+      if (!userId) throw new Error("User not authenticated")
+      const { error } = await supabase.from('profiles').update({ completed_days: [], notes: {}, updated_at: new Date().toISOString() }).eq('id', userId)
+      if (error) throw new Error(error.message)
+      return []
+    },
+    onSuccess: () => {
+      toast.success("Your course progress has been reset.")
+      queryClient.invalidateQueries({ queryKey: ['profile', userId] })
+    },
+    onError: () => {
+      toast.error("Failed to reset progress. Please try again.")
     }
-    localStorage.setItem("course-progress", JSON.stringify(progress))
-    setCompletedDays(completed)
-    setCurrentDay(current)
-  }
+  })
 
-  const toggleDayCompletion = (day: number) => {
-    const isCurrentlyCompleted = completedDays.includes(day)
-    let newCompleted: number[]
-
-    if (isCurrentlyCompleted) {
-      // If the day is already complete, remove it.
-      newCompleted = completedDays.filter((d) => d !== day)
-    } else {
-      // If the day is not complete, add it and re-sort.
-      newCompleted = [...completedDays, day]
-      newCompleted.sort((a, b) => a - b)
+  const { mutate: updateNote } = useMutation({
+    mutationFn: async ({ day, content }: { day: number; content: string }) => {
+      if (!userId) throw new Error("User not authenticated")
+      const newNotes = { ...notes, [day]: content }
+      const { error } = await supabase.from('profiles').update({ notes: newNotes, updated_at: new Date().toISOString() }).eq('id', userId)
+      if (error) throw new Error(error.message)
+      return newNotes
+    },
+    onSuccess: () => {
+      toast.success("Note saved!")
+      queryClient.invalidateQueries({ queryKey: ['profile', userId] });
+    },
+    onError: () => {
+      toast.error("Failed to save note.")
     }
-
-    // Recalculate the current day based on the highest completed day
-    const newCurrent = newCompleted.length > 0 ? Math.max(...newCompleted) + 1 : 1
-    // Ensure the current day doesn't exceed the total number of days
-    saveProgress(newCompleted, Math.min(newCurrent, 25))
-  }
-
-  const resetProgress = () => {
-    localStorage.removeItem("course-progress")
-    setCompletedDays([])
-    setCurrentDay(1)
-  }
+  })
 
   return {
+    session,
+    isLoading,
     completedDays,
-    currentDay,
-    toggleDayCompletion, // Use this new function instead of markDayComplete
-    resetProgress,
+    notes,
+    isAuthenticated: !!userId,
     isCompleted: (day: number) => completedDays.includes(day),
+    toggleDayCompletion,
+    resetProgress,
+    updateNote,
   }
 }

@@ -164,6 +164,13 @@ export function HomePage() {
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
                   </Button>
+
+                  <Button variant="secondary" size="lg" asChild>
+                    <Link href="/exam">
+                      <Trophy className="ml-2 h-5 w-5 mr-2" />
+                      Take Final Exam
+                    </Link>
+                  </Button>
                   
                   {/* --- MODIFIED "DOWNLOAD SYLLABUS" BUTTON --- */}
                   <Button variant="outline" size="lg" asChild>
