@@ -14,13 +14,14 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 import { NotesSection } from "@/components/notes-section"
 import { QuizSection } from "@/components/quiz-section"
+import { ConfidenceRating } from "@/components/confidence-rating"
 
 interface DayPageProps {
   day: CourseDay
 }
 
 export function DayPage({ day }: DayPageProps) {
-  const { toggleDayCompletion, isCompleted } = useProgress()
+  const { toggleDayCompletion, isCompleted, isLoading } = useProgress()
   const [isClient, setIsClient] = useState(false)
   const dayCompleted = isCompleted(day.day)
 
@@ -32,7 +33,7 @@ export function DayPage({ day }: DayPageProps) {
     toggleDayCompletion(day.day)
   }
 
-  if (!isClient) {
+  if (!isClient || isLoading) {
     return (
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header Skeleton */}
@@ -144,6 +145,8 @@ export function DayPage({ day }: DayPageProps) {
       
       <NotesSection day={day.day} />
 
+      <ConfidenceRating day={day.day} />
+
       {day.resources.length > 0 && (
         <Card className="border border-gray-200 dark:border-gray-700">
           <CardHeader>
@@ -218,12 +221,10 @@ function ExerciseCard({ exercise, index }: ExerciseCardProps) {
         <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           <p className="text-gray-700 dark:text-gray-300">{exercise.description}</p>
         </div>
-
         <Button variant="outline" onClick={() => setShowSolution(!showSolution)} className="w-full justify-between">
           <span>{showSolution ? "Hide" : "Show"} Solution</span>
           {showSolution ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </Button>
-
         {showSolution && (
           <div className="space-y-6">
             <CodeBlock code={exercise.solution.code} language="javascript" title={`Solution: ${exercise.title}`} />

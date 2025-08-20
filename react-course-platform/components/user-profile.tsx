@@ -48,7 +48,7 @@ export function UserProfile() {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email} />
+              <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || ''} />
               <AvatarFallback>{userInitial}</AvatarFallback>
             </Avatar>
           </Button>
@@ -57,13 +57,26 @@ export function UserProfile() {
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">My Account</p>
-              <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+              <p className="text-xs leading-none text-muted-foreground">
+                {user.email}
+              </p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild><Link href="/profile">Profile</Link></DropdownMenuItem>
+          
+          {/* --- THIS IS THE CORRECTED MENU --- */}
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard">Dashboard</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/profile">Profile Settings</Link>
+          </DropdownMenuItem>
+          {/* --- END OF CORRECTION --- */}
+
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleSignOut}>Sign out</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleSignOut}>
+            Sign out
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     )
@@ -77,7 +90,9 @@ export function UserProfile() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Welcome</DialogTitle>
-          <DialogDescription>Sign in to save your progress across devices.</DialogDescription>
+          <DialogDescription>
+            Sign in to save your progress across devices.
+          </DialogDescription>
         </DialogHeader>
         <Auth
           supabaseClient={supabase}

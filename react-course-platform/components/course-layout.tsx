@@ -12,6 +12,7 @@ import { useProgress } from "@/hooks/use-progress"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { UserProfile } from "./user-profile"
+import { useAuth } from "@/components/auth/auth-provider"
 
 interface CourseLayoutProps {
   children: React.ReactNode
@@ -21,19 +22,24 @@ interface CourseLayoutProps {
 export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
-  const { completedDays, isCompleted } = useProgress()
+  const { completedDays, isCompleted, updateStreak } = useProgress()
+  const { user } = useAuth()
+
+  useEffect(() => {
+    if (user) {
+      updateStreak();
+    }
+  }, [user, updateStreak]);
 
   const currentDayData = currentDay ? courseDays.find((d) => d.day === currentDay) : null
   const currentPhase = currentDayData ? getPhaseForDay(currentDayData.day) : null
 
-  // Close sidebar on route change
   useEffect(() => {
     setSidebarOpen(false)
   }, [pathname])
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      {/* Sidebar overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
@@ -41,7 +47,6 @@ export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
         />
       )}
 
-      {/* Sidebar - Always a fixed overlay */}
       <aside
         className={`
         fixed top-0 left-0 z-50 h-full w-80 transform transition-transform duration-300 ease-in-out
@@ -83,8 +88,12 @@ export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
             </div>
             <nav className="flex-1 overflow-y-auto p-4">
               <div className="space-y-6">
+                
+                {/* --- CORRECTED MAPPING LOGIC --- */}
                 {phases.map((phase) => {
-                  const phaseDays = courseDays.filter((day) => day.phase === phase.name)
+                  const phaseDays = courseDays.filter((day) => day.phase === phase.name);
+                  if (phaseDays.length === 0) return null; // Don't render a phase if it has no days
+
                   return (
                     <div key={phase.name} className="space-y-2">
                       <div
@@ -98,31 +107,40 @@ export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
                         <p className="text-xs text-muted-foreground mt-1">{phase.days}</p>
                       </div>
                       <div className="space-y-1 ml-2">
-                        {phaseDays.map((dayData) => (
-                          <Link
-                            key={dayData.day}
-                            href={`/day/${dayData.day}`}
-                            className={`block p-2 rounded-lg text-sm transition-colors ${
-                              currentDay === dayData.day
-                                ? `bg-gradient-to-r ${getPhaseForDay(dayData.day)?.gradient} text-white shadow-lg`
-                                : "hover:bg-white/50 dark:hover:bg-white/5"
-                            }`}
-                          >
-                            <div className="font-medium">Day {dayData.day}</div>
-                            <div className="text-xs opacity-75">{dayData.title}</div>
-                          </Link>
-                        ))}
+                        {phaseDays.map((dayData) => {
+                          const dayNumber = dayData.day;
+                          const isActive = currentDay === dayNumber;
+                          const isDayCompleted = isCompleted(dayNumber);
+
+                          return (
+                            <Link
+                              key={dayNumber}
+                              href={`/day/${dayNumber}`}
+                              className={`block p-2 rounded-lg text-sm transition-colors ${
+                                isActive
+                                  ? `bg-gradient-to-r ${getPhaseForDay(dayNumber)?.gradient} text-white shadow-lg`
+                                  : isDayCompleted
+                                    ? "text-muted-foreground opacity-70 hover:opacity-100"
+                                    : "hover:bg-white/50 dark:hover:bg-white/5"
+                              }`}
+                            >
+                              <div className="font-medium">Day {dayNumber}</div>
+                              <div className="text-xs opacity-75">{dayData.title}</div>
+                            </Link>
+                          );
+                        })}
                       </div>
                     </div>
-                  )
+                  );
                 })}
+                {/* --- END OF CORRECTION --- */}
+
               </div>
             </nav>
           </div>
         </div>
       </aside>
 
-      {/* Main content */}
       <div className="flex-1">
         <header className="sticky top-0 z-30 bg-white/70 dark:bg-slate-950/70 backdrop-blur-lg border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center justify-between p-4">
@@ -134,13 +152,13 @@ export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
                 <Link href="/" className="flex items-center text-muted-foreground hover:text-foreground">
                   <Home className="h-4 w-4" />
                 </Link>
-                {currentDayData && (
+                {currentDayData && currentPhase && (
                   <>
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     <span
-                      className={`font-medium bg-gradient-to-r ${currentPhase?.gradient} bg-clip-text text-transparent`}
+                      className={`font-medium bg-gradient-to-r ${currentPhase.gradient} bg-clip-text text-transparent`}
                     >
-                      {currentPhase?.name}
+                      {currentPhase.name}
                     </span>
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium text-foreground">

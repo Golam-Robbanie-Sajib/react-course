@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useProgress } from "@/hooks/use-progress"
 import { useAuth } from "@/components/auth/auth-provider"
+import { Flame } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,10 +20,10 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export default function ProfilePage() {
-  const { session } = useAuth()
-  const { resetProgress, isLoading } = useProgress()
+  const { session, isLoading: isAuthLoading } = useAuth()
+  const { resetProgress, currentStreak, isLoading: isProgressLoading } = useProgress()
 
-  if (isLoading) {
+  if (isAuthLoading || isProgressLoading) {
     return (
       <CourseLayout>
         <div className="text-center">Loading profile...</div>
@@ -49,13 +50,22 @@ export default function ProfilePage() {
         <Card>
           <CardHeader>
             <CardTitle>Account Information</CardTitle>
-            <CardDescription>Your personal details.</CardDescription>
+            <CardDescription>Your personal details and stats.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
+          <CardContent className="space-y-4">
+            <div>
               <p className="text-sm font-medium">Email Address</p>
               <p className="text-muted-foreground">{session.user.email}</p>
             </div>
+            
+            <div>
+              <p className="text-sm font-medium">Daily Streak</p>
+              <div className="flex items-center space-x-2 text-orange-500">
+                <Flame className="h-5 w-5" />
+                <span className="text-lg font-bold">{currentStreak} {currentStreak === 1 ? 'day' : 'days'}</span>
+              </div>
+            </div>
+            
           </CardContent>
         </Card>
 
@@ -73,7 +83,7 @@ export default function ProfilePage() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently delete your course progress. All completed days and notes will be cleared.
+                    This will permanently delete your course progress, including completed days, notes, and exam scores.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
