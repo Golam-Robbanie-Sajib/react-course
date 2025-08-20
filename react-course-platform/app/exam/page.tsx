@@ -26,13 +26,14 @@ import {
 
 const EXAM_DURATION = 3600 * 1000; // 1 hour in milliseconds
 
-const shuffleArray = (array: any[]) => [...array].sort(() => Math.random() - 0.5);
+const shuffleArray = <T,>(array: T[]): T[] => [...array].sort(() => Math.random() - 0.5);
 
 type ExamState = "idle" | "active" | "finished";
 
 export default function FinalExamPage() {
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [examState, setExamState] = useState<ExamState>("idle");
+  const [examFinished, setExamFinished] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<(number | null)[]>([]);
   const [score, setScore] = useState(0);
@@ -48,13 +49,13 @@ export default function FinalExamPage() {
   };
 
   const handleFinishExam = useCallback(() => {
-    if (examState === 'finished') return;
+    if (examFinished) return;
 
     let finalScore = 0;
     const finalAnswers = JSON.parse(localStorage.getItem('userAnswers') || '[]') as (number | null)[];
     const savedQuestions = JSON.parse(localStorage.getItem('examQuestions') || '[]') as QuizQuestion[];
 
-    if (savedQuestions.length === 0) return; // Avoid finishing an unstarted exam
+    if (savedQuestions.length === 0) return;
     
     for (let i = 0; i < savedQuestions.length; i++) {
       if (finalAnswers[i] === savedQuestions[i].correctAnswerIndex) {
@@ -63,9 +64,10 @@ export default function FinalExamPage() {
     }
     setScore(finalScore);
     updateExamScores({ newScore: finalScore, totalQuestions: savedQuestions.length });
+    setExamFinished(true);
     setExamState('finished');
     clearExamState();
-  }, [examState, updateExamScores]);
+  }, [examFinished, updateExamScores]);
 
   const { minutes, seconds } = useCountdown(examDeadline, handleFinishExam);
 
@@ -87,16 +89,24 @@ export default function FinalExamPage() {
   const handleStartExam = () => {
     clearExamState();
     const shuffledQuestions = shuffleArray(finalExamQuestions);
+    const processedQuestions = shuffledQuestions.map(q => {
+      const originalCorrectAnswerText = q.options[q.correctAnswerIndex];
+      const shuffledOptions = shuffleArray(q.options);
+      const newCorrectIndex = shuffledOptions.indexOf(originalCorrectAnswerText);
+      return { ...q, options: shuffledOptions, correctAnswerIndex: newCorrectIndex };
+    });
+
     const deadline = Date.now() + EXAM_DURATION;
-    const initialAnswers = new Array(shuffledQuestions.length).fill(null);
+    const initialAnswers = new Array(processedQuestions.length).fill(null);
     
-    setQuestions(shuffledQuestions);
+    setQuestions(processedQuestions);
     setExamDeadline(deadline);
     setUserAnswers(initialAnswers);
-    setCurrentQuestionIndex(0);
+    setExamFinished(false);
     setScore(0);
+    setCurrentQuestionIndex(0);
     
-    localStorage.setItem('examQuestions', JSON.stringify(shuffledQuestions));
+    localStorage.setItem('examQuestions', JSON.stringify(processedQuestions));
     localStorage.setItem('examDeadline', deadline.toString());
     localStorage.setItem('userAnswers', JSON.stringify(initialAnswers));
 
@@ -130,7 +140,6 @@ export default function FinalExamPage() {
           <p className="text-muted-foreground mb-8 max-w-md">
             You will have 1 hour to complete {finalExamQuestions.length} questions. Good luck!
           </p>
-          
           {(highestScore !== null || lastScore !== null) && (
             <Card className="mb-8 p-6 text-left">
               <CardTitle className="mb-4">Your Previous Scores</CardTitle>
@@ -140,7 +149,6 @@ export default function FinalExamPage() {
               </div>
             </Card>
           )}
-
           <Button size="lg" onClick={handleStartExam}>
             Start Exam <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -214,6 +222,8 @@ export default function FinalExamPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
+              
+              {/* --- THIS IS THE UPDATED SECTION --- */}
               {currentQuestion?.options.map((option, index) => {
                 const isSelected = selectedAnswer === index;
                 return (
@@ -222,10 +232,11 @@ export default function FinalExamPage() {
                     variant="outline"
                     className={`
                       w-full justify-start h-auto py-3 text-left whitespace-normal 
-                      transition-all duration-150 ease-in-out
+                      transition-colors duration-200
+                      border-2  // Use a thicker border for better visibility
                       ${isSelected 
-                        ? 'border-foreground bg-foreground text-background' // Selected: Black border, black bg, white text
-                        : 'hover:border-foreground/50' // Hover: Slightly darker border
+                        ? 'bg-foreground text-background border-foreground' // Selected State
+                        : 'bg-transparent hover:bg-accent' // Default and Hover State
                       }
                     `}
                     onClick={() => handleAnswerSelect(index)}
@@ -234,6 +245,8 @@ export default function FinalExamPage() {
                   </Button>
                 )
               })}
+              {/* --- END OF UPDATE --- */}
+
             </div>
             <div className="flex justify-between items-center pt-4">
               <span className="text-sm text-muted-foreground">Answered: {userAnswers.filter(a => a !== null).length}/{questions.length}</span>
