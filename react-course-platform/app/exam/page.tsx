@@ -8,12 +8,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { finalExamQuestions } from "@/lib/exam-data"
 import type { QuizQuestion } from "@/lib/course-data"
-import { ArrowRight, CheckCircle, RefreshCw, Trophy } from "lucide-react"
+import { ArrowRight, CheckCircle, RefreshCw, Trophy, Clock } from "lucide-react"
+import { useCountdown } from "@/hooks/use-countdown"
 
-// A simple shuffle function
-const shuffleArray = (array: any[]) => {
-  return [...array].sort(() => Math.random() - 0.5);
-};
+const EXAM_DURATION = 3600 * 1000; // 1 hour in milliseconds
+
+const shuffleArray = (array: any[]) => [...array].sort(() => Math.random() - 0.5);
 
 export default function FinalExamPage() {
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
@@ -22,13 +22,57 @@ export default function FinalExamPage() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<number[]>([]);
   const [score, setScore] = useState(0);
+  const [examDeadline, setExamDeadline] = useState<number | null>(null);
 
+  // Check for an ongoing exam on component mount
   useEffect(() => {
-    setQuestions(shuffleArray(finalExamQuestions));
+    const savedDeadline = localStorage.getItem('examDeadline');
+    if (savedDeadline) {
+      const deadline = parseInt(savedDeadline, 10);
+      if (deadline > Date.now()) {
+        setExamDeadline(deadline);
+        setQuestions(finalExamQuestions); // Use non-shuffled for consistency on refresh
+        setUserAnswers(JSON.parse(localStorage.getItem('userAnswers') || '[]'));
+        setExamStarted(true);
+      } else {
+        // If deadline has passed, clear storage
+        localStorage.removeItem('examDeadline');
+        localStorage.removeItem('userAnswers');
+      }
+    }
   }, []);
 
+  const handleFinishExam = () => {
+    let finalScore = 0;
+    const answers = JSON.parse(localStorage.getItem('userAnswers') || '[]') as number[];
+    const savedQuestions = finalExamQuestions; // Use consistent question order for scoring
+
+    for (let i = 0; i < savedQuestions.length; i++) {
+      if (answers[i] === savedQuestions[i].correctAnswerIndex) {
+        finalScore++;
+      }
+    }
+    setScore(finalScore);
+    setExamFinished(true);
+    localStorage.removeItem('examDeadline');
+    localStorage.removeItem('userAnswers');
+  };
+
+  const { minutes, seconds } = useCountdown(examDeadline, handleFinishExam);
+
   const handleStartExam = () => {
-    setUserAnswers(new Array(questions.length).fill(null));
+    const shuffledQuestions = shuffleArray(finalExamQuestions);
+    const deadline = Date.now() + EXAM_DURATION;
+    const initialAnswers = new Array(shuffledQuestions.length).fill(null);
+    
+    setQuestions(shuffledQuestions);
+    setExamDeadline(deadline);
+    setUserAnswers(initialAnswers);
+    
+    localStorage.setItem('examQuestions', JSON.stringify(shuffledQuestions)); // Save shuffled order
+    localStorage.setItem('examDeadline', deadline.toString());
+    localStorage.setItem('userAnswers', JSON.stringify(initialAnswers));
+
     setExamStarted(true);
   };
 
@@ -36,6 +80,7 @@ export default function FinalExamPage() {
     const newAnswers = [...userAnswers];
     newAnswers[currentQuestionIndex] = answerIndex;
     setUserAnswers(newAnswers);
+    localStorage.setItem('userAnswers', JSON.stringify(newAnswers));
   };
 
   const handleNextQuestion = () => {
@@ -44,19 +89,10 @@ export default function FinalExamPage() {
     }
   };
 
-  const handleFinishExam = () => {
-    let finalScore = 0;
-    for (let i = 0; i < questions.length; i++) {
-      if (userAnswers[i] === questions[i].correctAnswerIndex) {
-        finalScore++;
-      }
-    }
-    setScore(finalScore);
-    setExamFinished(true);
-  };
-
   const handleRestartExam = () => {
-    setQuestions(shuffleArray(finalExamQuestions));
+    localStorage.removeItem('examDeadline');
+    localStorage.removeItem('userAnswers');
+    localStorage.removeItem('examQuestions');
     setExamStarted(false);
     setExamFinished(false);
     setCurrentQuestionIndex(0);
@@ -71,7 +107,7 @@ export default function FinalExamPage() {
           <Trophy className="h-16 w-16 text-yellow-500 mb-4" />
           <h1 className="text-3xl font-bold mb-2">Final Exam</h1>
           <p className="text-muted-foreground mb-6 max-w-md">
-            Test your knowledge with {questions.length} multiple-choice questions covering all topics from the course. Good luck!
+            You will have 1 hour to complete {finalExamQuestions.length} questions. Good luck!
           </p>
           <Button size="lg" onClick={handleStartExam}>
             Start Exam <ArrowRight className="h-4 w-4 ml-2" />
@@ -108,11 +144,18 @@ export default function FinalExamPage() {
 
   return (
     <CourseLayout>
+      <div className="fixed top-16 left-1/2 -translate-x-1/2 z-20">
+         <div className={`flex items-center space-x-2 px-4 py-2 rounded-full border shadow-lg transition-colors ${parseInt(minutes) < 5 ? 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/50 dark:text-red-200 dark:border-red-800' : 'bg-white/70 backdrop-blur-lg dark:bg-slate-900/70'}`}>
+          <Clock className="h-5 w-5" />
+          <span className="text-lg font-semibold tabular-nums">{minutes}:{seconds}</span>
+        </div>
+      </div>
       <motion.div
         key={currentQuestionIndex}
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3 }}
+        className="pt-16"
       >
         <Card className="max-w-3xl mx-auto">
           <CardHeader>
@@ -132,7 +175,10 @@ export default function FinalExamPage() {
                 </Button>
               ))}
             </div>
-            <div className="flex justify-end pt-4">
+            <div className="flex justify-between items-center pt-4">
+              <span className="text-sm text-muted-foreground">
+                Answered: {userAnswers.filter(a => a !== null).length}/{questions.length}
+              </span>
               {currentQuestionIndex < questions.length - 1 ? (
                 <Button onClick={handleNextQuestion} disabled={selectedAnswer === null}>
                   Next Question <ArrowRight className="h-4 w-4 ml-2" />
