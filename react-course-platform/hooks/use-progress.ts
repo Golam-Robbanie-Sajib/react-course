@@ -1,7 +1,8 @@
 // filepath: hooks/use-progress.ts
 "use client"
 
-import { supabase } from "@/lib/supabase/client"
+import { db } from "@/lib/firebase"
+import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useAuth } from "@/components/auth/auth-provider"
@@ -15,59 +16,94 @@ const areDatesConsecutive = (date1: Date, date2: Date) => {
   return diffDays === 1;
 };
 
+// Define the shape of the user profile stored in Firestore
+interface UserProfile {
+  completed_days: number[];
+  notes: { [key: number]: string };
+  exam_highest_score: number | null;
+  exam_last_score: number | null;
+  confidence_ratings: { [key: number]: number };
+  current_streak: number;
+  last_login_date: string | null;
+}
+
+const defaultProfile: UserProfile = {
+  completed_days: [],
+  notes: {},
+  exam_highest_score: null,
+  exam_last_score: null,
+  confidence_ratings: {},
+  current_streak: 0,
+  last_login_date: null,
+};
+
 export function useProgress() {
   const queryClient = useQueryClient()
-  const { user, session } = useAuth()
-  const userId = user?.id
+  const { user } = useAuth()
+  const userId = user?.uid
 
   const { data: userProfile, isLoading: isProgressLoading } = useQuery({
     queryKey: ['profile', userId],
     queryFn: async () => {
       if (!userId) return null
-      const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single()
-      if (error) {
-        console.error("Error fetching profile:", error)
-        return null
+      const docRef = doc(db, "users", userId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        return docSnap.data() as UserProfile;
+      } else {
+        // Create default profile if it doesn't exist
+        await setDoc(docRef, defaultProfile);
+        return defaultProfile;
       }
-      return data
     },
     enabled: !!userId,
   })
 
-  // --- CORRECTED DESTRUCTURING ---
-  const completedDays: number[] = userProfile?.completed_days || [];
-  const notes: { [key: number]: string } = (userProfile?.notes as any) || {};
-  const highestScore: number | null = userProfile?.exam_highest_score || null;
-  const lastScore: number | null = userProfile?.exam_last_score || null;
-  const confidenceRatings: { [key: number]: number } = (userProfile?.confidence_ratings as any) || {};
-  const currentStreak: number = userProfile?.current_streak || 0;
-  const lastLoginDate: string | null = userProfile?.last_login_date || null;
+  // Safe access with defaults
+  const completedDays = userProfile?.completed_days || [];
+  const notes = userProfile?.notes || {};
+  const highestScore = userProfile?.exam_highest_score || null;
+  const lastScore = userProfile?.exam_last_score || null;
+  const confidenceRatings = userProfile?.confidence_ratings || {};
+  const currentStreak = userProfile?.current_streak || 0;
+  const lastLoginDate = userProfile?.last_login_date || null;
 
   // --- MUTATIONS ---
 
   const { mutate: toggleDayCompletion } = useMutation({
     mutationFn: async (day: number) => {
       if (!userId) throw new Error("User not authenticated")
-      const isCurrentlyCompleted = completedDays.includes(day)
-      const newCompleted = isCurrentlyCompleted ? completedDays.filter((d: number) => d !== day) : [...completedDays, day].sort((a, b) => a - b)
-      const { error } = await supabase.from('profiles').update({ completed_days: newCompleted, updated_at: new Date().toISOString() }).eq('id', userId)
-      if (error) throw new Error(error.message)
-      return { newCompleted, day }
+      const docRef = doc(db, "users", userId);
+      const isCurrentlyCompleted = completedDays.includes(day);
+
+      if (isCurrentlyCompleted) {
+        await updateDoc(docRef, {
+            completed_days: arrayRemove(day)
+        });
+        return { completed: false, day };
+      } else {
+        await updateDoc(docRef, {
+            completed_days: arrayUnion(day)
+        });
+        return { completed: true, day };
+      }
     },
-    onSuccess: ({ newCompleted, day }) => {
-      const isCompleted = newCompleted.includes(day)
-      toast.success(isCompleted ? `Day ${day} marked complete!` : `Day ${day} progress removed.`)
+    onSuccess: ({ completed, day }) => {
+      toast.success(completed ? `Day ${day} marked complete!` : `Day ${day} progress removed.`)
       queryClient.invalidateQueries({ queryKey: ['profile', userId] })
     },
-    onError: (error) => { toast.error("Failed to update progress.") }
+    onError: () => { toast.error("Failed to update progress.") }
   })
 
   const { mutate: resetProgress } = useMutation({
     mutationFn: async () => {
       if (!userId) throw new Error("User not authenticated")
-      const { error } = await supabase.from('profiles').update({ completed_days: [], notes: {}, updated_at: new Date().toISOString() }).eq('id', userId)
-      if (error) throw new Error(error.message)
-      return []
+      const docRef = doc(db, "users", userId);
+      await updateDoc(docRef, {
+        completed_days: [],
+        notes: {}
+      });
     },
     onSuccess: () => {
       toast.success("Your course progress has been reset.")
@@ -79,10 +115,13 @@ export function useProgress() {
   const { mutate: updateNote } = useMutation({
     mutationFn: async ({ day, content }: { day: number; content: string }) => {
       if (!userId) throw new Error("User not authenticated")
-      const newNotes = { ...notes, [day]: content }
-      const { error } = await supabase.from('profiles').update({ notes: newNotes, updated_at: new Date().toISOString() }).eq('id', userId)
-      if (error) throw new Error(error.message)
-      return newNotes
+      const docRef = doc(db, "users", userId);
+      // Create the nested field path for updating a specific note
+      // Firestore allows dot notation for map fields: "notes.1": "content"
+      await updateDoc(docRef, {
+        [`notes.${day}`]: content
+      });
+      return { day, content };
     },
     onSuccess: () => {
       toast.success("Note saved!")
@@ -97,8 +136,12 @@ export function useProgress() {
       const newPercentage = Math.round((newScore / totalQuestions) * 100);
       const currentHighest = highestScore || 0;
       const newHighest = Math.max(currentHighest, newPercentage);
-      const { error } = await supabase.from('profiles').update({ exam_last_score: newPercentage, exam_highest_score: newHighest }).eq('id', userId)
-      if (error) throw new Error(error.message)
+
+      const docRef = doc(db, "users", userId);
+      await updateDoc(docRef, {
+          exam_last_score: newPercentage,
+          exam_highest_score: newHighest
+      });
       return { newHighest, newPercentage }
     },
     onSuccess: () => {
@@ -111,10 +154,11 @@ export function useProgress() {
   const { mutate: updateConfidenceRating } = useMutation({
     mutationFn: async ({ day, rating }: { day: number; rating: number }) => {
       if (!userId) throw new Error("User not authenticated")
-      const newRatings = { ...confidenceRatings, [day]: rating }
-      const { error } = await supabase.from('profiles').update({ confidence_ratings: newRatings }).eq('id', userId)
-      if (error) throw new Error(error.message)
-      return newRatings
+      const docRef = doc(db, "users", userId);
+      await updateDoc(docRef, {
+          [`confidence_ratings.${day}`]: rating
+      });
+      return { day, rating };
     },
     onSuccess: () => {
       toast.success("Confidence rating saved!")
@@ -126,17 +170,22 @@ export function useProgress() {
     mutationFn: async () => {
       if (!userId) return;
       const today = new Date();
+      const todayStr = today.toISOString().split('T')[0];
       const lastLogin = lastLoginDate ? new Date(lastLoginDate) : null;
+
+      // If already logged in today, do nothing
       if (lastLogin && today.toDateString() === lastLogin.toDateString()) return;
+
       let newStreak = 1;
       if (lastLogin && areDatesConsecutive(lastLogin, today)) {
         newStreak = (currentStreak || 0) + 1;
       }
-      const { error } = await supabase.from('profiles').update({
+
+      const docRef = doc(db, "users", userId);
+      await updateDoc(docRef, {
         current_streak: newStreak,
-        last_login_date: today.toISOString().split('T')[0]
-      }).eq('id', userId)
-      if (error) throw new Error(error.message)
+        last_login_date: todayStr
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile', userId] });
@@ -152,7 +201,6 @@ export function useProgress() {
     confidenceRatings,
     currentStreak,
     isAuthenticated: !!userId,
-    session,
     isCompleted: (day: number) => completedDays.includes(day),
     toggleDayCompletion,
     resetProgress,
