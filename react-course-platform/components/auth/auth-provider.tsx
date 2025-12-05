@@ -2,13 +2,12 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase/client'
-import type { Session } from '@supabase/supabase-js'
+import { auth } from '@/lib/firebase'
+import { onAuthStateChanged, User } from 'firebase/auth'
 
 // 1. Define the context shape
 type AuthContextType = {
-  session: Session | null
-  user: Session['user'] | null
+  user: User | null
   isLoading: boolean
 }
 
@@ -17,26 +16,21 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // 3. Create the AuthProvider component
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     // This effect runs ONLY ONCE.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session)
-        setIsLoading(false)
-      }
-    )
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user)
+      setIsLoading(false)
+    })
 
-    return () => {
-      subscription.unsubscribe()
-    }
+    return () => unsubscribe()
   }, [])
 
   const value = {
-    session,
-    user: session?.user ?? null,
+    user,
     isLoading,
   }
 
@@ -44,7 +38,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 }
 
 // 4. Create the custom hook to consume the context.
-//    This is the hook our components will use.
 export const useAuth = () => {
   const context = useContext(AuthContext)
   if (context === undefined) {

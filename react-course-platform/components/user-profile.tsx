@@ -1,9 +1,8 @@
 // filepath: components/user-profile.tsx
 "use client"
 
-import { supabase } from "@/lib/supabase/client"
-import { Auth } from '@supabase/auth-ui-react'
-import { ThemeSupa } from '@supabase/auth-ui-shared'
+import { auth } from "@/lib/firebase"
+import { signOut, GoogleAuthProvider, signInWithPopup } from "firebase/auth"
 import { useTheme } from "next-themes"
 import { Button } from "./ui/button"
 import { useAuth } from "@/components/auth/auth-provider"
@@ -26,15 +25,38 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { FcGoogle } from "react-icons/fc"
+import { toast } from "sonner"
 
 export function UserProfile() {
   const { resolvedTheme } = useTheme()
   const { user, isLoading } = useAuth()
   const router = useRouter()
+  const [isAuthLoading, setIsAuthLoading] = useState(false)
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.refresh()
+    try {
+      await signOut(auth)
+      toast.success("Signed out successfully")
+      router.refresh()
+    } catch (error) {
+      toast.error("Error signing out")
+    }
+  }
+
+  const handleGoogleLogin = async () => {
+    setIsAuthLoading(true)
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      toast.success("Signed in successfully!")
+    } catch (error: any) {
+      console.error(error);
+      toast.error("Failed to sign in. " + error.message)
+    } finally {
+      setIsAuthLoading(false)
+    }
   }
 
   if (isLoading) {
@@ -48,7 +70,7 @@ export function UserProfile() {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-8 w-8 rounded-full">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || ''} />
+              <AvatarImage src={user.photoURL || undefined} alt={user.email || ''} />
               <AvatarFallback>{userInitial}</AvatarFallback>
             </Avatar>
           </Button>
@@ -56,7 +78,7 @@ export function UserProfile() {
         <DropdownMenuContent className="w-56" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">My Account</p>
+              <p className="text-sm font-medium leading-none">{user.displayName || "User"}</p>
               <p className="text-xs leading-none text-muted-foreground">
                 {user.email}
               </p>
@@ -64,14 +86,12 @@ export function UserProfile() {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           
-          {/* --- THIS IS THE CORRECTED MENU --- */}
           <DropdownMenuItem asChild>
             <Link href="/dashboard">Dashboard</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/profile">Profile Settings</Link>
           </DropdownMenuItem>
-          {/* --- END OF CORRECTION --- */}
 
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut}>
@@ -94,13 +114,24 @@ export function UserProfile() {
             Sign in to save your progress across devices.
           </DialogDescription>
         </DialogHeader>
-        <Auth
-          supabaseClient={supabase}
-          appearance={{ theme: ThemeSupa }}
-          theme={resolvedTheme === 'dark' ? 'dark' : 'default'}
-          providers={['github', 'google']}
-          socialLayout="horizontal"
-        />
+
+        <div className="flex flex-col gap-4 py-4">
+            <Button
+                variant="outline"
+                onClick={handleGoogleLogin}
+                disabled={isAuthLoading}
+                className="flex items-center gap-2 justify-center"
+            >
+                {isAuthLoading ? "Signing in..." : (
+                    <>
+                        <FcGoogle className="w-5 h-5" />
+                        Continue with Google
+                    </>
+                )}
+            </Button>
+            {/* Add more providers here if needed */}
+        </div>
+
       </DialogContent>
     </Dialog>
   )
