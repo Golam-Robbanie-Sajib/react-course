@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 import { CourseLayout } from "@/components/course-layout"
-import { CourseLanding } from "@/components/course-landing"
-import { getCourse, courses } from "@/lib/courses"
+import { ExamView } from "@/components/exam-view"
+import { getCourse, getExamQuestions, courses } from "@/lib/courses"
 import type { Course } from "@/lib/courses/types"
 
 function sanitizeCourse(c: Course): Course {
@@ -18,18 +18,24 @@ interface Props {
   params: Promise<{ course: string }>
 }
 
-export default async function CoursePage({ params }: Props) {
+export default async function ExamPage({ params }: Props) {
   const { course: slug } = await params
   const course = getCourse(slug)
-  if (!course) notFound()
+  if (!course || !course.hasFinalExam) notFound()
+  const questions = getExamQuestions(course.id)
+  if (!questions || questions.length === 0) notFound()
   const safeCourse = sanitizeCourse(course)
   return (
     <CourseLayout course={safeCourse}>
-      <CourseLanding course={safeCourse} />
+      <ExamView
+        courseId={safeCourse.id}
+        courseTitle={safeCourse.title.split(" in ")[0]}
+        questions={questions}
+      />
     </CourseLayout>
   )
 }
 
 export function generateStaticParams() {
-  return courses.map((c) => ({ course: c.slug }))
+  return courses.filter((c) => c.hasFinalExam).map((c) => ({ course: c.slug }))
 }

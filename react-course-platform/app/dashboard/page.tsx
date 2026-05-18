@@ -3,10 +3,11 @@
 import Link from "next/link"
 import { CourseLayout } from "@/components/course-layout"
 import { useProgress } from "@/hooks/use-progress"
+import { useQuizAttempts } from "@/hooks/use-quiz-attempts"
 import { courses } from "@/lib/courses"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { CheckCircle, Flame, Star, Trophy, ArrowRight } from "lucide-react"
+import { CheckCircle, Flame, Star, Trophy, ArrowRight, Brain } from "lucide-react"
 
 export default function DashboardPage() {
   return (
@@ -26,6 +27,8 @@ export default function DashboardPage() {
 
         <PlatformStats />
 
+        <ReviewQueueCard />
+
         <div className="space-y-6">
           {courses.map((c) => (
             <CourseProgressCard key={c.id} course={c} />
@@ -33,6 +36,51 @@ export default function DashboardPage() {
         </div>
       </div>
     </CourseLayout>
+  )
+}
+
+function ReviewQueueCard() {
+  const { dueQuestionIds, store } = useQuizAttempts()
+  const dueCount = dueQuestionIds().length
+  const totalSeen = Object.keys(store.byQuestion).length
+  if (totalSeen === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Brain className="h-4 w-4 text-purple-500" /> Spaced review
+          </CardTitle>
+          <CardDescription>
+            Answer any quiz question on a lesson and it gets added to your review queue —
+            missed ones come back tomorrow, correct ones reappear at growing intervals.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    )
+  }
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex justify-between items-start gap-3 flex-wrap">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Brain className="h-4 w-4 text-purple-500" /> Spaced review
+            </CardTitle>
+            <CardDescription>
+              {dueCount > 0
+                ? `${dueCount} question${dueCount === 1 ? "" : "s"} due for review.`
+                : `All caught up — ${totalSeen} questions tracked.`}
+            </CardDescription>
+          </div>
+          <Button asChild disabled={dueCount === 0}>
+            <Link href="/review">
+              {dueCount > 0 ? "Start review" : "Nothing due"}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      </CardHeader>
+    </Card>
   )
 }
 

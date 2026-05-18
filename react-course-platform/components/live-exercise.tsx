@@ -162,18 +162,48 @@ interface TestResult {
   error?: string
 }
 
-function runTests(userCode: string, tests: ExerciseTest[]): TestResult[] {
-  return tests.map((t) => {
-    try {
-      const body = `${userCode}\n;return (function(){ ${t.assertion} })();`
-      // eslint-disable-next-line no-new-func
-      const fn = new Function(body)
-      const passed = !!fn()
-      return { description: t.description, passed }
-    } catch (err: any) {
-      return { description: t.description, passed: false, error: err?.message || String(err) }
-    }
-  })
+async function runTests(
+  files: Record<string, { code: string }>,
+  activeFile: string,
+  tests: ExerciseTest[]
+): Promise<TestResult[]> {
+  // Find the best JS-ish file for "js" runner tests.
+  const jsFile = /\.(js|mjs|ts|tsx|jsx)$/i.test(activeFile)
+    ? activeFile
+    : Object.keys(files).find((n) => /\.(js|mjs)$/.test(n)) || activeFile
+  const htmlFile = /\.html?$/i.test(activeFile)
+    ? activeFile
+    : Object.keys(files).find((n) => /\.html?$/i.test(n)) || activeFile
+
+  return Promise.all(
+    tests.map(async (t): Promise<TestResult> => {
+      const runner = t.runner || "js"
+      try {
+        if (runner === "html") {
+          const target = t.targetFile || htmlFile
+          const html = files[target]?.code || ""
+          if (typeof DOMParser === "undefined") {
+            return { description: t.description, passed: false, error: "DOMParser unavailable" }
+          }
+          const doc = new DOMParser().parseFromString(html, "text/html")
+          // eslint-disable-next-line no-new-func
+          const fn = new Function("doc", `return (function(){ ${t.assertion} })();`)
+          const result = await Promise.resolve(fn(doc))
+          return { description: t.description, passed: !!result }
+        }
+        // Default "js" runner — also supports async assertions (Promise return).
+        const target = t.targetFile || jsFile
+        const code = files[target]?.code || ""
+        const body = `${code}\n;return (function(){ ${t.assertion} })();`
+        // eslint-disable-next-line no-new-func
+        const fn = new Function(body)
+        const result = await Promise.resolve(fn())
+        return { description: t.description, passed: !!result }
+      } catch (err: any) {
+        return { description: t.description, passed: false, error: err?.message || String(err) }
+      }
+    })
+  )
 }
 
 function TestRunner({
@@ -190,16 +220,16 @@ function TestRunner({
   const { sandpack } = useSandpack()
   const [results, setResults] = useState<TestResult[] | null>(null)
 
-  const handleRun = () => {
+  const [running, setRunning] = useState(false)
+  const handleRun = async () => {
     onAttempt?.()
-    const activeFile = sandpack.activeFile
-    const code = sandpack.files[activeFile]?.code || ""
-    let testTargetCode = code
-    if (!/\.(js|ts|jsx|tsx|mjs)$/i.test(activeFile)) {
-      const jsFile = Object.entries(sandpack.files).find(([name]) => /\.(js|mjs)$/.test(name))
-      if (jsFile) testTargetCode = jsFile[1].code
+    setRunning(true)
+    try {
+      const r = await runTests(sandpack.files, sandpack.activeFile, tests)
+      setResults(r)
+    } finally {
+      setRunning(false)
     }
-    setResults(runTests(testTargetCode, tests))
   }
 
   const passedCount = results?.filter((r) => r.passed).length ?? 0
@@ -230,8 +260,8 @@ function TestRunner({
           >
             <RefreshCw className="h-3.5 w-3.5 mr-2" /> Reset
           </Button>
-          <Button size="sm" onClick={handleRun}>
-            <Play className="h-3.5 w-3.5 mr-2" /> Run tests
+          <Button size="sm" onClick={handleRun} disabled={running}>
+            <Play className="h-3.5 w-3.5 mr-2" /> {running ? "Running…" : "Run tests"}
           </Button>
         </div>
       </div>

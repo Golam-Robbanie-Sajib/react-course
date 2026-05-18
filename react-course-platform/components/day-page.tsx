@@ -1,5 +1,6 @@
 "use client"
 
+import type React from "react"
 import { useState, useEffect } from "react"
 import { ExternalLink, BookOpen, Target, Lightbulb, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -19,9 +20,12 @@ import { usePrefetchDay } from "@/hooks/use-prefetch-day"
 interface DayPageProps {
   course: Course
   day: CourseDay
+  /** Pre-rendered theory body. Provided by the server page so MDX components
+   *  (which can't cross the server→client boundary) render correctly. */
+  theoryNode?: React.ReactNode
 }
 
-export function DayPage({ course, day }: DayPageProps) {
+export function DayPage({ course, day, theoryNode }: DayPageProps) {
   const { toggleDayCompletion, isCompleted, isLoading } = useProgress(course.id)
   const [isClient, setIsClient] = useState(false)
   const dayCompleted = isCompleted(day.day)
@@ -120,10 +124,12 @@ export function DayPage({ course, day }: DayPageProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div
-            className="prose prose-gray dark:prose-invert max-w-none"
-            dangerouslySetInnerHTML={{ __html: day.theory }}
-          />
+          <div className="prose prose-gray dark:prose-invert max-w-none">
+            {theoryNode ??
+              (typeof day.theory === "string" ? (
+                <div dangerouslySetInnerHTML={{ __html: day.theory }} />
+              ) : null)}
+          </div>
         </CardContent>
       </Card>
 
@@ -179,7 +185,7 @@ export function DayPage({ course, day }: DayPageProps) {
         </Card>
       )}
 
-      <QuizSection questions={day.quiz} />
+      <QuizSection questions={day.quiz} courseId={course.id} day={day.day} />
 
       <div className="flex justify-between items-center pt-8 border-t border-gray-200 dark:border-gray-700">
         <div>

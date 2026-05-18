@@ -1,5 +1,7 @@
 // Shared types for all courses on the platform.
 
+import type * as React from "react"
+
 export interface Resource {
   name: string
   url: string
@@ -14,9 +16,17 @@ export type SandboxTemplate = "vanilla" | "static" | "react" | "react-ts"
 
 export interface ExerciseTest {
   description: string
-  // Body of a function that returns true when the user's code is correct.
-  // Receives `code` (string) plus any helpers exposed by the runner.
+  /**
+   * Body of a function that must return a truthy value when the user's
+   * solution is correct. The available globals depend on `runner`:
+   *  - "js" (default): user code is concatenated above the assertion, so
+   *    any function/variable defined in the editor is in scope.
+   *  - "html": parse the active HTML file and expose `doc: Document`.
+   */
   assertion: string
+  runner?: "js" | "html"
+  /** Optional filename to feed into the runner. Defaults to the active file. */
+  targetFile?: string
 }
 
 export interface Exercise {
@@ -45,7 +55,12 @@ export interface CourseDay {
   title: string
   topics: string[]
   resources: Resource[]
-  theory: string
+  /**
+   * The lesson body. Either an HTML string (rendered with
+   * dangerouslySetInnerHTML) or a React component — typically an MDX page.
+   * MDX is preferred for new content; HTML strings are kept for back-compat.
+   */
+  theory: string | React.ComponentType
   exercises: Exercise[]
   quiz?: QuizQuestion[]
 }

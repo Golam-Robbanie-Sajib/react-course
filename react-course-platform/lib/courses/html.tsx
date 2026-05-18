@@ -1,4 +1,5 @@
 import type { Course, CourseDay, Phase } from "./types"
+import Day1Theory from "./html/day1-theory.mdx"
 
 const phases: Phase[] = [
   {
@@ -40,7 +41,7 @@ const days: CourseDay[] = [
     resources: [
       { name: "MDN: Getting started with HTML", url: "https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/Getting_started" },
     ],
-    theory: `<strong>HTML (HyperText Markup Language)</strong> is the skeleton of every web page. Browsers read HTML and turn it into the visual page you see.<br/><br/>An HTML document is made of <strong>elements</strong>. An element usually looks like: <code>&lt;tagname&gt;content&lt;/tagname&gt;</code>. The opening and closing tags wrap the content, and the browser uses the tag name to decide how to render it.<br/><br/>A minimum HTML5 document needs five things:<ul><li><code>&lt;!DOCTYPE html&gt;</code> — tells the browser to use modern (HTML5) rules.</li><li><code>&lt;html&gt;</code> — the root element.</li><li><code>&lt;head&gt;</code> — invisible metadata: title, charset, links to CSS, etc.</li><li><code>&lt;body&gt;</code> — visible content.</li><li><code>&lt;title&gt;</code> — text shown in the browser tab.</li></ul><br/>Tip: HTML is forgiving of mistakes (the browser tries to "guess" what you meant), but cleaner HTML makes pages more accessible and easier to maintain. Throughout this course you'll learn the modern, semantic way to write it.`,
+    theory: Day1Theory,
     exercises: [
       {
         title: "Your first HTML page",
@@ -57,6 +58,18 @@ const days: CourseDay[] = [
 -->
 `,
         },
+        tests: [
+          {
+            description: "Page has a <title> reading 'My First Page'",
+            runner: "html",
+            assertion: `return doc.title.trim() === 'My First Page';`,
+          },
+          {
+            description: "Body contains an <h1> with 'Hello, web!'",
+            runner: "html",
+            assertion: `const h = doc.querySelector('h1'); return !!h && h.textContent.trim() === 'Hello, web!';`,
+          },
+        ],
         hints: [
           "Start with <!DOCTYPE html> on line 1, then wrap everything else in <html>...</html>.",
           "Put <title>My First Page</title> inside <head>. Put <h1>Hello, web!</h1> inside <body>.",
@@ -124,6 +137,23 @@ const days: CourseDay[] = [
 </html>
 `,
         },
+        tests: [
+          {
+            description: "Exactly one <h1>",
+            runner: "html",
+            assertion: `return doc.querySelectorAll('h1').length === 1;`,
+          },
+          {
+            description: "At least two <h2> headings",
+            runner: "html",
+            assertion: `return doc.querySelectorAll('h2').length >= 2;`,
+          },
+          {
+            description: "At least two <p> paragraphs",
+            runner: "html",
+            assertion: `return doc.querySelectorAll('p').length >= 2;`,
+          },
+        ],
         hints: [
           "Use exactly one <h1>.",
           "Each <h2> should be followed by a <p> containing some prose.",
@@ -230,6 +260,23 @@ const days: CourseDay[] = [
 </body></html>
 `,
         },
+        tests: [
+          {
+            description: "Has at least 3 <a> elements",
+            runner: "html",
+            assertion: `return doc.querySelectorAll('a').length >= 3;`,
+          },
+          {
+            description: "Has an in-page link to #about",
+            runner: "html",
+            assertion: `return !!doc.querySelector('a[href=\"#about\"]');`,
+          },
+          {
+            description: "Has a mailto link",
+            runner: "html",
+            assertion: `return !!doc.querySelector('a[href^=\"mailto:\"]');`,
+          },
+        ],
         hints: [
           "An in-page link uses href='#about' and the target needs id='about'.",
           "A mail link uses href='mailto:hello@example.com'.",
@@ -273,6 +320,18 @@ const days: CourseDay[] = [
 </body></html>
 `,
         },
+        tests: [
+          {
+            description: "Has a <figure> containing an <img> and a <figcaption>",
+            runner: "html",
+            assertion: `const f = doc.querySelector('figure'); return !!f && !!f.querySelector('img') && !!f.querySelector('figcaption');`,
+          },
+          {
+            description: "The <img> has a non-empty alt attribute",
+            runner: "html",
+            assertion: `const img = doc.querySelector('img'); return !!img && (img.getAttribute('alt') || '').trim().length > 0;`,
+          },
+        ],
         hints: [
           "You can use https://picsum.photos/300/200 as a placeholder image.",
           "alt should describe what the image shows, not the word 'image'.",
@@ -323,6 +382,18 @@ const days: CourseDay[] = [
 </body></html>
 `,
         },
+        tests: [
+          {
+            description: "Has at least one <ul> with 3 items",
+            runner: "html",
+            assertion: `return Array.from(doc.querySelectorAll('ul')).some(ul => ul.children.length >= 3);`,
+          },
+          {
+            description: "Has at least one <ol> with 3 items",
+            runner: "html",
+            assertion: `return Array.from(doc.querySelectorAll('ol')).some(ol => ol.children.length >= 3);`,
+          },
+        ],
         hints: ["Each item goes in its own <li>."],
         solution: {
           code: `<h2>Ingredients</h2>
@@ -374,6 +445,23 @@ const days: CourseDay[] = [
 </html>
 `,
         },
+        tests: [
+          {
+            description: "Has <header>, <nav>, <main>, and <footer>",
+            runner: "html",
+            assertion: `return ['header','nav','main','footer'].every(t => !!doc.querySelector(t));`,
+          },
+          {
+            description: "<nav> has at least 3 links",
+            runner: "html",
+            assertion: `return (doc.querySelector('nav')?.querySelectorAll('a').length || 0) >= 3;`,
+          },
+          {
+            description: "<main> contains an <article>",
+            runner: "html",
+            assertion: `return !!doc.querySelector('main article');`,
+          },
+        ],
         hints: [
           "Place <nav> either inside <header> or right after it — both are valid.",
           "The article should have its own <h2>.",
@@ -429,6 +517,23 @@ const days: CourseDay[] = [
 </body></html>
 `,
         },
+        tests: [
+          {
+            description: "Has a <table> with a <caption>, <thead>, and <tbody>",
+            runner: "html",
+            assertion: `const t = doc.querySelector('table'); return !!t && !!t.querySelector('caption') && !!t.querySelector('thead') && !!t.querySelector('tbody');`,
+          },
+          {
+            description: "<thead> has at least 2 <th> cells",
+            runner: "html",
+            assertion: `return (doc.querySelector('thead')?.querySelectorAll('th').length || 0) >= 2;`,
+          },
+          {
+            description: "<tbody> has at least 2 data rows",
+            runner: "html",
+            assertion: `return (doc.querySelector('tbody')?.querySelectorAll('tr').length || 0) >= 2;`,
+          },
+        ],
         hints: ["Add scope=\"col\" to your <th> cells in the header."],
         solution: {
           code: `<table>
@@ -523,6 +628,23 @@ const days: CourseDay[] = [
 </body></html>
 `,
         },
+        tests: [
+          {
+            description: "Has a button with id 'submit-btn'",
+            runner: "html",
+            assertion: `return !!doc.querySelector('button#submit-btn');`,
+          },
+          {
+            description: "The button has both 'btn' and 'primary' classes",
+            runner: "html",
+            assertion: `const b = doc.querySelector('button#submit-btn'); return !!b && b.classList.contains('btn') && b.classList.contains('primary');`,
+          },
+          {
+            description: "Has a data-* attribute set on the button",
+            runner: "html",
+            assertion: `const b = doc.querySelector('button#submit-btn'); return !!b && Object.keys(b.dataset).length > 0;`,
+          },
+        ],
         hints: ["Multiple classes go in one attribute: class=\"btn primary\"."],
         solution: {
           code: `<button id="submit-btn" class="btn primary" data-action="submit">Save</button>`,
@@ -564,6 +686,23 @@ const days: CourseDay[] = [
 </body></html>
 `,
         },
+        tests: [
+          {
+            description: "Has a <form> with email and password inputs",
+            runner: "html",
+            assertion: `return !!doc.querySelector('form input[type=\"email\"]') && !!doc.querySelector('form input[type=\"password\"]');`,
+          },
+          {
+            description: "Has at least 2 <label> elements",
+            runner: "html",
+            assertion: `return doc.querySelectorAll('form label').length >= 2;`,
+          },
+          {
+            description: "Has a submit button",
+            runner: "html",
+            assertion: `return !!doc.querySelector('form button, form input[type=\"submit\"]');`,
+          },
+        ],
         hints: ["Use <input type=\"email\"> and <input type=\"password\">."],
         solution: {
           code: `<form action="/login" method="post">
@@ -616,6 +755,23 @@ const days: CourseDay[] = [
 </body></html>
 `,
         },
+        tests: [
+          {
+            description: "Email input is required",
+            runner: "html",
+            assertion: `const e = doc.querySelector('input[type=\"email\"]'); return !!e && e.hasAttribute('required');`,
+          },
+          {
+            description: "Password input requires at least 8 characters",
+            runner: "html",
+            assertion: `const p = doc.querySelector('input[type=\"password\"]'); return !!p && Number(p.getAttribute('minlength')) >= 8;`,
+          },
+          {
+            description: "Number input has min=13 and max=120",
+            runner: "html",
+            assertion: `const n = doc.querySelector('input[type=\"number\"]'); return !!n && Number(n.getAttribute('min')) === 13 && Number(n.getAttribute('max')) === 120;`,
+          },
+        ],
         hints: ["required is a boolean attribute — just include it without a value."],
         solution: {
           code: `<form>
@@ -660,6 +816,28 @@ const days: CourseDay[] = [
 </body></html>
 `,
         },
+        tests: [
+          {
+            description: "Has a <fieldset> with a <legend>",
+            runner: "html",
+            assertion: `const fs = doc.querySelector('fieldset'); return !!fs && !!fs.querySelector('legend');`,
+          },
+          {
+            description: "Has 3 radio buttons with the same name",
+            runner: "html",
+            assertion: `const radios = doc.querySelectorAll('input[type=\"radio\"]'); if (radios.length < 3) return false; const names = new Set(Array.from(radios).map(r => r.name)); return names.size === 1;`,
+          },
+          {
+            description: "Has a <select> with 3+ <option>s",
+            runner: "html",
+            assertion: `return (doc.querySelector('select')?.querySelectorAll('option').length || 0) >= 3;`,
+          },
+          {
+            description: "Has a <textarea>",
+            runner: "html",
+            assertion: `return !!doc.querySelector('textarea');`,
+          },
+        ],
         hints: [
           "All radios in one group must share the same `name`.",
           "Wrap radios in <fieldset><legend>...</legend>...</fieldset>.",
@@ -768,6 +946,33 @@ const days: CourseDay[] = [
 </html>
 `,
         },
+        tests: [
+          {
+            description: "Has <meta charset>",
+            runner: "html",
+            assertion: `return !!doc.querySelector('meta[charset]');`,
+          },
+          {
+            description: "Has the viewport meta tag",
+            runner: "html",
+            assertion: `return !!doc.querySelector('meta[name=\"viewport\"]');`,
+          },
+          {
+            description: "Has a non-empty <title>",
+            runner: "html",
+            assertion: `return doc.title.trim().length > 0;`,
+          },
+          {
+            description: "Has a meta description",
+            runner: "html",
+            assertion: `const m = doc.querySelector('meta[name=\"description\"]'); return !!m && (m.getAttribute('content') || '').length > 0;`,
+          },
+          {
+            description: "Has an og:image meta tag",
+            runner: "html",
+            assertion: `return !!doc.querySelector('meta[property=\"og:image\"]');`,
+          },
+        ],
         hints: ["The viewport meta is the one that makes mobile work."],
         solution: {
           code: `<head>
@@ -917,6 +1122,33 @@ const days: CourseDay[] = [
 </html>
 `,
         },
+        tests: [
+          {
+            description: "Page uses semantic header/nav/main/footer",
+            runner: "html",
+            assertion: `return ['header','nav','main','footer'].every(t => !!doc.querySelector(t));`,
+          },
+          {
+            description: "Page has exactly one <h1>",
+            runner: "html",
+            assertion: `return doc.querySelectorAll('h1').length === 1;`,
+          },
+          {
+            description: "<main> contains #about, #projects, and #contact sections",
+            runner: "html",
+            assertion: `return ['#about','#projects','#contact'].every(s => !!doc.querySelector('main ' + s));`,
+          },
+          {
+            description: "Projects section has a list with 3+ items",
+            runner: "html",
+            assertion: `return (doc.querySelector('#projects ul, #projects ol')?.querySelectorAll('li').length || 0) >= 3;`,
+          },
+          {
+            description: "Contact section has a labelled form with a submit button",
+            runner: "html",
+            assertion: `const f = doc.querySelector('#contact form'); return !!f && f.querySelectorAll('label').length >= 2 && !!f.querySelector('button, input[type=\"submit\"]');`,
+          },
+        ],
         hints: [
           "Reuse what you learned about semantic elements, labels, and meta tags.",
           "Sections can have ids that match nav links (#about, #projects, #contact).",
@@ -992,4 +1224,5 @@ export const htmlCourse: Course = {
   coverGradient: "from-orange-500 to-pink-600",
   phases,
   days,
+  hasFinalExam: true,
 }

@@ -39,11 +39,12 @@ export function SearchDialog({ course }: SearchDialogProps) {
     const q = query.toLowerCase()
     const matched = corpus.filter(({ day }) => {
       const exerciseHay = day.exercises.map((e) => `${e.title} ${e.description}`).join(" ")
+      const theoryText = typeof day.theory === "string" ? day.theory : ""
       return (
         day.title.toLowerCase().includes(q) ||
         day.phase.toLowerCase().includes(q) ||
         day.topics.some((topic) => topic.toLowerCase().includes(q)) ||
-        day.theory.toLowerCase().includes(q) ||
+        theoryText.toLowerCase().includes(q) ||
         exerciseHay.toLowerCase().includes(q)
       )
     })

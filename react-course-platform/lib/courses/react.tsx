@@ -318,6 +318,13 @@ console.log(generatePrimes(20));
 // take the input value and append a new <li> to #todo-list.
 `,
         },
+        tests: [
+          {
+            description: "HTML has the required #todo-input, #add-btn and #todo-list",
+            runner: "html",
+            assertion: `return !!doc.querySelector('#todo-input') && !!doc.querySelector('#add-btn') && !!doc.querySelector('#todo-list');`,
+          },
+        ],
         hints: [
           "Use `document.getElementById('add-btn').addEventListener('click', ...)`.",
           "Use `document.createElement('li')` and `appendChild` to add a new item.",
@@ -350,20 +357,35 @@ console.log(generatePrimes(20));
     exercises: [
       {
         title: "Fetch and Display",
-        description: "Use `fetch` to load `https://jsonplaceholder.typicode.com/users/1` and log the user's name and city.",
+        description:
+          "Write `loadUserCity(id)` that fetches `https://jsonplaceholder.typicode.com/users/<id>` and returns a Promise resolving to a string `\"<name> lives in <city>\"`.",
         template: "vanilla",
         activeFile: "/index.js",
         starter: {
-          "/index.js": `// TODO: fetch the user and print their name and address.city
+          "/index.js": `function loadUserCity(id) {
+  // TODO: fetch the user and resolve to "<name> lives in <city>"
+}
+
+loadUserCity(1).then(console.log);
 `,
         },
+        tests: [
+          {
+            description: "Returns a Promise",
+            assertion: `return loadUserCity(1) instanceof Promise;`,
+          },
+          {
+            description: "Resolves to a string mentioning a city",
+            assertion: `return loadUserCity(1).then(s => typeof s === 'string' && /lives in /.test(s));`,
+          },
+        ],
         hints: [
           "Call `.json()` on the Response to parse the body.",
           "Chain `.then()` calls or use `async/await` (Day 10).",
         ],
         solution: {
-          code: `fetch('https://jsonplaceholder.typicode.com/users/1')\n  .then(r => r.json())\n  .then(u => console.log(u.name, u.address.city))\n  .catch(err => console.error(err));`,
-          explanation: "fetch returns a Promise. The first `.then` parses JSON, the second consumes the parsed object.",
+          code: `function loadUserCity(id) {\n  return fetch(\`https://jsonplaceholder.typicode.com/users/\${id}\`)\n    .then(r => r.json())\n    .then(u => \`\${u.name} lives in \${u.address.city}\`);\n}\n\nloadUserCity(1).then(console.log);`,
+          explanation: "fetch returns a Promise. The first `.then` parses JSON, the second formats the string. Returning the chain from the function lets callers await it.",
         },
       },
     ],
@@ -450,6 +472,21 @@ const log = debounce((msg) => console.log(msg), 300);
 log('a'); log('b'); log('c'); // only 'c' should log
 `,
         },
+        tests: [
+          {
+            description: "debounce returns a function",
+            assertion: `return typeof debounce(()=>{}, 100) === 'function';`,
+          },
+          {
+            description: "Only the last call within the wait window runs",
+            assertion: `return new Promise(resolve => {
+              const calls = [];
+              const fn = debounce((x) => calls.push(x), 50);
+              fn('a'); fn('b'); fn('c');
+              setTimeout(() => resolve(calls.length === 1 && calls[0] === 'c'), 120);
+            });`,
+          },
+        ],
         hints: [
           "Declare `let timeout;` outside the returned function so it persists across calls.",
           "Each call should `clearTimeout(timeout)` then `setTimeout` again.",
@@ -492,6 +529,20 @@ class Car extends Vehicle {
 console.log(new Car('Toyota', 'Camry', 4).getInfo());
 `,
         },
+        tests: [
+          {
+            description: "Car instance has make, model, and numDoors",
+            assertion: `const c = new Car('Toyota', 'Camry', 4); return c.make === 'Toyota' && c.model === 'Camry' && c.numDoors === 4;`,
+          },
+          {
+            description: "Car inherits Vehicle.getInfo() and returns 'Toyota Camry'",
+            assertion: `return new Car('Toyota', 'Camry', 4).getInfo() === 'Toyota Camry';`,
+          },
+          {
+            description: "Car is an instance of Vehicle",
+            assertion: `return new Car('a','b',2) instanceof Vehicle;`,
+          },
+        ],
         hints: ["Call `super(make, model)` first in `Car`'s constructor."],
         solution: {
           code: `class Vehicle {\n  constructor(make, model) { this.make = make; this.model = model; }\n  getInfo() { return \`\${this.make} \${this.model}\`; }\n}\nclass Car extends Vehicle {\n  constructor(make, model, numDoors) { super(make, model); this.numDoors = numDoors; }\n}`,
@@ -527,6 +578,20 @@ console.log(new Car('Toyota', 'Camry', 4).getInfo());
 }
 `,
         },
+        tests: [
+          {
+            description: "Resolves on first successful attempt (1 fetch call)",
+            assertion: `let calls = 0;
+              globalThis.fetch = () => { calls++; return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ ok: true }) }); };
+              return fetchWithRetry('x', 3).then(v => calls === 1 && v && v.ok === true);`,
+          },
+          {
+            description: "Retries on failure up to the limit",
+            assertion: `let calls = 0;
+              globalThis.fetch = () => { calls++; if (calls < 3) return Promise.reject(new Error('boom')); return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ ok: true }) }); };
+              return fetchWithRetry('x', 3).then(v => calls === 3 && v && v.ok === true);`,
+          },
+        ],
         hints: ["Loop with try/catch; await `new Promise(r => setTimeout(r, 500))` between attempts."],
         solution: {
           code: `async function fetchWithRetry(url, retries = 3) {\n  for (let i = 0; i < retries; i++) {\n    try {\n      const r = await fetch(url);\n      if (!r.ok) throw new Error(r.status);\n      return await r.json();\n    } catch (e) {\n      if (i === retries - 1) throw e;\n      await new Promise(res => setTimeout(res, 500));\n    }\n  }\n}`,
@@ -568,6 +633,13 @@ console.log(new Car('Toyota', 'Camry', 4).getInfo());
           "/script.js": `// TODO: single listener on #list that toggles 'active' on the clicked <li>
 `,
         },
+        tests: [
+          {
+            description: "HTML has a #list element with at least 3 <li> children",
+            runner: "html",
+            assertion: `const ul = doc.querySelector('#list'); return !!ul && ul.querySelectorAll('li').length >= 3;`,
+          },
+        ],
         hints: [
           "Check `event.target.tagName === 'LI'` before doing anything.",
           "Use `classList.toggle('active')`.",

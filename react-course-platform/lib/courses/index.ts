@@ -1,8 +1,19 @@
-import type { Course, Phase } from "./types"
+import type { Course, Phase, QuizQuestion } from "./types"
 import { reactCourse } from "./react"
 import { htmlCourse } from "./html"
+import { finalExamQuestions as reactExamQuestions } from "@/lib/exam-data"
+import { htmlFinalExamQuestions } from "./html-exam-data"
 
 export const courses: Course[] = [htmlCourse, reactCourse]
+
+export const examQuestions: Record<string, QuizQuestion[]> = {
+  react: reactExamQuestions,
+  html: htmlFinalExamQuestions,
+}
+
+export function getExamQuestions(courseId: string): QuizQuestion[] | null {
+  return examQuestions[courseId] || null
+}
 
 export function getCourse(slug: string): Course | undefined {
   return courses.find((c) => c.slug === slug)

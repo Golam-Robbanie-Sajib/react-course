@@ -37,7 +37,7 @@ export function CourseLanding({ course }: Props) {
           </Button>
           {course.hasFinalExam && (
             <Button size="lg" variant="outline" asChild>
-              <Link href={`/exam`}>Take the final exam</Link>
+              <Link href={`/courses/${course.slug}/exam`}>Take the final exam</Link>
             </Button>
           )}
         </div>
