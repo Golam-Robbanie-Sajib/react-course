@@ -1,38 +1,55 @@
-// file: components/search-dialog.tsx
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Search, BookOpen, Hash } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { courseDays, phases } from "@/lib/course-data"
+import { courses, getPhaseForDay } from "@/lib/courses"
+import type { Course, CourseDay } from "@/lib/courses/types"
 import Link from "next/link"
 
-export function SearchDialog() {
+interface SearchDialogProps {
+  course?: Course
+}
+
+interface Hit {
+  course: Course
+  day: CourseDay
+}
+
+export function SearchDialog({ course }: SearchDialogProps) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState("")
-  const [results, setResults] = useState<typeof courseDays>([])
+  const [results, setResults] = useState<Hit[]>([])
+
+  const corpus: Hit[] = useMemo(() => {
+    const list = course ? [course] : courses
+    const hits: Hit[] = []
+    for (const c of list) for (const d of c.days) hits.push({ course: c, day: d })
+    return hits
+  }, [course])
 
   useEffect(() => {
     if (!query.trim()) {
       setResults([])
       return
     }
-
-    const searchResults = courseDays.filter((day) => {
-      const searchText = query.toLowerCase()
+    const q = query.toLowerCase()
+    const matched = corpus.filter(({ day }) => {
+      const exerciseHay = day.exercises.map((e) => `${e.title} ${e.description}`).join(" ")
+      const theoryText = typeof day.theory === "string" ? day.theory : ""
       return (
-        day.title.toLowerCase().includes(searchText) ||
-        day.phase.toLowerCase().includes(searchText) ||
-        day.topics.some((topic) => topic.toLowerCase().includes(searchText)) ||
-        day.theory.toLowerCase().includes(searchText)
+        day.title.toLowerCase().includes(q) ||
+        day.phase.toLowerCase().includes(q) ||
+        day.topics.some((topic) => topic.toLowerCase().includes(q)) ||
+        theoryText.toLowerCase().includes(q) ||
+        exerciseHay.toLowerCase().includes(q)
       )
     })
-
-    setResults(searchResults.slice(0, 8)) // Limit to 8 results
-  }, [query])
+    setResults(matched.slice(0, 10))
+  }, [query, corpus])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -41,18 +58,9 @@ export function SearchDialog() {
         setOpen(true)
       }
     }
-
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [])
-
-  const getPhaseForDay = (day: number) => {
-    if (day <= 5) return phases[0]
-    if (day <= 10) return phases[1]
-    if (day <= 15) return phases[2]
-    if (day <= 20) return phases[3]
-    return phases[4]
-  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -67,11 +75,11 @@ export function SearchDialog() {
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Search Course Content</DialogTitle>
+          <DialogTitle>Search {course ? `the ${course.title.split(" in ")[0]} course` : "all courses"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <Input
-            placeholder="Search for lessons, topics, or concepts..."
+            placeholder="Search for lessons, topics, or exercises..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full"
@@ -80,12 +88,12 @@ export function SearchDialog() {
 
           {results.length > 0 && (
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {results.map((day) => {
-                const phase = getPhaseForDay(day.day)
+              {results.map((hit) => {
+                const phase = getPhaseForDay(hit.course, hit.day.day)
                 return (
                   <Link
-                    key={day.day}
-                    href={`/day/${day.day}`}
+                    key={`${hit.course.id}-${hit.day.day}`}
+                    href={`/courses/${hit.course.slug}/day/${hit.day.day}`}
                     onClick={() => setOpen(false)}
                     className="block p-4 rounded-lg border hover:bg-muted/50 transition-colors"
                   >
@@ -94,24 +102,24 @@ export function SearchDialog() {
                         <div className="flex items-center space-x-2">
                           <BookOpen className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">
-                            Day {day.day}: {day.title}
+                            {hit.course.title.split(" in ")[0]} · Day {hit.day.day}: {hit.day.title}
                           </span>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <Badge
-                            variant="outline"
-                            className={`bg-gradient-to-r ${phase.gradient} text-white border-0 text-xs`}
-                          >
-                            {day.phase}
-                          </Badge>
-                          <div className="flex flex-wrap gap-1">
-                            {day.topics.slice(0, 3).map((topic) => (
-                              <Badge key={topic} variant="secondary" className="text-xs">
-                                <Hash className="h-3 w-3 mr-1" />
-                                {topic}
-                              </Badge>
-                            ))}
-                          </div>
+                        <div className="flex items-center space-x-2 flex-wrap gap-1">
+                          {phase && (
+                            <Badge
+                              variant="outline"
+                              className={`bg-gradient-to-r ${phase.gradient} text-white border-0 text-xs`}
+                            >
+                              {hit.day.phase}
+                            </Badge>
+                          )}
+                          {hit.day.topics.slice(0, 3).map((topic) => (
+                            <Badge key={topic} variant="secondary" className="text-xs">
+                              <Hash className="h-3 w-3 mr-1" />
+                              {topic}
+                            </Badge>
+                          ))}
                         </div>
                       </div>
                     </div>

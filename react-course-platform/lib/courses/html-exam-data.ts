@@ -1,0 +1,261 @@
+import type { QuizQuestion } from "./types"
+
+export const htmlFinalExamQuestions: QuizQuestion[] = [
+  {
+    question: "What does the <!DOCTYPE html> declaration do?",
+    options: [
+      "Declares the document's language",
+      "Switches the browser into modern HTML5 standards mode",
+      "Imports an external stylesheet",
+      "Defines a comment",
+    ],
+    correctAnswerIndex: 1,
+    explanation: "The doctype tells the browser to render the page using modern (HTML5) standards instead of legacy 'quirks' mode.",
+  },
+  {
+    question: "Which element wraps all the visible content of a page?",
+    options: ["<head>", "<main>", "<body>", "<section>"],
+    correctAnswerIndex: 2,
+    explanation: "<body> contains everything the user sees. <head> contains metadata.",
+  },
+  {
+    question: "How many <h1> elements should a typical page have?",
+    options: ["As many as needed", "Exactly one", "At least three", "Zero — h2 is preferred"],
+    correctAnswerIndex: 1,
+    explanation: "One h1 (the page title) is the standard and most accessible pattern.",
+  },
+  {
+    question: "What happens to runs of whitespace in your HTML source when the page renders?",
+    options: [
+      "They are preserved exactly",
+      "They collapse to a single space",
+      "They cause a parse error",
+      "They become <br> tags",
+    ],
+    correctAnswerIndex: 1,
+    explanation: "HTML collapses any consecutive whitespace into a single space at render time.",
+  },
+  {
+    question: "Which tag carries semantic 'importance' rather than just visual bold?",
+    options: ["<b>", "<bold>", "<strong>", "<i>"],
+    correctAnswerIndex: 2,
+    explanation: "<strong> signals importance to assistive tech; <b> is purely visual.",
+  },
+  {
+    question: 'When you use target="_blank" on a link, which rel value should you add for safety?',
+    options: ["nofollow", "external", "noopener noreferrer", "alternate"],
+    correctAnswerIndex: 2,
+    explanation: "noopener noreferrer prevents the opened tab from accessing window.opener and leaking the referrer.",
+  },
+  {
+    question: "Which href pattern jumps to a specific element on the same page?",
+    options: ["/about", "page.html#about", "#about", "javascript:about()"],
+    correctAnswerIndex: 2,
+    explanation: "A hash-only href like `#about` scrolls to the element with that id on the current page.",
+  },
+  {
+    question: 'When is `alt=""` (empty alt) appropriate on an <img>?',
+    options: [
+      "Never — every image needs descriptive alt",
+      "When the image is purely decorative",
+      "When the image is small",
+      "Only when alt is unknown",
+    ],
+    correctAnswerIndex: 1,
+    explanation: "Empty alt tells screen readers to skip a decorative image. Omitting the attribute entirely is wrong.",
+  },
+  {
+    question: "Which element pairs an image with a caption?",
+    options: ["<img> + <p>", "<figure> + <figcaption>", "<picture> + <legend>", "<caption> + <img>"],
+    correctAnswerIndex: 1,
+    explanation: "<figure>/<figcaption> link an image to its caption semantically.",
+  },
+  {
+    question: "Which list type best represents a set of ordered cooking steps?",
+    options: ["<ul>", "<ol>", "<dl>", "<menu>"],
+    correctAnswerIndex: 1,
+    explanation: "Ordered lists (<ol>) communicate that the sequence matters.",
+  },
+  {
+    question: "How many <main> elements should a typical page have?",
+    options: ["As many as needed", "One", "Zero — it's optional", "One per section"],
+    correctAnswerIndex: 1,
+    explanation: "One <main>, marking the primary content area.",
+  },
+  {
+    question: "Which element best represents a self-contained piece of content like a blog post?",
+    options: ["<section>", "<article>", "<aside>", "<div>"],
+    correctAnswerIndex: 1,
+    explanation: "<article> is for content that makes sense on its own.",
+  },
+  {
+    question: "What does the `scope` attribute on a <th> communicate?",
+    options: [
+      "The visual color of the cell",
+      "Whether the header applies to a row or a column",
+      "The data type of the column",
+      "The width of the column",
+    ],
+    correctAnswerIndex: 1,
+    explanation: 'scope="col" or scope="row" tells assistive tech how the header relates to data cells.',
+  },
+  {
+    question: "Which element is inline by default?",
+    options: ["<p>", "<div>", "<span>", "<section>"],
+    correctAnswerIndex: 2,
+    explanation: "<span> is the canonical inline generic container; <div> is block.",
+  },
+  {
+    question: "Which statement about `id` is correct?",
+    options: [
+      "An id can be repeated on multiple elements",
+      "An id must be unique within the document",
+      "Ids are required on every element",
+      "Ids work the same as classes",
+    ],
+    correctAnswerIndex: 1,
+    explanation: "Each id identifies a single element on the page.",
+  },
+  {
+    question: "Why associate a <label> with an <input>?",
+    options: [
+      "It changes the visual style",
+      "It's required for the form to submit",
+      "It improves accessibility and lets users click the label to focus the input",
+      "It's purely decorative",
+    ],
+    correctAnswerIndex: 2,
+    explanation: "Labels announce their input to screen readers and increase the click target.",
+  },
+  {
+    question: "Which attribute restricts a text input to values matching a regex?",
+    options: ["regex", "match", "pattern", "validate"],
+    correctAnswerIndex: 2,
+    explanation: 'pattern="..." applies a regular expression to the input value.',
+  },
+  {
+    question: "What makes a group of radio buttons mutually exclusive?",
+    options: [
+      "Wrapping them in a div",
+      "They share the same `name` attribute",
+      "They share the same `id`",
+      "They use type='exclusive'",
+    ],
+    correctAnswerIndex: 1,
+    explanation: "Radios with the same name behave as one choice group.",
+  },
+  {
+    question: "Which attribute on <video> shows the native play/pause UI?",
+    options: ["autoplay", "controls", "muted", "preview"],
+    correctAnswerIndex: 1,
+    explanation: "Without `controls`, the video has no visible UI.",
+  },
+  {
+    question: "Which <meta> tag makes sites render correctly on mobile?",
+    options: ["meta description", "meta charset", "meta viewport", "meta keywords"],
+    correctAnswerIndex: 2,
+    explanation: "Without the viewport meta, mobile browsers render at a desktop width and zoom out.",
+  },
+  {
+    question: "What does `meta charset=\"utf-8\"` do?",
+    options: [
+      "Sets the document language",
+      "Tells the browser to decode the bytes as UTF-8",
+      "Loads a font",
+      "Enables emoji support only",
+    ],
+    correctAnswerIndex: 1,
+    explanation: "It specifies the character encoding so the browser can decode text correctly.",
+  },
+  {
+    question: "When is using ARIA most appropriate?",
+    options: [
+      "Always — it improves every element",
+      "Only when no native HTML element does the job",
+      "Only for forms",
+      "Never — semantic HTML is enough by itself",
+    ],
+    correctAnswerIndex: 1,
+    explanation: "Native HTML first; ARIA as a last resort. Bad ARIA harms accessibility.",
+  },
+  {
+    question: "How would you give an icon-only button an accessible name 'Close dialog'?",
+    options: [
+      "Use the title attribute",
+      "Use aria-label on the button",
+      "Set placeholder on the button",
+      "Wrap the icon in a <strong> element",
+    ],
+    correctAnswerIndex: 1,
+    explanation: "aria-label gives elements without visible text an accessible name.",
+  },
+  {
+    question: "What does the `defer` attribute on a <script> do?",
+    options: [
+      "Cancels the script entirely",
+      "Downloads the script in parallel and runs it after the DOM is parsed",
+      "Loads the script before any HTML",
+      "Has no effect on loading order",
+    ],
+    correctAnswerIndex: 1,
+    explanation: "defer is the modern preferred way to load scripts that depend on the DOM.",
+  },
+  {
+    question: "Where should a <link rel=\"stylesheet\"> typically go?",
+    options: [
+      "At the end of <body>",
+      "Inside <head>",
+      "Inside <main>",
+      "Inside the <script> element",
+    ],
+    correctAnswerIndex: 1,
+    explanation: "Stylesheet links go in <head> so styles are available before content paints.",
+  },
+  {
+    question: "Which form input type is best suited for a date of birth?",
+    options: ["text", "number", "date", "datetime-local"],
+    correctAnswerIndex: 2,
+    explanation: "type=date gives a native date picker and the right mobile keyboard.",
+  },
+  {
+    question: "What does the `required` attribute do on an input?",
+    options: [
+      "Highlights the input visually",
+      "Prevents form submission unless the input has a value",
+      "Sets a placeholder",
+      "Disables the input",
+    ],
+    correctAnswerIndex: 1,
+    explanation: "required blocks form submission and shows a native validation message.",
+  },
+  {
+    question: "Which HTML element should you use for navigation links?",
+    options: ["<menu>", "<links>", "<nav>", "<header>"],
+    correctAnswerIndex: 2,
+    explanation: "<nav> marks primary site navigation. Assistive tech can jump straight to it.",
+  },
+  {
+    question: "What does a description list (<dl>) represent?",
+    options: [
+      "An ordered set of items",
+      "An unordered set of items",
+      "A set of term/definition pairs",
+      "A navigation menu",
+    ],
+    correctAnswerIndex: 2,
+    explanation: "<dl> with <dt>/<dd> pairs is for terms and their definitions — glossaries, FAQs, key/values.",
+  },
+  {
+    question:
+      "Which of these is the BEST starting layout for a typical content page?",
+    options: [
+      "Many nested <div>s with class names like 'header' and 'footer'",
+      "<header>, <nav>, <main>, <footer> with semantic content inside",
+      "<table> for the overall page layout",
+      "A single <section> containing everything",
+    ],
+    correctAnswerIndex: 1,
+    explanation:
+      "Semantic elements communicate meaning to browsers, screen readers, and search engines.",
+  },
+]

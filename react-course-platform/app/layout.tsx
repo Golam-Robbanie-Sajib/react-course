@@ -15,8 +15,9 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "React Course Platform - Learn JavaScript to React in 25 Days",
-  description: "Master JavaScript and React with our comprehensive 25-day course platform",
+  title: "Self-Learn Hub — HTML and React, in-browser",
+  description:
+    "Self-paced HTML and React courses with live in-browser exercises, auto-graded tests, progressive hints, and progress that works without an account.",
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

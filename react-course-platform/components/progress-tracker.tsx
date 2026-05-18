@@ -9,7 +9,8 @@ import { useProgress } from "@/hooks/use-progress"
 import { phases } from "@/lib/course-data"
 
 export function ProgressTracker() {
-  const { completedDays, currentDay } = useProgress()
+  const { completedDays } = useProgress()
+  const currentDay = (completedDays[completedDays.length - 1] ?? 0) + 1
 
   const totalDays = 25
   const completionPercentage = (completedDays.length / totalDays) * 100

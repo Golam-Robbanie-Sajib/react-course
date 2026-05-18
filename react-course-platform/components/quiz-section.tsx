@@ -6,13 +6,17 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { CheckCircle, XCircle, Lightbulb, RefreshCw } from "lucide-react"
-import type { QuizQuestion } from "@/lib/course-data"
+import type { QuizQuestion } from "@/lib/courses/types"
+import { useQuizAttempts, questionId } from "@/hooks/use-quiz-attempts"
 
 interface QuizSectionProps {
   questions?: QuizQuestion[]
+  courseId?: string
+  day?: number
 }
 
-export function QuizSection({ questions }: QuizSectionProps) {
+export function QuizSection({ questions, courseId, day }: QuizSectionProps) {
+  const { record } = useQuizAttempts()
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswerIndex, setSelectedAnswerIndex] = useState<number | null>(null)
   const [showResult, setShowResult] = useState(false)
@@ -36,6 +40,9 @@ export function QuizSection({ questions }: QuizSectionProps) {
     const isCorrect = selectedAnswerIndex === currentQuestion.correctAnswerIndex
     if (isCorrect) {
       setScore(score + 1)
+    }
+    if (courseId !== undefined && day !== undefined) {
+      record(questionId(courseId, day, currentQuestionIndex), isCorrect)
     }
     setShowResult(true)
   }
