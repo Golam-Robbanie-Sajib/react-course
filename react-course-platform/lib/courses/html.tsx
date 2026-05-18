@@ -115,16 +115,17 @@ const days: CourseDay[] = [
     day: 2,
     phase: "HTML Foundations",
     title: "Text Content & Headings",
-    topics: ["Headings h1-h6", "Paragraphs", "Line breaks", "Whitespace"],
+    topics: ["Headings h1-h6", "Paragraphs", "Line breaks", "Horizontal rule", "Whitespace"],
     resources: [
       { name: "MDN: Headings", url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Heading_Elements" },
+      { name: "MDN: <hr>", url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/hr" },
     ],
-    theory: `Text is the most basic content on the web. HTML gives you specific tags to mark up different <em>kinds</em> of text:<ul><li><code>&lt;h1&gt;</code> through <code>&lt;h6&gt;</code> for headings, where <code>&lt;h1&gt;</code> is the most important. Use only one <code>&lt;h1&gt;</code> per page (the page title) and don't skip levels (don't go from <code>&lt;h2&gt;</code> straight to <code>&lt;h4&gt;</code>).</li><li><code>&lt;p&gt;</code> for a paragraph of running prose.</li><li><code>&lt;br/&gt;</code> forces a line break — but use it sparingly. Most "spacing" should come from styling paragraphs, not from sprinkling <code>&lt;br&gt;</code>s.</li><li><code>&lt;hr/&gt;</code> is a thematic break (a horizontal rule).</li></ul><br/><strong>HTML collapses whitespace.</strong> Any run of spaces, tabs, or newlines in your source becomes a single space when rendered. So you can indent your code freely; the browser doesn't care.<br/><br/>Why does heading structure matter? Search engines and screen readers build an outline of your page from the heading levels. A well-structured outline is a huge accessibility and SEO win — for free.`,
+    theory: `Text is the most basic content on the web. HTML gives you specific tags to mark up different <em>kinds</em> of text:<ul><li><code>&lt;h1&gt;</code> through <code>&lt;h6&gt;</code> for headings, where <code>&lt;h1&gt;</code> is the most important. Use only one <code>&lt;h1&gt;</code> per page (the page title) and don't skip levels (don't go from <code>&lt;h2&gt;</code> straight to <code>&lt;h4&gt;</code>).</li><li><code>&lt;p&gt;</code> for a paragraph of running prose. The paragraph element automatically adds vertical space above and below itself, so you usually don't need extra spacing.</li><li><code>&lt;br&gt;</code> forces a line break inside text. It's an <strong>empty element</strong> — no closing tag, just <code>&lt;br&gt;</code>. Use it sparingly; most "spacing" should come from styling paragraphs, not from sprinkling <code>&lt;br&gt;</code>s.</li><li><code>&lt;hr&gt;</code> is a <strong>thematic break</strong> — a horizontal rule drawn across the page that signals a shift in topic. Also an empty element.</li></ul><br/><strong>HTML collapses whitespace.</strong> Any run of spaces, tabs, or newlines in your source becomes a single space when rendered. So you can indent your code freely; the browser doesn't care.<br/><br/>Why does heading structure matter? Search engines and screen readers build an outline of your page from the heading levels. A well-structured outline is a huge accessibility and SEO win — for free.`,
     exercises: [
       {
         title: "Article outline",
         description:
-          "Build a page with this outline: one h1 'My Blog', then two h2 sections ('Today' and 'Yesterday'). Each section has one paragraph of any text.",
+          "Build a page with this outline: one h1 'My Blog', two h2 sections ('Today' and 'Yesterday') each with one <p>, and an <hr> between the two sections.",
         template: "static",
         activeFile: "/index.html",
         starter: {
@@ -132,7 +133,7 @@ const days: CourseDay[] = [
 <html lang="en">
   <head><meta charset="utf-8" /><title>Blog</title></head>
   <body>
-    <!-- TODO: h1, then two h2 sections with paragraphs -->
+    <!-- TODO: h1, then two h2 sections (with paragraphs) separated by an <hr> -->
   </body>
 </html>
 `,
@@ -153,19 +154,26 @@ const days: CourseDay[] = [
             runner: "html",
             assertion: `return doc.querySelectorAll('p').length >= 2;`,
           },
+          {
+            description: "Has at least one <hr> separator",
+            runner: "html",
+            assertion: `return doc.querySelectorAll('hr').length >= 1;`,
+          },
         ],
         hints: [
           "Use exactly one <h1>.",
           "Each <h2> should be followed by a <p> containing some prose.",
+          "<hr> is self-closing — just write <hr> between the two sections.",
         ],
         solution: {
           code: `<h1>My Blog</h1>
 <h2>Today</h2>
 <p>I learned HTML headings and how they form a document outline.</p>
+<hr>
 <h2>Yesterday</h2>
 <p>Yesterday I wrote my first page from scratch.</p>`,
           explanation:
-            "A single h1 communicates the page title; h2s form the next-level outline. Screen readers can jump between headings to navigate the page.",
+            "A single h1 communicates the page title; h2s form the next-level outline. <hr> signals a thematic shift between the sections.",
         },
       },
     ],
@@ -187,40 +195,79 @@ const days: CourseDay[] = [
         correctAnswerIndex: 1,
         explanation: "HTML collapses any whitespace run to one space.",
       },
+      {
+        question: "Which of these are empty elements (no closing tag)?",
+        options: ["<p> and <h1>", "<br> and <hr>", "<div> and <span>", "<strong> and <em>"],
+        correctAnswerIndex: 1,
+        explanation: "<br> (line break) and <hr> (horizontal rule) are both empty — they have no closing tag and no content.",
+      },
     ],
   },
   {
     day: 3,
     phase: "HTML Foundations",
     title: "Text Formatting & Inline Elements",
-    topics: ["strong", "em", "code", "mark", "small", "br vs p"],
+    topics: ["b/strong", "i/em", "u", "sup/sub", "small/big", "code/mark/abbr"],
     resources: [
       { name: "MDN: Inline text semantics", url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element#inline_text_semantics" },
     ],
-    theory: `Once you have paragraphs, you'll often want to emphasize parts of them. HTML separates <strong>meaning</strong> from <strong>style</strong>:<ul><li><code>&lt;strong&gt;</code> — important text (screen readers may speak it more forcefully). Visually <strong>bold</strong> by default.</li><li><code>&lt;em&gt;</code> — emphasized text. Visually <em>italic</em> by default.</li><li><code>&lt;b&gt;</code> and <code>&lt;i&gt;</code> — purely visual bold/italic with no extra meaning. Prefer <code>&lt;strong&gt;</code>/<code>&lt;em&gt;</code> when the emphasis is meaningful.</li><li><code>&lt;code&gt;</code> — inline code, like <code>const x = 1</code>.</li><li><code>&lt;mark&gt;</code> — highlighted text (e.g. search results).</li><li><code>&lt;small&gt;</code> — side comments and fine print.</li><li><code>&lt;abbr title="..."&gt;</code> — an abbreviation, with the full form in the title.</li></ul>The general rule: pick the tag that describes <em>what the text is</em>, not <em>what it looks like</em>. Looks are styled later with CSS.`,
+    theory: `Once you have paragraphs, you'll often want to format parts of them. HTML separates <strong>meaning</strong> from <strong>style</strong>:<br/><br/><strong>Visual formatting (presentational)</strong><ul><li><code>&lt;b&gt;</code> — <b>bold</b> text, no extra meaning.</li><li><code>&lt;i&gt;</code> — <i>italic</i> text, no extra meaning.</li><li><code>&lt;u&gt;</code> — <u>underlined</u> text.</li><li><code>&lt;big&gt;</code> — slightly bigger text. <em>Note: removed in HTML5; modern code uses CSS <code>font-size</code> instead. Still appears in many textbooks.</em></li><li><code>&lt;small&gt;</code> — smaller side comments and fine print.</li></ul><br/><strong>Semantic emphasis (preferred)</strong><ul><li><code>&lt;strong&gt;</code> — important text. Screen readers may speak it more forcefully. Bold by default.</li><li><code>&lt;em&gt;</code> — emphasized text (changes the meaning of the sentence). Italic by default.</li><li><code>&lt;mark&gt;</code> — <mark>highlighted</mark> text (e.g. search results).</li><li><code>&lt;abbr title="..."&gt;</code> — an abbreviation, with the full form in the title.</li><li><code>&lt;code&gt;</code> — inline code, like <code>const x = 1</code>.</li></ul><br/><strong>Superscript and subscript</strong><ul><li><code>&lt;sup&gt;</code> — superscript, e.g. <code>a&lt;sup&gt;2&lt;/sup&gt;</code> renders as a². Useful for exponents and footnote markers.</li><li><code>&lt;sub&gt;</code> — subscript, e.g. <code>H&lt;sub&gt;2&lt;/sub&gt;O</code> renders as H₂O. Useful for chemical formulas and math indices.</li></ul><br/>The general rule: pick the tag that describes <em>what the text is</em>, not <em>what it looks like</em>. Reach for <code>&lt;strong&gt;</code>/<code>&lt;em&gt;</code> when the emphasis is meaningful; reach for <code>&lt;b&gt;</code>/<code>&lt;i&gt;</code>/<code>&lt;u&gt;</code> only when the styling is purely visual. Looks are otherwise handled with CSS.`,
     exercises: [
       {
-        title: "Highlight important words",
+        title: "Format a math + chemistry note",
         description:
-          "Take a paragraph about HTML and mark the word 'semantic' as strong, 'meaning' as em, and 'HTML' as inline code.",
+          "Write a paragraph that uses every formatting tag we just covered: bold/italic/underline, strong/em, code, plus a math expression (with <sup>) and a chemical formula (with <sub>).",
         template: "static",
         activeFile: "/index.html",
         starter: {
           "/index.html": `<!DOCTYPE html>
 <html><body>
   <p>
-    <!-- TODO: write a sentence using <strong>, <em>, and <code> -->
+    <!-- TODO: include <strong>, <em>, <u>, <code>, <sup>, and <sub> -->
   </p>
 </body></html>
 `,
         },
-        hints: ["Inline elements live inside a block element like <p>."],
+        tests: [
+          {
+            description: "Has at least one <strong>",
+            runner: "html",
+            assertion: `return !!doc.querySelector('strong');`,
+          },
+          {
+            description: "Has at least one <em>",
+            runner: "html",
+            assertion: `return !!doc.querySelector('em');`,
+          },
+          {
+            description: "Has at least one <u> (underline)",
+            runner: "html",
+            assertion: `return !!doc.querySelector('u');`,
+          },
+          {
+            description: "Has at least one <sup> (superscript)",
+            runner: "html",
+            assertion: `return !!doc.querySelector('sup');`,
+          },
+          {
+            description: "Has at least one <sub> (subscript)",
+            runner: "html",
+            assertion: `return !!doc.querySelector('sub');`,
+          },
+        ],
+        hints: [
+          "Inline tags live inside a block element like <p>.",
+          "Try (a + b)<sup>2</sup> for the math, and H<sub>2</sub>O for the chemistry.",
+        ],
         solution: {
           code: `<p>
-  <strong>Semantic</strong> tags add <em>meaning</em>, not just style.
-  We use <code>HTML</code> to mark content.
+  <strong>Semantic</strong> tags add <em>meaning</em>; <u>underline</u>
+  remains purely visual. We can mark <code>code</code> inline, write
+  expressions like (a + b)<sup>2</sup> = a<sup>2</sup> + 2ab + b<sup>2</sup>,
+  and chemistry like H<sub>2</sub>O.
 </p>`,
-          explanation: "Semantic tags describe what content is, decoupling meaning from styling.",
+          explanation:
+            "Semantic tags describe what content is (decoupling meaning from styling); <sup>/<sub> are still the right tool for math and chemistry notation even in modern HTML.",
         },
       },
     ],
@@ -231,6 +278,18 @@ const days: CourseDay[] = [
         correctAnswerIndex: 2,
         explanation: "<strong> carries semantic importance; <b> is visual-only.",
       },
+      {
+        question: "Which tag renders text as a superscript (e.g. for exponents)?",
+        options: ["<sup>", "<top>", "<small>", "<big>"],
+        correctAnswerIndex: 0,
+        explanation: "<sup> superscripts its content; <sub> subscripts it.",
+      },
+      {
+        question: "Which two tags would you use to write the chemical formula H₂O and the equation x²?",
+        options: ["<big> and <small>", "<sub> and <sup>", "<strong> and <em>", "<u> and <i>"],
+        correctAnswerIndex: 1,
+        explanation: "<sub> lowers text (H<sub>2</sub>O) and <sup> raises it (x<sup>2</sup>).",
+      },
     ],
   },
   {
@@ -239,7 +298,7 @@ const days: CourseDay[] = [
     title: "Links",
     topics: ["Anchors", "href", "target", "rel", "Same-page links"],
     resources: [{ name: "MDN: <a>", url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a" }],
-    theory: `Links are how the web is woven together. The <code>&lt;a&gt;</code> ("anchor") element creates a hyperlink:<br/><br/><code>&lt;a href="https://example.com"&gt;Visit Example&lt;/a&gt;</code><br/><br/>Important attributes:<ul><li><code>href</code> — the destination URL. Absolute (<code>https://...</code>), relative (<code>about.html</code>, <code>../page.html</code>), or in-page (<code>#section-id</code>).</li><li><code>target="_blank"</code> — opens the link in a new tab.</li><li><code>rel="noopener noreferrer"</code> — pair this with <code>target="_blank"</code> for security and privacy.</li><li><code>download</code> — turns the link into a file download.</li></ul><br/>You can also link to <strong>email</strong> (<code>href="mailto:hi@example.com"</code>) and <strong>phone numbers</strong> (<code>href="tel:+15551234"</code>) — useful on mobile.<br/><br/>Always write link text that makes sense out of context. "Click here" is a poor link; "Read the privacy policy" is much better for users and screen readers.`,
+    theory: `Links are how the web is woven together. The <code>&lt;a&gt;</code> ("anchor") element creates a hyperlink:<br/><br/><code>&lt;a href="https://example.com"&gt;Visit Example&lt;/a&gt;</code><br/><br/>Important attributes:<ul><li><code>href</code> — the destination URL. Absolute (<code>https://...</code>), relative (<code>about.html</code>, <code>../page.html</code>), or in-page (<code>#section-id</code>).</li><li><code>target="_blank"</code> — opens the link in a new tab.</li><li><code>rel="noopener noreferrer"</code> — pair this with <code>target="_blank"</code> for security and privacy.</li><li><code>download</code> — turns the link into a file download.</li></ul><br/>You can also link to <strong>email</strong> (<code>href="mailto:hi@example.com"</code>) and <strong>phone numbers</strong> (<code>href="tel:+15551234"</code>) — useful on mobile.<br/><br/><strong>Linking with an image instead of text.</strong> An anchor can wrap any inline content, including an <code>&lt;img&gt;</code>. This is how clickable logos and thumbnail galleries are built:<br/><br/><code>&lt;a href="https://www.google.com" target="_blank"&gt;<br/>&nbsp;&nbsp;&lt;img src="logo.jpg" alt="Google"&gt;<br/>&lt;/a&gt;</code><br/><br/>Always write link text that makes sense out of context. "Click here" is a poor link; "Read the privacy policy" is much better for users and screen readers.`,
     exercises: [
       {
         title: "Build a small navigation",
@@ -363,52 +422,82 @@ const days: CourseDay[] = [
     day: 6,
     phase: "Structuring Content",
     title: "Lists: ordered, unordered, description",
-    topics: ["<ul>", "<ol>", "<li>", "<dl>", "Nested lists"],
+    topics: ["<ul>", "<ol>", "<li>", "<dl>", "Nested lists", "type attribute"],
     resources: [{ name: "MDN: Lists", url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ul" }],
-    theory: `Lists group related items.<ul><li><code>&lt;ul&gt;</code> — <strong>unordered list</strong>, where order doesn't matter (a shopping list, a set of features).</li><li><code>&lt;ol&gt;</code> — <strong>ordered list</strong>, where order matters (steps, rankings). Use <code>start="..."</code> or <code>reversed</code> to control numbering.</li><li><code>&lt;li&gt;</code> — a single list item, used inside both ul and ol.</li><li><code>&lt;dl&gt;</code>, <code>&lt;dt&gt;</code>, <code>&lt;dd&gt;</code> — <strong>description lists</strong>: pairs of terms (dt) and definitions (dd). Useful for FAQs, glossaries, key/value pairs.</li></ul>Lists can be nested — put another <code>&lt;ul&gt;</code> or <code>&lt;ol&gt;</code> inside a <code>&lt;li&gt;</code>. This is how you build sub-bullets.<br/><br/>One important habit: don't reach for lists just because you want a vertical stack of items. Use them when the items truly are a group. Otherwise, plain paragraphs or sections may be clearer.`,
+    theory: `Lists group related items.<ul><li><code>&lt;ul&gt;</code> — <strong>unordered list</strong>, where order doesn't matter (a shopping list, a set of features).</li><li><code>&lt;ol&gt;</code> — <strong>ordered list</strong>, where order matters (steps, rankings). Use <code>start="..."</code> or <code>reversed</code> to control numbering.</li><li><code>&lt;li&gt;</code> — a single list item, used inside both ul and ol.</li><li><code>&lt;dl&gt;</code>, <code>&lt;dt&gt;</code>, <code>&lt;dd&gt;</code> — <strong>description lists</strong>: pairs of terms (dt) and definitions (dd). Useful for FAQs, glossaries, key/value pairs.</li></ul><br/><strong>Nested lists.</strong> Put another <code>&lt;ul&gt;</code> or <code>&lt;ol&gt;</code> inside a <code>&lt;li&gt;</code> to build sub-bullets:<br/><br/><code>&lt;ul&gt;<br/>&nbsp;&nbsp;&lt;li&gt;Sylhet<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;ul&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;Sunamganj&lt;/li&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;Habiganj&lt;/li&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/ul&gt;<br/>&nbsp;&nbsp;&lt;/li&gt;<br/>&lt;/ul&gt;</code><br/><br/><strong>The <code>type</code> attribute.</strong> An attribute lives inside the opening tag and changes how the element behaves. For lists:<ul><li><code>&lt;ul type="disc"&gt;</code> — solid bullets (the default).</li><li><code>&lt;ul type="circle"&gt;</code> — hollow circle bullets.</li><li><code>&lt;ul type="square"&gt;</code> — square bullets.</li><li><code>&lt;ol type="1"&gt;</code> — 1, 2, 3 (the default).</li><li><code>&lt;ol type="A"&gt;</code> — A, B, C; <code>type="a"</code> for lowercase.</li><li><code>&lt;ol type="I"&gt;</code> — I, II, III (Roman); <code>type="i"</code> for lowercase.</li></ul>Attributes are written as <code>name="value"</code> pairs. An element can have multiple attributes or none at all.<br/><br/>One important habit: don't reach for lists just because you want a vertical stack of items. Use them when the items truly are a group. Otherwise, plain paragraphs or sections may be clearer.`,
     exercises: [
       {
-        title: "Recipe steps",
-        description: "Build an ordered list of 3 steps to make tea, and an unordered list of 3 ingredients.",
+        title: "Recipe steps + nested location list",
+        description:
+          "Build an unordered list of 3 ingredients (with type='square'), an ordered list of 3 steps (with type='I' Roman numerals), and a nested list of two divisions where each contains 2 sub-districts.",
         template: "static",
         activeFile: "/index.html",
         starter: {
           "/index.html": `<!DOCTYPE html>
 <html><body>
   <h2>Ingredients</h2>
-  <!-- TODO: ul -->
+  <!-- TODO: ul with type="square" -->
   <h2>Steps</h2>
-  <!-- TODO: ol -->
+  <!-- TODO: ol with type="I" -->
+  <h2>Where to find ingredients</h2>
+  <!-- TODO: nested ul: two top-level li, each containing a nested ul of 2 items -->
 </body></html>
 `,
         },
         tests: [
           {
-            description: "Has at least one <ul> with 3 items",
+            description: "Has a <ul type=\"square\"> with 3 items",
             runner: "html",
-            assertion: `return Array.from(doc.querySelectorAll('ul')).some(ul => ul.children.length >= 3);`,
+            assertion: `const ul = doc.querySelector('ul[type=\"square\"]'); return !!ul && ul.querySelectorAll(':scope > li').length >= 3;`,
           },
           {
-            description: "Has at least one <ol> with 3 items",
+            description: "Has an <ol type=\"I\"> with 3 items",
             runner: "html",
-            assertion: `return Array.from(doc.querySelectorAll('ol')).some(ol => ol.children.length >= 3);`,
+            assertion: `const ol = doc.querySelector('ol[type=\"I\"]'); return !!ol && ol.querySelectorAll(':scope > li').length >= 3;`,
+          },
+          {
+            description: "Has a nested list (a <ul>/<ol> inside an <li>)",
+            runner: "html",
+            assertion: `return !!doc.querySelector('li > ul, li > ol');`,
           },
         ],
-        hints: ["Each item goes in its own <li>."],
+        hints: [
+          "Each item goes in its own <li>.",
+          "type lives inside the opening tag: <ul type=\"square\">.",
+          "For nesting, put a complete <ul>...</ul> inside an <li> next to its text.",
+        ],
         solution: {
           code: `<h2>Ingredients</h2>
-<ul>
+<ul type="square">
   <li>Water</li>
   <li>Tea leaves</li>
   <li>Milk (optional)</li>
 </ul>
+
 <h2>Steps</h2>
-<ol>
+<ol type="I">
   <li>Boil water.</li>
   <li>Add tea leaves and steep 3 minutes.</li>
   <li>Strain into a cup.</li>
-</ol>`,
-          explanation: "Order matters for steps (ol), not for ingredients (ul).",
+</ol>
+
+<h2>Where to find ingredients</h2>
+<ul>
+  <li>Sylhet
+    <ul>
+      <li>Sunamganj</li>
+      <li>Habiganj</li>
+    </ul>
+  </li>
+  <li>Chattogram
+    <ul>
+      <li>Cox's Bazar</li>
+      <li>Rangamati</li>
+    </ul>
+  </li>
+</ul>`,
+          explanation:
+            "Order matters for steps (ol), not for ingredients (ul). The type attribute changes the bullet/number style. Nested lists are just a <ul>/<ol> placed inside an <li>.",
         },
       },
     ],
@@ -418,6 +507,29 @@ const days: CourseDay[] = [
         options: ["<ul>", "<ol>", "<dl>", "<menu>"],
         correctAnswerIndex: 1,
         explanation: "Ordered lists communicate that order matters.",
+      },
+      {
+        question: "Which attribute on <ul> gives you square bullets?",
+        options: ["bullet=\"square\"", "style=\"square\"", "type=\"square\"", "shape=\"square\""],
+        correctAnswerIndex: 2,
+        explanation: "type=\"square\" (or \"circle\" / \"disc\") sets the bullet style on <ul>.",
+      },
+      {
+        question: "How do you make an <ol> count using uppercase Roman numerals (I, II, III)?",
+        options: ["type=\"R\"", "type=\"I\"", "type=\"roman\"", "type=\"1\""],
+        correctAnswerIndex: 1,
+        explanation: "type=\"I\" gives uppercase Roman numerals; type=\"i\" gives lowercase.",
+      },
+      {
+        question: "How do you create a nested (sub-) list?",
+        options: [
+          "Add a second <ul> right after the parent <ul>",
+          "Put a full <ul>...</ul> inside one of the parent's <li> elements",
+          "Use the <sub-list> element",
+          "Set indent=\"true\" on the items",
+        ],
+        correctAnswerIndex: 1,
+        explanation: "A nested list is just a <ul>/<ol> placed inside an <li> of the outer list.",
       },
     ],
   },
@@ -501,19 +613,21 @@ const days: CourseDay[] = [
     day: 8,
     phase: "Structuring Content",
     title: "Tables",
-    topics: ["<table>", "<tr>", "<td>", "<th>", "<thead>/<tbody>", "scope"],
+    topics: ["<table>", "<tr>", "<td>", "<th>", "<thead>/<tbody>/<tfoot>", "<caption>", "colspan", "rowspan", "scope"],
     resources: [{ name: "MDN: Tables", url: "https://developer.mozilla.org/en-US/docs/Learn/HTML/Tables/Basics" }],
-    theory: `Tables are for <em>tabular data</em> — rows and columns of related values. Don't use them for page layout; that's what semantic elements and CSS are for.<br/><br/>Anatomy:<ul><li><code>&lt;table&gt;</code> — the table wrapper.</li><li><code>&lt;tr&gt;</code> — a row.</li><li><code>&lt;th&gt;</code> — a header cell (bold/centered by default).</li><li><code>&lt;td&gt;</code> — a data cell.</li><li><code>&lt;thead&gt;</code>, <code>&lt;tbody&gt;</code>, <code>&lt;tfoot&gt;</code> — group rows into header / body / footer regions.</li><li><code>&lt;caption&gt;</code> — a title for the whole table, placed at the top.</li></ul>For accessibility, give your header cells <code>scope="col"</code> or <code>scope="row"</code>. This tells assistive tech which cells are headers for which data.`,
+    theory: `Tables are for <em>tabular data</em> — rows and columns of related values. Don't use them for page layout; that's what semantic elements and CSS are for.<br/><br/><strong>Anatomy</strong><ul><li><code>&lt;table&gt;</code> — the table wrapper.</li><li><code>&lt;tr&gt;</code> — a row.</li><li><code>&lt;th&gt;</code> — a header cell (bold/centered by default).</li><li><code>&lt;td&gt;</code> — a data cell.</li><li><code>&lt;thead&gt;</code>, <code>&lt;tbody&gt;</code>, <code>&lt;tfoot&gt;</code> — group rows into header / body / footer regions. Header and footer rows are optional.</li><li><code>&lt;caption&gt;</code> — a title for the whole table, placed at the top.</li></ul>For accessibility, give your header cells <code>scope="col"</code> or <code>scope="row"</code>. This tells assistive tech which cells are headers for which data.<br/><br/><strong>Merging cells: colspan and rowspan</strong><br/><br/>By default each cell occupies one column and one row. You can stretch a cell across multiple columns or rows:<ul><li><code>colspan="2"</code> — the cell spans 2 columns horizontally.</li><li><code>rowspan="3"</code> — the cell spans 3 rows vertically.</li></ul>Example: a "Bills" header that sits above three sub-columns can be written as <code>&lt;th colspan="3"&gt;Bills&lt;/th&gt;</code>. A label in column 1 that applies to two rows of data is <code>&lt;td rowspan="2"&gt;January&lt;/td&gt;</code>.<br/><br/>When you span cells, the row that contains the spanned cell counts <strong>fewer</strong> &lt;td&gt;/&lt;th&gt; elements — the spanned space is "taken" by the cell above or to the left.`,
     exercises: [
       {
-        title: "Pricing table",
-        description: "Create a table with a caption 'Pricing' and a header row of 'Plan' and 'Price', then two data rows.",
+        title: "Bills table with merged cells",
+        description:
+          "Build a table titled 'Bills' with a thead containing a single 'Bills' header that spans 3 columns (colspan='3'), then a sub-header row of ('Month', 'Electricity', 'Water'), and 2 data rows. The first cell of the body should use rowspan='2' to label both rows as 'January'.",
         template: "static",
         activeFile: "/index.html",
         starter: {
           "/index.html": `<!DOCTYPE html>
 <html><body>
-  <!-- TODO: <table> with <caption>, <thead>, <tbody> -->
+  <!-- TODO: <table> with <caption>, <thead> (colspan title row + sub-header row),
+       and <tbody> with a rowspan="2" cell in the first column -->
 </body></html>
 `,
         },
@@ -524,9 +638,14 @@ const days: CourseDay[] = [
             assertion: `const t = doc.querySelector('table'); return !!t && !!t.querySelector('caption') && !!t.querySelector('thead') && !!t.querySelector('tbody');`,
           },
           {
-            description: "<thead> has at least 2 <th> cells",
+            description: "<thead> has a cell with colspan='3'",
             runner: "html",
-            assertion: `return (doc.querySelector('thead')?.querySelectorAll('th').length || 0) >= 2;`,
+            assertion: `return !!doc.querySelector('thead [colspan=\"3\"]');`,
+          },
+          {
+            description: "<tbody> has a cell with rowspan='2'",
+            runner: "html",
+            assertion: `return !!doc.querySelector('tbody [rowspan=\"2\"]');`,
           },
           {
             description: "<tbody> has at least 2 data rows",
@@ -534,19 +653,36 @@ const days: CourseDay[] = [
             assertion: `return (doc.querySelector('tbody')?.querySelectorAll('tr').length || 0) >= 2;`,
           },
         ],
-        hints: ["Add scope=\"col\" to your <th> cells in the header."],
+        hints: [
+          "Add scope=\"col\" to your <th> cells in the header.",
+          "colspan goes on the cell that should be wider; the row contains one fewer <th>.",
+          "rowspan goes on the cell that should be taller; the next row contains one fewer <td>.",
+        ],
         solution: {
           code: `<table>
-  <caption>Pricing</caption>
+  <caption>Bills</caption>
   <thead>
-    <tr><th scope="col">Plan</th><th scope="col">Price</th></tr>
+    <tr><th colspan="3">Bills</th></tr>
+    <tr>
+      <th scope="col">Month</th>
+      <th scope="col">Electricity</th>
+      <th scope="col">Water</th>
+    </tr>
   </thead>
   <tbody>
-    <tr><td>Free</td><td>$0</td></tr>
-    <tr><td>Pro</td><td>$10/mo</td></tr>
+    <tr>
+      <td rowspan="2">January</td>
+      <td>800</td>
+      <td>200</td>
+    </tr>
+    <tr>
+      <td>900</td>
+      <td>250</td>
+    </tr>
   </tbody>
 </table>`,
-          explanation: "thead/tbody and scope improve both readability and accessibility.",
+          explanation:
+            "colspan stretches a cell horizontally; rowspan stretches it vertically. The rows that contain spanned cells need fewer <td>s because the merged area was already claimed.",
         },
       },
     ],
@@ -561,6 +697,18 @@ const days: CourseDay[] = [
         ],
         correctAnswerIndex: 1,
         explanation: "scope=\"col\" or scope=\"row\" tells assistive tech how the header relates to data cells.",
+      },
+      {
+        question: "Which attribute makes a cell stretch across multiple columns?",
+        options: ["span", "rowspan", "colspan", "width"],
+        correctAnswerIndex: 2,
+        explanation: "colspan='N' merges N columns into one cell horizontally.",
+      },
+      {
+        question: "If a cell in row 1 uses rowspan='2', how many cells does row 2 need to fill the same number of columns?",
+        options: ["The same number as row 1", "One more than row 1", "One fewer than row 1", "Always 1"],
+        correctAnswerIndex: 2,
+        explanation: "The spanned cell already occupies row 2's slot in that column, so row 2 needs one fewer <td>.",
       },
     ],
   },
@@ -929,7 +1077,7 @@ const days: CourseDay[] = [
     title: "The <head>: meta, viewport, and SEO",
     topics: ["<meta charset>", "viewport", "description", "Open Graph", "<title>"],
     resources: [{ name: "MDN: <head>", url: "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/head" }],
-    theory: `The <code>&lt;head&gt;</code> is invisible but powerful. It tells browsers, search engines, and social platforms <em>what</em> your page is.<br/><br/>The essentials:<ul><li><code>&lt;meta charset="utf-8"&gt;</code> — character encoding. Always UTF-8.</li><li><code>&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;</code> — makes the page render at a sensible size on mobile. <strong>If you forget this, your site looks broken on phones.</strong></li><li><code>&lt;title&gt;...&lt;/title&gt;</code> — tab title; also the link title in search results.</li><li><code>&lt;meta name="description" content="..."&gt;</code> — the snippet shown in search results.</li></ul>For sharing on social platforms (Twitter, Slack, Discord), add <strong>Open Graph</strong> tags:<br/><code>&lt;meta property="og:title" content="..."&gt;<br/>&lt;meta property="og:description" content="..."&gt;<br/>&lt;meta property="og:image" content="..."&gt;</code><br/><br/>Finally, link CSS with <code>&lt;link rel="stylesheet" href="styles.css"&gt;</code> and a favicon with <code>&lt;link rel="icon" href="..."&gt;</code>.`,
+    theory: `The <code>&lt;head&gt;</code> is invisible but powerful. It tells browsers, search engines, and social platforms <em>what</em> your page is.<br/><br/>The essentials:<ul><li><code>&lt;meta charset="utf-8"&gt;</code> — character encoding. Always UTF-8.</li><li><code>&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;</code> — makes the page render at a sensible size on mobile. <strong>If you forget this, your site looks broken on phones.</strong></li><li><code>&lt;title&gt;...&lt;/title&gt;</code> — tab title; also the link title in search results.</li><li><code>&lt;meta name="description" content="..."&gt;</code> — the snippet shown in search results.</li><li><code>&lt;html lang="..."&gt;</code> — the page's primary language (e.g. <code>"en"</code>, <code>"bn"</code> for Bangla). Helps screen readers pronounce text correctly and helps search engines index by language.</li></ul><br/><strong>Displaying non-Latin scripts (e.g. Bangla).</strong> The browser can show any Unicode character — Bangla, Arabic, Chinese, emoji — as long as you tell it to decode the file as UTF-8. Save your file as UTF-8, declare it with <code>&lt;meta charset="utf-8"&gt;</code>, and you can write text like this directly in the body:<br/><br/><code>&lt;!DOCTYPE html&gt;<br/>&lt;html lang="bn"&gt;<br/>&nbsp;&nbsp;&lt;head&gt;&lt;meta charset="utf-8"&gt;&lt;title&gt;আমার প্রথম পৃষ্ঠা&lt;/title&gt;&lt;/head&gt;<br/>&nbsp;&nbsp;&lt;body&gt;&lt;h1&gt;স্বাগতম&lt;/h1&gt;&lt;/body&gt;<br/>&lt;/html&gt;</code><br/><br/>Without the UTF-8 declaration, the browser may guess a different encoding and render garbled text ("mojibake").<br/><br/><strong>Sharing on social platforms</strong> (Twitter, Slack, Discord) — add Open Graph tags:<br/><code>&lt;meta property="og:title" content="..."&gt;<br/>&lt;meta property="og:description" content="..."&gt;<br/>&lt;meta property="og:image" content="..."&gt;</code><br/><br/>Finally, link CSS with <code>&lt;link rel="stylesheet" href="styles.css"&gt;</code> and a favicon with <code>&lt;link rel="icon" href="..."&gt;</code>.`,
     exercises: [
       {
         title: "Production-quality <head>",
@@ -992,6 +1140,17 @@ const days: CourseDay[] = [
         options: ["meta description", "meta charset", "meta viewport", "meta keywords"],
         correctAnswerIndex: 2,
         explanation: "Without the viewport meta, mobile browsers render at a desktop width and zoom out.",
+      },
+      {
+        question: "Which meta tag lets you display Bangla (or any non-Latin script) without garbled characters?",
+        options: [
+          "<meta name=\"language\" content=\"bn\">",
+          "<meta charset=\"utf-8\">",
+          "<meta name=\"viewport\" ...>",
+          "<meta name=\"keywords\" content=\"bangla\">",
+        ],
+        correctAnswerIndex: 1,
+        explanation: "UTF-8 covers all Unicode characters. Declare it with <meta charset=\"utf-8\"> and save the file as UTF-8.",
       },
     ],
   },
