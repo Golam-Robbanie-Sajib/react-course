@@ -16,6 +16,7 @@ import { QuizSection } from "@/components/quiz-section"
 import { ConfidenceRating } from "@/components/confidence-rating"
 import { ExerciseCard } from "@/components/exercise-card"
 import { usePrefetchDay } from "@/hooks/use-prefetch-day"
+import { useIdlePrefetch } from "@/hooks/use-idle-prefetch"
 
 interface DayPageProps {
   course: Course
@@ -31,6 +32,10 @@ export function DayPage({ course, day, theoryNode }: DayPageProps) {
   const dayCompleted = isCompleted(day.day)
   const totalDays = course.days.length
   const prefetchDay = usePrefetchDay(course)
+
+  // Keep the Sandpack bundle warm so navigating Prev/Next never shows
+  // "Loading editor…" twice.
+  useIdlePrefetch(() => import("@/components/live-exercise"))
 
   useEffect(() => {
     setIsClient(true)

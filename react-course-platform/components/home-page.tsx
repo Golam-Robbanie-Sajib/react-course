@@ -6,10 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { courses } from "@/lib/courses"
 import { useProgress } from "@/hooks/use-progress"
+import { useIdlePrefetch } from "@/hooks/use-idle-prefetch"
 import { OnboardingDialog } from "@/components/onboarding-dialog"
 import Link from "next/link"
 
 export function HomePage() {
+  // Warm up the Sandpack editor bundle while the user is reading the catalog,
+  // so clicking into Day 1 of either course is instant.
+  useIdlePrefetch(() => import("@/components/live-exercise"))
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       <OnboardingDialog />
