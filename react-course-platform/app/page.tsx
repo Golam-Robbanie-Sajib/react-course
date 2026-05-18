@@ -1,4 +1,3 @@
-// filepath: app/page.tsx
 import { CourseLayout } from "@/components/course-layout"
 import { HomePage } from "@/components/home-page"
 

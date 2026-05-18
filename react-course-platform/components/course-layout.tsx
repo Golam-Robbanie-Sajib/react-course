@@ -1,42 +1,67 @@
-// filepath: components/course-layout.tsx
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
-import { Menu, X, Home, ChevronRight } from "lucide-react"
+import { useState, useEffect, useCallback } from "react"
+import { Menu, X, Home, ChevronRight, BookOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { SearchDialog } from "@/components/search-dialog"
-import { courseDays, phases, getPhaseForDay } from "@/lib/course-data"
+import { courses, getCourse, getPhaseForDay } from "@/lib/courses"
 import { useProgress } from "@/hooks/use-progress"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { UserProfile } from "./user-profile"
 import { useAuth } from "@/components/auth/auth-provider"
+import type { Course } from "@/lib/courses/types"
 
 interface CourseLayoutProps {
   children: React.ReactNode
+  course?: Course
   currentDay?: number
 }
 
-export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
+export function CourseLayout({ children, course, currentDay }: CourseLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
-  const { completedDays, isCompleted, updateStreak } = useProgress()
+  const router = useRouter()
+  const activeCourse = course ?? courses[0]
+  const { completedDays, isCompleted, updateStreak } = useProgress(activeCourse.id)
   const { user } = useAuth()
 
   useEffect(() => {
-    if (user) {
-      updateStreak();
-    }
-  }, [user, updateStreak]);
-
-  const currentDayData = currentDay ? courseDays.find((d) => d.day === currentDay) : null
-  const currentPhase = currentDayData ? getPhaseForDay(currentDayData.day) : null
+    if (user) updateStreak()
+  }, [user, updateStreak])
 
   useEffect(() => {
     setSidebarOpen(false)
   }, [pathname])
+
+  const currentDayData = currentDay ? activeCourse.days.find((d) => d.day === currentDay) : null
+  const currentPhase = currentDay ? getPhaseForDay(activeCourse, currentDay) : null
+  const totalDays = activeCourse.days.length
+
+  const goToDay = useCallback(
+    (delta: number) => {
+      if (!currentDay) return
+      const next = currentDay + delta
+      if (next < 1 || next > totalDays) return
+      router.push(`/courses/${activeCourse.slug}/day/${next}`)
+    },
+    [currentDay, totalDays, activeCourse.slug, router]
+  )
+
+  useEffect(() => {
+    if (!currentDay) return
+    const handler = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+      if (e.key === "ArrowLeft") goToDay(-1)
+      else if (e.key === "ArrowRight") goToDay(1)
+    }
+    window.addEventListener("keydown", handler)
+    return () => window.removeEventListener("keydown", handler)
+  }, [currentDay, goToDay])
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -57,10 +82,12 @@ export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-between p-6 border-b border-white/20 dark:border-white/10">
               <div>
-                <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  React Course
-                </h2>
-                <p className="text-sm text-muted-foreground">25-Day Journey</p>
+                <Link href="/" className="block">
+                  <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Self-Learn Hub
+                  </h2>
+                  <p className="text-xs text-muted-foreground">All courses · {courses.length}</p>
+                </Link>
               </div>
               <div className="flex items-center space-x-2">
                 <ThemeToggle />
@@ -69,30 +96,54 @@ export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
                 </Button>
               </div>
             </div>
+
+            <div className="p-4 border-b border-white/20 dark:border-white/10 space-y-3">
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">Courses</div>
+              <div className="space-y-1">
+                {courses.map((c) => (
+                  <Link
+                    key={c.id}
+                    href={`/courses/${c.slug}`}
+                    className={`flex items-center justify-between p-2 rounded-lg text-sm transition-colors ${
+                      c.id === activeCourse.id
+                        ? "bg-white/60 dark:bg-white/10 font-medium"
+                        : "hover:bg-white/40 dark:hover:bg-white/5"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <BookOpen className="h-3.5 w-3.5 opacity-70" />
+                      {c.title.split(" in ")[0]}
+                    </span>
+                    <span className="text-xs text-muted-foreground">{c.days.length}d</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
             <div className="p-4 border-b border-white/20 dark:border-white/10">
-              <SearchDialog />
+              <SearchDialog course={activeCourse} />
             </div>
             <div className="p-6 border-b border-white/20 dark:border-white/10">
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Progress</span>
-                  <span className="font-medium">{completedDays.length}/25</span>
+                  <span className="text-muted-foreground">{activeCourse.title.split(" in ")[0]} progress</span>
+                  <span className="font-medium">
+                    {completedDays.length}/{totalDays}
+                  </span>
                 </div>
                 <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
-                    style={{ width: `${(completedDays.length / 25) * 100}%` }}
+                    style={{ width: `${(completedDays.length / totalDays) * 100}%` }}
                   />
                 </div>
               </div>
             </div>
             <nav className="flex-1 overflow-y-auto p-4">
               <div className="space-y-6">
-                
-                {/* --- CORRECTED MAPPING LOGIC --- */}
-                {phases.map((phase) => {
-                  const phaseDays = courseDays.filter((day) => day.phase === phase.name);
-                  if (phaseDays.length === 0) return null; // Don't render a phase if it has no days
+                {activeCourse.phases.map((phase) => {
+                  const phaseDays = activeCourse.days.filter((day) => day.phase === phase.name)
+                  if (phaseDays.length === 0) return null
 
                   return (
                     <div key={phase.name} className="space-y-2">
@@ -108,17 +159,17 @@ export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
                       </div>
                       <div className="space-y-1 ml-2">
                         {phaseDays.map((dayData) => {
-                          const dayNumber = dayData.day;
-                          const isActive = currentDay === dayNumber;
-                          const isDayCompleted = isCompleted(dayNumber);
-
+                          const dayNumber = dayData.day
+                          const isActive = currentDay === dayNumber
+                          const isDayCompleted = isCompleted(dayNumber)
+                          const dayPhase = getPhaseForDay(activeCourse, dayNumber)
                           return (
                             <Link
                               key={dayNumber}
-                              href={`/day/${dayNumber}`}
+                              href={`/courses/${activeCourse.slug}/day/${dayNumber}`}
                               className={`block p-2 rounded-lg text-sm transition-colors ${
                                 isActive
-                                  ? `bg-gradient-to-r ${getPhaseForDay(dayNumber)?.gradient} text-white shadow-lg`
+                                  ? `bg-gradient-to-r ${dayPhase?.gradient ?? "from-blue-500 to-purple-500"} text-white shadow-lg`
                                   : isDayCompleted
                                     ? "text-muted-foreground opacity-70 hover:opacity-100"
                                     : "hover:bg-white/50 dark:hover:bg-white/5"
@@ -127,14 +178,12 @@ export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
                               <div className="font-medium">Day {dayNumber}</div>
                               <div className="text-xs opacity-75">{dayData.title}</div>
                             </Link>
-                          );
+                          )
                         })}
                       </div>
                     </div>
-                  );
+                  )
                 })}
-                {/* --- END OF CORRECTION --- */}
-
               </div>
             </nav>
           </div>
@@ -151,6 +200,13 @@ export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
               <nav className="flex items-center space-x-2 text-sm">
                 <Link href="/" className="flex items-center text-muted-foreground hover:text-foreground">
                   <Home className="h-4 w-4" />
+                </Link>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                <Link
+                  href={`/courses/${activeCourse.slug}`}
+                  className="font-medium text-foreground hover:underline"
+                >
+                  {activeCourse.title.split(" in ")[0]}
                 </Link>
                 {currentDayData && currentPhase && (
                   <>
@@ -171,15 +227,17 @@ export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
             <div className="flex items-center space-x-4">
               <UserProfile />
               {currentDay && (
-                <div className="flex items-center space-x-2">
+                <div className="hidden sm:flex items-center space-x-2">
                   {currentDay > 1 && (
                     <Button variant="outline" size="sm" asChild>
-                      <Link href={`/day/${currentDay - 1}`}>Previous</Link>
+                      <Link href={`/courses/${activeCourse.slug}/day/${currentDay - 1}`}>
+                        Previous
+                      </Link>
                     </Button>
                   )}
-                  {currentDay < 25 && (
+                  {currentDay < totalDays && (
                     <Button size="sm" asChild>
-                      <Link href={`/day/${currentDay + 1}`}>Next</Link>
+                      <Link href={`/courses/${activeCourse.slug}/day/${currentDay + 1}`}>Next</Link>
                     </Button>
                   )}
                 </div>
@@ -191,4 +249,9 @@ export function CourseLayout({ children, currentDay }: CourseLayoutProps) {
       </div>
     </div>
   )
+}
+
+// Helper used internally by older imports (kept for compatibility with dashboard etc.)
+export function resolveCourseBySlug(slug?: string) {
+  return slug ? getCourse(slug) : courses[0]
 }
