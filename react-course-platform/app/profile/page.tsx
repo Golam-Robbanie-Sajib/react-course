@@ -46,20 +46,14 @@ export default function ProfilePage() {
         <Card>
           <CardHeader>
             <CardTitle>Account</CardTitle>
-            <CardDescription>
-              {session ? "Your account info and platform-wide stats." : "You're using the site as a guest."}
-            </CardDescription>
+            <CardDescription>Your account info and platform-wide stats.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {session ? (
+            {session && (
               <div>
                 <p className="text-sm font-medium">Email Address</p>
                 <p className="text-muted-foreground">{session.user.email}</p>
               </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Sign in to sync progress across devices. Your current progress is saved locally on this device.
-              </p>
             )}
             <div>
               <p className="text-sm font-medium">Daily Streak</p>

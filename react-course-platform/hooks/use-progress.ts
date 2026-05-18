@@ -146,111 +146,116 @@ export function useProgress(courseId: string = DEFAULT_COURSE) {
     ? (userProfile as any)?.last_login_date ?? null
     : localProfile.lastLoginDate
 
-  const persistRemoteProgress = async (mutator: (cur: CourseProgressState) => CourseProgressState) => {
-    if (!userId) return
-    const next = { ...remoteByCourse, [courseId]: mutator(currentCourseRemote) }
-    const { error } = await supabase
-      .from("profiles")
-      .update({ course_progress: next, updated_at: new Date().toISOString() })
-      .eq("id", userId)
-    if (error) {
-      // course_progress column may not exist yet; fall back to legacy fields for React.
-      if (courseId === "react") {
-        const cp = next[courseId]
-        const { error: legacyErr } = await supabase
-          .from("profiles")
-          .update({
-            completed_days: cp.completedDays,
-            notes: cp.notes,
-            confidence_ratings: cp.confidenceRatings,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", userId)
-        if (legacyErr) throw new Error(legacyErr.message)
-        return
+  const profileKey = ["profile", userId] as const
+
+  /**
+   * Apply a course-progress mutation optimistically:
+   * 1. Snapshot the current cached profile.
+   * 2. Patch the cache so the UI updates instantly.
+   * 3. POST to Supabase; if it fails, roll back to the snapshot.
+   */
+  const optimisticCoursePatch = async (
+    mutator: (cur: CourseProgressState) => CourseProgressState,
+    label: string
+  ) => {
+    if (!useRemote) {
+      // Guest path (rare under the auth gate, but kept for safety): write
+      // straight to localStorage. Already synchronous, no UI lag.
+      updateLocal((prev) => {
+        const p = ensureCourse(prev, courseId)
+        const cur = p.byCourse[courseId]
+        return {
+          ...p,
+          byCourse: { ...p.byCourse, [courseId]: mutator(cur) },
+        }
+      })
+      return
+    }
+
+    await queryClient.cancelQueries({ queryKey: profileKey })
+    const previous = queryClient.getQueryData<any>(profileKey)
+    const nextByCourse = { ...remoteByCourse, [courseId]: mutator(currentCourseRemote) }
+
+    // Apply optimistic update — write the new course_progress AND the
+    // legacy column shape so derived selectors that still look at the
+    // legacy columns (react course) read the right thing immediately.
+    if (previous) {
+      const cp = nextByCourse[courseId]
+      queryClient.setQueryData(profileKey, {
+        ...previous,
+        course_progress: nextByCourse,
+        ...(courseId === "react"
+          ? {
+              completed_days: cp.completedDays,
+              notes: cp.notes,
+              confidence_ratings: cp.confidenceRatings,
+            }
+          : {}),
+      })
+    }
+
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ course_progress: nextByCourse, updated_at: new Date().toISOString() })
+        .eq("id", userId)
+      if (error) {
+        if (courseId === "react") {
+          const cp = nextByCourse[courseId]
+          const { error: legacyErr } = await supabase
+            .from("profiles")
+            .update({
+              completed_days: cp.completedDays,
+              notes: cp.notes,
+              confidence_ratings: cp.confidenceRatings,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", userId)
+          if (legacyErr) throw new Error(legacyErr.message)
+          return
+        }
+        throw new Error(error.message)
       }
-      throw new Error(error.message)
+    } catch (err) {
+      // Roll back the optimistic update.
+      if (previous) queryClient.setQueryData(profileKey, previous)
+      toast.error(`Failed to ${label}. Please try again.`)
+      throw err
     }
   }
 
   const { mutate: toggleDayCompletion } = useMutation({
     mutationFn: async (day: number) => {
-      if (useRemote) {
-        await persistRemoteProgress((cur) => {
-          const isDone = cur.completedDays.includes(day)
-          return {
-            ...cur,
-            completedDays: isDone
-              ? cur.completedDays.filter((d) => d !== day)
-              : [...cur.completedDays, day].sort((a, b) => a - b),
-          }
-        })
-      } else {
-        updateLocal((prev) => {
-          const p = ensureCourse(prev, courseId)
-          const cur = p.byCourse[courseId]
-          const isDone = cur.completedDays.includes(day)
-          return {
-            ...p,
-            byCourse: {
-              ...p.byCourse,
-              [courseId]: {
-                ...cur,
-                completedDays: isDone
-                  ? cur.completedDays.filter((d) => d !== day)
-                  : [...cur.completedDays, day].sort((a, b) => a - b),
-              },
-            },
-          }
-        })
-      }
-      return day
+      const wasDone = completedDays.includes(day)
+      await optimisticCoursePatch(
+        (cur) => ({
+          ...cur,
+          completedDays: cur.completedDays.includes(day)
+            ? cur.completedDays.filter((d) => d !== day)
+            : [...cur.completedDays, day].sort((a, b) => a - b),
+        }),
+        "update progress"
+      )
+      return { day, wasDone }
     },
-    onSuccess: (day) => {
-      const isCompleted = !completedDays.includes(day)
-      toast.success(isCompleted ? `Day ${day} marked complete!` : `Day ${day} progress removed.`)
-      if (useRemote) queryClient.invalidateQueries({ queryKey: ["profile", userId] })
+    onSuccess: ({ day, wasDone }) => {
+      toast.success(wasDone ? `Day ${day} progress removed.` : `Day ${day} marked complete!`)
     },
-    onError: () => toast.error("Failed to update progress."),
   })
 
   const { mutate: resetProgress } = useMutation({
-    mutationFn: async () => {
-      if (useRemote) {
-        await persistRemoteProgress(() => emptyCourse())
-      } else {
-        updateLocal((prev) => ({
-          ...prev,
-          byCourse: { ...prev.byCourse, [courseId]: emptyCourse() },
-        }))
-      }
-    },
-    onSuccess: () => {
-      toast.success("Your course progress has been reset.")
-      if (useRemote) queryClient.invalidateQueries({ queryKey: ["profile", userId] })
-    },
-    onError: () => toast.error("Failed to reset progress."),
+    mutationFn: () => optimisticCoursePatch(() => emptyCourse(), "reset progress"),
+    onSuccess: () => toast.success("Your course progress has been reset."),
   })
 
   const { mutate: updateNote } = useMutation({
     mutationFn: async ({ day, content }: { day: number; content: string }) => {
-      if (useRemote) {
-        await persistRemoteProgress((cur) => ({ ...cur, notes: { ...cur.notes, [day]: content } }))
-      } else {
-        updateLocal((prev) => {
-          const p = ensureCourse(prev, courseId)
-          const cur = p.byCourse[courseId]
-          return {
-            ...p,
-            byCourse: { ...p.byCourse, [courseId]: { ...cur, notes: { ...cur.notes, [day]: content } } },
-          }
-        })
-      }
+      await optimisticCoursePatch(
+        (cur) => ({ ...cur, notes: { ...cur.notes, [day]: content } }),
+        "save note"
+      )
     },
-    onSuccess: () => {
-      if (useRemote) queryClient.invalidateQueries({ queryKey: ["profile", userId] })
-    },
-    onError: () => toast.error("Failed to save note."),
+    // Notes are auto-saved on debounce — silent on success to avoid toast spam.
   })
 
   const { mutate: updateExamScores } = useMutation({
@@ -279,29 +284,11 @@ export function useProgress(courseId: string = DEFAULT_COURSE) {
   })
 
   const { mutate: updateConfidenceRating } = useMutation({
-    mutationFn: async ({ day, rating }: { day: number; rating: number }) => {
-      if (useRemote) {
-        await persistRemoteProgress((cur) => ({
-          ...cur,
-          confidenceRatings: { ...cur.confidenceRatings, [day]: rating },
-        }))
-      } else {
-        updateLocal((prev) => {
-          const p = ensureCourse(prev, courseId)
-          const cur = p.byCourse[courseId]
-          return {
-            ...p,
-            byCourse: {
-              ...p.byCourse,
-              [courseId]: { ...cur, confidenceRatings: { ...cur.confidenceRatings, [day]: rating } },
-            },
-          }
-        })
-      }
-    },
-    onSuccess: () => {
-      if (useRemote) queryClient.invalidateQueries({ queryKey: ["profile", userId] })
-    },
+    mutationFn: ({ day, rating }: { day: number; rating: number }) =>
+      optimisticCoursePatch(
+        (cur) => ({ ...cur, confidenceRatings: { ...cur.confidenceRatings, [day]: rating } }),
+        "save rating"
+      ),
   })
 
   const { mutate: updateStreak } = useMutation({
