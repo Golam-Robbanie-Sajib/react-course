@@ -1,6 +1,31 @@
-Welcome to Day 1! Today we'll cover the absolute basics of HTML — how to build a web page from nothing.
+## How the web works
 
-**HTML (HyperText Markup Language)** is the skeleton of every web page. Browsers read HTML and turn it into the visual page you see.
+Before we write any HTML, here's the 30-second picture of what's actually happening
+when you open a web page:
+
+- Your **browser** (Chrome, Firefox, Safari, Edge) is a **client**.
+- A **web server** is a computer on the internet that stores web pages.
+- The browser asks the server for a page (HTTP request). The server sends back the
+  page (HTTP response). The browser renders it.
+
+A web page is built from three languages, each with its own job:
+
+- **HTML** — the **structure** (headings, paragraphs, images, links). This is what
+  this course teaches.
+- **CSS** — the **style** (colors, spacing, layout, fonts). Covered in our next
+  course.
+- **JavaScript** — the **behavior** (clicks, form validation, fetching data, animation).
+
+You can write a useful page with HTML alone. Add CSS to make it look right. Add
+JavaScript to make it interactive.
+
+## What is HTML?
+
+Welcome to Day 1! Today we'll cover the absolute basics of HTML — how to build a
+web page from nothing.
+
+**HTML (HyperText Markup Language)** is the skeleton of every web page. Browsers
+read HTML and turn it into the visual page you see.
 
 An HTML document is made of **elements**. An element usually looks like:
 
@@ -8,7 +33,11 @@ An HTML document is made of **elements**. An element usually looks like:
 <tagname>content</tagname>
 ```
 
-The opening and closing tags wrap the content, and the browser uses the tag name to decide how to render it.
+The opening and closing tags wrap the content, and the browser uses the tag name
+to decide how to render it. Some elements are **empty** (no closing tag and no
+content) — for example `<br>` for a line break.
+
+## The minimum HTML5 document
 
 A minimum HTML5 document needs five things:
 
@@ -18,4 +47,20 @@ A minimum HTML5 document needs five things:
 - `<body>` — visible content.
 - `<title>` — text shown in the browser tab.
 
-> **Tip:** HTML is forgiving of mistakes (the browser tries to "guess" what you meant), but cleaner HTML makes pages more accessible and easier to maintain. Throughout this course you'll learn the modern, semantic way to write it.
+## How to write (nest) elements
+
+Elements are written **sequentially**, one after another, or **nested** — one
+element inside another. **They must not overlap.**
+
+```html
+<p><em>Abracadabra</em></p>   <!-- correct: em is fully inside p -->
+<p><em>Abracadabra</p></em>   <!-- wrong: tags overlap -->
+```
+
+A useful mental model: think of each element as a box. A small box can sit inside
+a bigger box; two boxes can sit side by side. But a box can never poke half-in,
+half-out of another box.
+
+> **Tip:** HTML is forgiving of mistakes — the browser tries to guess what you
+> meant. Cleaner HTML makes pages more accessible and easier to maintain.
+> Throughout this course you'll learn the modern, semantic way to write it.
