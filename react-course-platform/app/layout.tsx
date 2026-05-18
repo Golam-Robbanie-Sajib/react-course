@@ -5,6 +5,7 @@ import { Inter } from "next/font/google"
 import { ThemeProvider } from "next-themes"
 import { Providers } from "@/components/providers"
 import { AuthProvider } from "@/components/auth/auth-provider"
+import { AuthGate } from "@/components/auth/auth-gate"
 import { Toaster } from "@/components/ui/toaster"
 import "./globals.css"
 
@@ -27,7 +28,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <AuthProvider>
             <Providers>
-              {children}
+              <AuthGate>{children}</AuthGate>
               <Toaster richColors />
             </Providers>
           </AuthProvider>

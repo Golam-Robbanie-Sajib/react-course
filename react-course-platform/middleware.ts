@@ -66,8 +66,11 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Run on every page except Next.js internals and common static files.
-  // The OAuth callback /auth/callback is included so we still refresh
-  // cookies through the middleware on that round-trip.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map)$).*)"],
+  // Run on every page including the home route. Excludes Next.js internals,
+  // API routes, the favicon, and static asset extensions. The OAuth callback
+  // /auth/callback is intentionally included so the cookie refresh runs.
+  matcher: [
+    "/",
+    "/((?!api/|_next/static|_next/image|_next/data|favicon\\.ico|robots\\.txt|sitemap\\.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|map|woff|woff2|ttf|otf)$).*)",
+  ],
 }
