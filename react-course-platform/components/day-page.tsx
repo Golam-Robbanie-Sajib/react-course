@@ -14,6 +14,7 @@ import { NotesSection } from "@/components/notes-section"
 import { QuizSection } from "@/components/quiz-section"
 import { ConfidenceRating } from "@/components/confidence-rating"
 import { ExerciseCard } from "@/components/exercise-card"
+import { usePrefetchDay } from "@/hooks/use-prefetch-day"
 
 interface DayPageProps {
   course: Course
@@ -25,10 +26,14 @@ export function DayPage({ course, day }: DayPageProps) {
   const [isClient, setIsClient] = useState(false)
   const dayCompleted = isCompleted(day.day)
   const totalDays = course.days.length
+  const prefetchDay = usePrefetchDay(course)
 
   useEffect(() => {
     setIsClient(true)
-  }, [])
+    // Prefetch adjacent days on mount so Prev/Next are warm.
+    prefetchDay(day.day + 1)
+    prefetchDay(day.day - 1)
+  }, [day.day, prefetchDay])
 
   if (!isClient || isLoading) {
     return (
@@ -131,7 +136,13 @@ export function DayPage({ course, day }: DayPageProps) {
         </div>
         <div className="grid gap-6">
           {day.exercises.map((exercise, index) => (
-            <ExerciseCard key={index} exercise={exercise} index={index} />
+            <ExerciseCard
+              key={index}
+              exercise={exercise}
+              index={index}
+              courseId={course.id}
+              day={day.day}
+            />
           ))}
         </div>
       </div>
@@ -173,15 +184,15 @@ export function DayPage({ course, day }: DayPageProps) {
       <div className="flex justify-between items-center pt-8 border-t border-gray-200 dark:border-gray-700">
         <div>
           {prevHref ? (
-            <Button variant="outline" asChild>
-              <Link href={prevHref}>← Previous Day</Link>
+            <Button variant="outline" asChild onMouseEnter={() => prefetchDay(day.day - 1)}>
+              <Link href={prevHref} prefetch>← Previous Day</Link>
             </Button>
           ) : null}
         </div>
         <div>
           {nextHref ? (
-            <Button asChild>
-              <Link href={nextHref}>Next Day →</Link>
+            <Button asChild onMouseEnter={() => prefetchDay(day.day + 1)}>
+              <Link href={nextHref} prefetch>Next Day →</Link>
             </Button>
           ) : null}
         </div>

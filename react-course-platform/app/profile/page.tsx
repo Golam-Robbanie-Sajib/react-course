@@ -1,4 +1,3 @@
-// filepath: app/profile/page.tsx
 "use client"
 
 import { CourseLayout } from "@/components/course-layout"
@@ -7,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useProgress } from "@/hooks/use-progress"
 import { useAuth } from "@/components/auth/auth-provider"
 import { Flame } from "lucide-react"
+import { ProgressExport } from "@/components/progress-export"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,56 +18,62 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { courses } from "@/lib/courses"
 
 export default function ProfilePage() {
   const { session, isLoading: isAuthLoading } = useAuth()
-  const { resetProgress, currentStreak, isLoading: isProgressLoading } = useProgress()
+  const reactProg = useProgress("react")
+  const htmlProg = useProgress("html")
 
-  if (isAuthLoading || isProgressLoading) {
+  if (isAuthLoading) {
     return (
       <CourseLayout>
         <div className="text-center">Loading profile...</div>
       </CourseLayout>
-    );
-  }
-
-  if (!session) {
-    return (
-      <CourseLayout>
-        <div className="text-center">Please log in to view your profile.</div>
-      </CourseLayout>
     )
   }
 
-  const handleResetProgress = () => {
-    resetProgress()
+  const handleResetAll = () => {
+    reactProg.resetProgress()
+    htmlProg.resetProgress()
   }
 
   return (
     <CourseLayout>
       <div className="max-w-2xl mx-auto space-y-6">
         <h1 className="text-3xl font-bold">My Profile</h1>
+
         <Card>
           <CardHeader>
-            <CardTitle>Account Information</CardTitle>
-            <CardDescription>Your personal details and stats.</CardDescription>
+            <CardTitle>Account</CardTitle>
+            <CardDescription>
+              {session ? "Your account info and platform-wide stats." : "You're using the site as a guest."}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <p className="text-sm font-medium">Email Address</p>
-              <p className="text-muted-foreground">{session.user.email}</p>
-            </div>
-            
+            {session ? (
+              <div>
+                <p className="text-sm font-medium">Email Address</p>
+                <p className="text-muted-foreground">{session.user.email}</p>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Sign in to sync progress across devices. Your current progress is saved locally on this device.
+              </p>
+            )}
             <div>
               <p className="text-sm font-medium">Daily Streak</p>
               <div className="flex items-center space-x-2 text-orange-500">
                 <Flame className="h-5 w-5" />
-                <span className="text-lg font-bold">{currentStreak} {currentStreak === 1 ? 'day' : 'days'}</span>
+                <span className="text-lg font-bold">
+                  {reactProg.currentStreak} {reactProg.currentStreak === 1 ? "day" : "days"}
+                </span>
               </div>
             </div>
-            
           </CardContent>
         </Card>
+
+        <ProgressExport />
 
         <Card className="border-destructive">
           <CardHeader>
@@ -77,19 +83,20 @@ export default function ProfilePage() {
           <CardContent>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive">Reset Course Progress</Button>
+                <Button variant="destructive">Reset Progress (All Courses)</Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently delete your course progress, including completed days, notes, and exam scores.
+                    This will reset completed days, notes, and confidence ratings across all{" "}
+                    {courses.length} courses. Exam scores stay.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleResetProgress}>
-                    Yes, Reset My Progress
+                  <AlertDialogAction onClick={handleResetAll}>
+                    Yes, reset everything
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

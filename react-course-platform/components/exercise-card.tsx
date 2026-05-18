@@ -20,9 +20,12 @@ const LiveExercise = dynamic(() => import("./live-exercise").then((m) => m.LiveE
 interface ExerciseCardProps {
   exercise: Exercise
   index: number
+  courseId: string
+  day: number
 }
 
-export function ExerciseCard({ exercise, index }: ExerciseCardProps) {
+export function ExerciseCard({ exercise, index, courseId, day }: ExerciseCardProps) {
+  const storageKey = `slh:sandpack:${courseId}:${day}:${index}`
   const [revealedHints, setRevealedHints] = useState(0)
   const [showSolution, setShowSolution] = useState(false)
   const [hasAttempted, setHasAttempted] = useState(false)
@@ -48,7 +51,11 @@ export function ExerciseCard({ exercise, index }: ExerciseCardProps) {
         </div>
 
         {hasLive ? (
-          <LiveExercise exercise={exercise} onAttempt={() => setHasAttempted(true)} />
+          <LiveExercise
+            exercise={exercise}
+            storageKey={storageKey}
+            onAttempt={() => setHasAttempted(true)}
+          />
         ) : null}
 
         {hints.length > 0 && (

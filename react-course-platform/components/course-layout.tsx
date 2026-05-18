@@ -12,6 +12,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { UserProfile } from "./user-profile"
 import { useAuth } from "@/components/auth/auth-provider"
+import { VirtualizedDayNav } from "./virtualized-day-nav"
 import type { Course } from "@/lib/courses/types"
 
 interface CourseLayoutProps {
@@ -139,53 +140,11 @@ export function CourseLayout({ children, course, currentDay }: CourseLayoutProps
                 </div>
               </div>
             </div>
-            <nav className="flex-1 overflow-y-auto p-4">
-              <div className="space-y-6">
-                {activeCourse.phases.map((phase) => {
-                  const phaseDays = activeCourse.days.filter((day) => day.phase === phase.name)
-                  if (phaseDays.length === 0) return null
-
-                  return (
-                    <div key={phase.name} className="space-y-2">
-                      <div
-                        className={`p-3 rounded-xl bg-gradient-to-r ${phase.bgGradient} dark:${phase.darkBgGradient} border border-white/20`}
-                      >
-                        <h3
-                          className={`font-semibold text-sm bg-gradient-to-r ${phase.gradient} bg-clip-text text-transparent`}
-                        >
-                          {phase.name}
-                        </h3>
-                        <p className="text-xs text-muted-foreground mt-1">{phase.days}</p>
-                      </div>
-                      <div className="space-y-1 ml-2">
-                        {phaseDays.map((dayData) => {
-                          const dayNumber = dayData.day
-                          const isActive = currentDay === dayNumber
-                          const isDayCompleted = isCompleted(dayNumber)
-                          const dayPhase = getPhaseForDay(activeCourse, dayNumber)
-                          return (
-                            <Link
-                              key={dayNumber}
-                              href={`/courses/${activeCourse.slug}/day/${dayNumber}`}
-                              className={`block p-2 rounded-lg text-sm transition-colors ${
-                                isActive
-                                  ? `bg-gradient-to-r ${dayPhase?.gradient ?? "from-blue-500 to-purple-500"} text-white shadow-lg`
-                                  : isDayCompleted
-                                    ? "text-muted-foreground opacity-70 hover:opacity-100"
-                                    : "hover:bg-white/50 dark:hover:bg-white/5"
-                              }`}
-                            >
-                              <div className="font-medium">Day {dayNumber}</div>
-                              <div className="text-xs opacity-75">{dayData.title}</div>
-                            </Link>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </nav>
+            <VirtualizedDayNav
+              course={activeCourse}
+              currentDay={currentDay}
+              isCompleted={isCompleted}
+            />
           </div>
         </div>
       </aside>
