@@ -62,11 +62,11 @@ export function LoginCard() {
             supabaseClient={supabase}
             appearance={{ theme: ThemeSupa }}
             theme={resolvedTheme === "dark" ? "dark" : "default"}
-            providers={["google", "github"]}
+            providers={["google"]}
             socialLayout="horizontal"
             redirectTo={redirectTo}
-            // The Auth UI defaults are reasonable; we just want the OAuth
-            // providers and email + password to route through our callback.
+            // Email + password and Google are the only flows. We intentionally
+            // omit GitHub for now since the provider isn't configured.
           />
         )}
       </CardContent>

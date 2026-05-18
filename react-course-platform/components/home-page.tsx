@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge"
 import { courses } from "@/lib/courses"
 import { useProgress } from "@/hooks/use-progress"
 import { useIdlePrefetch } from "@/hooks/use-idle-prefetch"
-import { OnboardingDialog } from "@/components/onboarding-dialog"
 import Link from "next/link"
 
 export function HomePage() {
@@ -17,7 +16,6 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      <OnboardingDialog />
       <main className="flex-1">
         <section className="bg-white dark:bg-gray-900 py-16">
           <div className="max-w-4xl mx-auto px-6 text-center">
