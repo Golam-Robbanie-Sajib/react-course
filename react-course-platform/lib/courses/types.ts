@@ -12,7 +12,7 @@ export interface ExerciseSolution {
   explanation: string
 }
 
-export type SandboxTemplate = "vanilla" | "static" | "react" | "react-ts"
+export type SandboxTemplate = "vanilla" | "static" | "react" | "react-ts" | "c"
 
 export interface ExerciseTest {
   description: string

@@ -17,6 +17,7 @@ import { ConfidenceRating } from "@/components/confidence-rating"
 import { ExerciseCard } from "@/components/exercise-card"
 import { usePrefetchDay } from "@/hooks/use-prefetch-day"
 import { useIdlePrefetch } from "@/hooks/use-idle-prefetch"
+import { useChatContext } from "@/components/chat/chat-context"
 
 interface DayPageProps {
   course: Course
@@ -32,10 +33,51 @@ export function DayPage({ course, day, theoryNode }: DayPageProps) {
   const dayCompleted = isCompleted(day.day)
   const totalDays = course.days.length
   const prefetchDay = usePrefetchDay(course)
+  const { setContext } = useChatContext()
 
   // Keep the Sandpack bundle warm so navigating Prev/Next never shows
   // "Loading editor…" twice.
   useIdlePrefetch(() => import("@/components/live-exercise"))
+
+  // Tell the floating AI tutor what page/lesson/exercise we're on. The
+  // current user code is picked up from localStorage on each AI send by
+  // looking at the saved Sandpack snapshot for the first exercise.
+  useEffect(() => {
+    const firstExercise = day.exercises[0]
+    const exerciseLanguageByCourse: Record<string, string> = {
+      c: "c",
+      html: "html",
+      react: "jsx",
+    }
+    const language = exerciseLanguageByCourse[course.id] || "code"
+    setContext({
+      pageTitle: `Day ${day.day}: ${day.title}`,
+      courseTitle: course.title,
+      dayTitle: `Day ${day.day}: ${day.title}`,
+      exerciseTitle: firstExercise?.title,
+      exercisePrompt: firstExercise?.description,
+      language,
+      getUserCode: () => {
+        // Aggregate any saved Sandpack files across all exercises on this day.
+        if (typeof window === "undefined") return ""
+        const out: string[] = []
+        for (let i = 0; i < day.exercises.length; i++) {
+          const key = `slh:sandpack:${course.id}:${day.day}:${i}`
+          const raw = window.localStorage.getItem(key)
+          if (!raw) continue
+          try {
+            const files = JSON.parse(raw) as Record<string, string>
+            for (const [fname, code] of Object.entries(files)) {
+              out.push(`// ${fname} (exercise ${i + 1})\n${code}`)
+            }
+          } catch {
+            /* ignore */
+          }
+        }
+        return out.join("\n\n").slice(0, 4000) // cap to keep prompt small
+      },
+    })
+  }, [course, day, setContext])
 
   useEffect(() => {
     setIsClient(true)

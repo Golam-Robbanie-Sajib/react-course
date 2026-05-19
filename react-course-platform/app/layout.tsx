@@ -6,6 +6,8 @@ import { ThemeProvider } from "next-themes"
 import { Providers } from "@/components/providers"
 import { AuthProvider } from "@/components/auth/auth-provider"
 import { AuthGate } from "@/components/auth/auth-gate"
+import { ChatContextProvider } from "@/components/chat/chat-context"
+import { ChatBubble } from "@/components/chat/chat-bubble"
 import { Toaster } from "@/components/ui/toaster"
 import "./globals.css"
 
@@ -28,7 +30,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <AuthProvider>
             <Providers>
-              <AuthGate>{children}</AuthGate>
+              <ChatContextProvider>
+                <AuthGate>{children}</AuthGate>
+                <ChatBubble />
+              </ChatContextProvider>
               <Toaster richColors />
             </Providers>
           </AuthProvider>

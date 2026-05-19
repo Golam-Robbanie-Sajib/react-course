@@ -20,9 +20,14 @@ export default function DashboardPage() {
               Track your progress across every course on the platform.
             </p>
           </div>
-          <Button asChild variant="outline">
-            <Link href="/profile">Profile settings</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild>
+              <Link href="/practice">Practice</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/profile">Profile settings</Link>
+            </Button>
+          </div>
         </div>
 
         <PlatformStats />
