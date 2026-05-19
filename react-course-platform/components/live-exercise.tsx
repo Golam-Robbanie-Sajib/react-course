@@ -24,6 +24,9 @@ const TEMPLATE_MAP: Record<SandboxTemplate, "vanilla" | "static" | "react"> = {
   static: "static",
   react: "react",
   "react-ts": "react",
+  // C exercises render in Sandpack as if vanilla (just for the editor chrome);
+  // the in-browser preview/console is hidden since we can't compile C client-side.
+  c: "vanilla",
 }
 
 function readSavedFiles(storageKey: string): Record<string, string> | null {
@@ -46,9 +49,10 @@ function writeSavedFiles(storageKey: string, files: Record<string, string>) {
 }
 
 export function LiveExercise({ exercise, storageKey, onAttempt }: LiveExerciseProps) {
+  const isC = exercise.template === "c"
   const template = TEMPLATE_MAP[exercise.template || "vanilla"]
-  const wantsPreview = template === "react" || template === "static"
-  const wantsConsole = template === "vanilla"
+  const wantsPreview = !isC && (template === "react" || template === "static")
+  const wantsConsole = !isC && template === "vanilla"
 
   const starter = exercise.starter || {}
   const [initialFiles, setInitialFiles] = useState<Record<string, string>>(starter)
