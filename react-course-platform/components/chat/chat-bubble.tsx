@@ -116,14 +116,25 @@ export function ChatBubble() {
           type="button"
           aria-label="Open AI tutor chat"
           onClick={() => setOpen(true)}
-          className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl transition-shadow"
+          className="fixed z-40 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl transition-shadow right-3 sm:right-5"
+          style={{
+            // Sit above the mobile prev/next dock + iPhone home indicator.
+            bottom: "calc(env(safe-area-inset-bottom) + 4.5rem)",
+          }}
         >
           <MessageCircle className="h-6 w-6" />
         </button>
       )}
 
       {open && (
-        <div className="fixed bottom-5 right-5 z-40 w-[min(380px,calc(100vw-2rem))] max-h-[min(70vh,640px)] flex flex-col rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-2xl overflow-hidden">
+        <div
+          className="fixed z-40 right-0 left-0 sm:left-auto sm:right-5 mx-auto sm:mx-0 w-full sm:w-[min(380px,calc(100vw-2rem))] max-w-[100vw] flex flex-col rounded-t-xl sm:rounded-xl border-t sm:border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-2xl overflow-hidden"
+          style={{
+            bottom: 0,
+            maxHeight: "min(85vh, 720px)",
+            paddingBottom: "env(safe-area-inset-bottom)",
+          }}
+        >
           <header className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4" />

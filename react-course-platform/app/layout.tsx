@@ -1,6 +1,6 @@
 // filepath: app/layout.tsx
 import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "next-themes"
 import { Providers } from "@/components/providers"
@@ -18,9 +18,20 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Self-Learn Hub — HTML and React, in-browser",
+  title: "Self-Learn Hub — HTML, C, and React, in-browser",
   description:
-    "Self-paced HTML and React courses with live in-browser exercises, auto-graded tests, progressive hints, and progress that works without an account.",
+    "Self-paced HTML, C, and React courses with live in-browser exercises, auto-graded tests, progressive hints, an AI tutor, and progress that syncs across devices.",
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // Allow zoom for accessibility — never set maximumScale: 1.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b1020" },
+  ],
+  colorScheme: "light dark",
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
