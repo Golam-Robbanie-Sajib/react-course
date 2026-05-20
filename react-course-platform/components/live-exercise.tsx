@@ -80,7 +80,10 @@ export function LiveExercise({ exercise, storageKey, onAttempt }: LiveExercisePr
   }
 
   return (
-    <div className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800">
+    // min-w-0 + max-w-full clamps the Sandpack iframe + editor to the parent
+    // card width so long code lines scroll inside the editor instead of
+    // pushing the entire card past the viewport.
+    <div className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 min-w-0 max-w-full">
       <SandpackProvider
         template={template}
         files={initialFiles}

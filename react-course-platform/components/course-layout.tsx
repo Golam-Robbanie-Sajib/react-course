@@ -255,7 +255,11 @@ export function CourseLayout({ children, course, currentDay }: CourseLayoutProps
             </div>
           </div>
         </header>
-        <main className="p-3 sm:p-6 lg:p-8 pb-24 sm:pb-8">{children}</main>
+        <main
+          className={`p-3 sm:p-6 lg:p-8 ${currentDay ? "pb-24 sm:pb-8" : "pb-8"}`}
+        >
+          {children}
+        </main>
 
         {/* Mobile-only sticky prev/next dock — sits above the chat bubble. */}
         {currentDay && (

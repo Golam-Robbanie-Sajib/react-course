@@ -120,31 +120,17 @@ export function DayPage({ course, day, theoryNode }: DayPageProps) {
     >
       <div className="p-4 sm:p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Badge variant="secondary" className="text-xs font-medium">
-                Day {day.day} of {totalDays}
-              </Badge>
-              <Badge variant="outline" className="text-xs">
-                {day.phase}
-              </Badge>
-            </div>
-            {dayCompleted ? (
-              <Button
-                onClick={handleToggleComplete}
-                size="sm"
-                variant="outline"
-                className="text-green-600 border-green-300 hover:bg-green-50 dark:text-green-400 dark:border-green-700 dark:hover:bg-green-900/50"
-              >
-                <CheckCircle className="h-4 w-4 mr-2" /> Completed
-              </Button>
-            ) : (
-              <Button onClick={handleToggleComplete} size="sm">
-                <CheckCircle className="h-4 w-4 mr-2" /> Mark as Complete
-              </Button>
-            )}
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary" className="text-xs font-medium">
+              Day {day.day} of {totalDays}
+            </Badge>
+            <Badge variant="outline" className="text-xs">
+              {day.phase}
+            </Badge>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white break-words">{day.title}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white break-words">
+            {day.title}
+          </h1>
           <div className="flex flex-wrap gap-2">
             {day.topics.map((topic) => (
               <Badge key={topic} variant="secondary" className="text-xs">
@@ -158,6 +144,21 @@ export function DayPage({ course, day, theoryNode }: DayPageProps) {
               By the end of this lesson, you'll understand {day.topics.join(", ").toLowerCase()}.
             </span>
           </div>
+
+          {dayCompleted ? (
+            <Button
+              onClick={handleToggleComplete}
+              size="sm"
+              variant="outline"
+              className="w-full sm:w-auto text-green-600 border-green-300 hover:bg-green-50 dark:text-green-400 dark:border-green-700 dark:hover:bg-green-900/50"
+            >
+              <CheckCircle className="h-4 w-4 mr-2" /> Completed — undo
+            </Button>
+          ) : (
+            <Button onClick={handleToggleComplete} size="sm" className="w-full sm:w-auto">
+              <CheckCircle className="h-4 w-4 mr-2" /> Mark as Complete
+            </Button>
+          )}
         </div>
       </div>
 

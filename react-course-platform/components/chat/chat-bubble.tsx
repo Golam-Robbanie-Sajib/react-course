@@ -42,6 +42,13 @@ export function ChatBubble() {
   // Hide entirely on login/auth pages where there's no useful context yet.
   const isPublicPage = pathname === "/login" || pathname.startsWith("/auth/")
 
+  // The mobile prev/next dock only shows on day pages. On other pages we can
+  // pull the bubble closer to the bottom so it doesn't float in dead space.
+  const isDayPage = /^\/courses\/[^/]+\/day\//.test(pathname)
+  const bubbleBottom = isDayPage
+    ? "calc(env(safe-area-inset-bottom) + 5.5rem)"
+    : "calc(env(safe-area-inset-bottom) + 1rem)"
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
@@ -142,7 +149,7 @@ export function ChatBubble() {
           aria-label="Open AI tutor chat"
           onClick={() => setOpen(true)}
           className="fixed z-40 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl transition-shadow right-3 sm:right-5"
-          style={{ bottom: "calc(env(safe-area-inset-bottom) + 4.5rem)" }}
+          style={{ bottom: bubbleBottom }}
         >
           <MessageCircle className="h-6 w-6" />
         </button>
