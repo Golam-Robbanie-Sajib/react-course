@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useCallback } from "react"
-import { Menu, X, Home, ChevronRight, BookOpen } from "lucide-react"
+import { Menu, X, Home, ChevronRight, BookOpen, Brain, Layout, Repeat } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { SearchDialog } from "@/components/search-dialog"
@@ -118,6 +118,43 @@ export function CourseLayout({ children, course, currentDay }: CourseLayoutProps
                     <span className="text-xs text-muted-foreground">{c.days.length}d</span>
                   </Link>
                 ))}
+              </div>
+
+              <div className="text-xs uppercase tracking-wide text-muted-foreground pt-2">Tools</div>
+              <div className="space-y-1">
+                <Link
+                  href="/practice"
+                  className={`flex items-center gap-2 p-2 rounded-lg text-sm transition-colors ${
+                    pathname === "/practice"
+                      ? "bg-white/60 dark:bg-white/10 font-medium"
+                      : "hover:bg-white/40 dark:hover:bg-white/5"
+                  }`}
+                >
+                  <Brain className="h-3.5 w-3.5 opacity-70" />
+                  Practice
+                </Link>
+                <Link
+                  href="/review"
+                  className={`flex items-center gap-2 p-2 rounded-lg text-sm transition-colors ${
+                    pathname === "/review"
+                      ? "bg-white/60 dark:bg-white/10 font-medium"
+                      : "hover:bg-white/40 dark:hover:bg-white/5"
+                  }`}
+                >
+                  <Repeat className="h-3.5 w-3.5 opacity-70" />
+                  Spaced review
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className={`flex items-center gap-2 p-2 rounded-lg text-sm transition-colors ${
+                    pathname === "/dashboard"
+                      ? "bg-white/60 dark:bg-white/10 font-medium"
+                      : "hover:bg-white/40 dark:hover:bg-white/5"
+                  }`}
+                >
+                  <Layout className="h-3.5 w-3.5 opacity-70" />
+                  Dashboard
+                </Link>
               </div>
             </div>
 

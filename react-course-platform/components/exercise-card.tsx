@@ -2,11 +2,21 @@
 
 import { useState } from "react"
 import dynamic from "next/dynamic"
-import { ChevronDown, ChevronUp, Lightbulb, Play, CheckCircle2, XCircle, Eye } from "lucide-react"
+import {
+  ChevronDown,
+  ChevronUp,
+  Lightbulb,
+  Play,
+  CheckCircle2,
+  XCircle,
+  Eye,
+  Sparkles,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CodeBlock } from "@/components/code-block"
 import type { Exercise } from "@/lib/courses/types"
+import { useChatContext } from "@/components/chat/chat-context"
 
 const LiveExercise = dynamic(() => import("./live-exercise").then((m) => m.LiveExercise), {
   ssr: false,
@@ -30,10 +40,24 @@ export function ExerciseCard({ exercise, index, courseId, day }: ExerciseCardPro
   const [showSolution, setShowSolution] = useState(false)
   const [hasAttempted, setHasAttempted] = useState(false)
 
+  const { openWithPrompt } = useChatContext()
+
   const hasLive = !!exercise.starter && !!exercise.template
   const hints = exercise.hints || []
   const hasMoreHints = revealedHints < hints.length
   const canShowSolution = hasAttempted || revealedHints >= Math.max(1, hints.length)
+
+  // For exercises without in-browser tests (most notably C), let the user
+  // ask the AI to grade their code. The chat already has the exercise prompt
+  // and the live editor's contents in its context — we just open it with
+  // a clear "please evaluate" question.
+  const hasAutoTests = !!exercise.tests && exercise.tests.length > 0
+  const checkWithAI = () => {
+    setHasAttempted(true)
+    openWithPrompt(
+      `Please check whether my current code correctly solves this exercise: "${exercise.title}".\n\nFirst answer with PASS or FAIL on its own line. Then give 2–3 sentences of specific feedback. If there are bugs, point at the line that's wrong.`
+    )
+  }
 
   return (
     <Card className="border border-gray-200 dark:border-gray-700">
@@ -42,12 +66,16 @@ export function ExerciseCard({ exercise, index, courseId, day }: ExerciseCardPro
           <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-400 text-sm font-bold">
             {index + 1}
           </div>
-          <span className="text-lg font-semibold">{exercise.title}</span>
+          <span className="text-lg font-semibold break-words">{exercise.title}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <p className="text-gray-700 dark:text-gray-300">{exercise.description}</p>
+          {/* Descriptions in course data may include HTML (e.g. <br/>, <code>). */}
+          <div
+            className="prose prose-sm prose-gray dark:prose-invert max-w-none text-gray-700 dark:text-gray-300"
+            dangerouslySetInnerHTML={{ __html: exercise.description }}
+          />
         </div>
 
         {hasLive ? (
@@ -57,6 +85,26 @@ export function ExerciseCard({ exercise, index, courseId, day }: ExerciseCardPro
             onAttempt={() => setHasAttempted(true)}
           />
         ) : null}
+
+        {/* "Check with AI" — shown whenever the exercise can't be auto-graded
+            (no tests) but does have an in-browser editor (so the AI can see
+            actual code in the localStorage snapshot). */}
+        {hasLive && !hasAutoTests && (
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-purple-200 dark:border-purple-900/50 bg-purple-50/60 dark:bg-purple-950/20 p-3">
+            <div className="text-sm text-purple-900 dark:text-purple-100 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 shrink-0" />
+              No automatic compiler here — ask the AI to grade your code.
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={checkWithAI}
+              className="border-purple-300 dark:border-purple-700 shrink-0"
+            >
+              Check my answer
+            </Button>
+          </div>
+        )}
 
         {hints.length > 0 && (
           <div className="rounded-lg border border-amber-200 dark:border-amber-900/50 bg-amber-50/60 dark:bg-amber-950/20 p-4 space-y-3">

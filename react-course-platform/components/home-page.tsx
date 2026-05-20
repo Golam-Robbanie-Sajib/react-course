@@ -33,10 +33,16 @@ export function HomePage() {
               progress that persists locally even without an account.
             </p>
 
-            <div className="flex flex-wrap gap-4 justify-center mb-12">
+            <div className="flex flex-wrap gap-3 sm:gap-4 justify-center mb-8 sm:mb-12">
               <Button size="lg" asChild>
                 <Link href="/courses/html">
                   Start with HTML
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+              <Button variant="outline" size="lg" asChild>
+                <Link href="/courses/c">
+                  Try C
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
@@ -45,6 +51,9 @@ export function HomePage() {
                   Jump to React
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
+              </Button>
+              <Button variant="secondary" size="lg" asChild>
+                <Link href="/practice">Practice now</Link>
               </Button>
             </div>
           </div>

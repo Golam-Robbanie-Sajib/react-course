@@ -52,6 +52,12 @@ export function UserProfile() {
             <Link href="/dashboard">Dashboard</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
+            <Link href="/practice">Practice</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/review">Spaced review</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
             <Link href="/profile">Profile settings</Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
