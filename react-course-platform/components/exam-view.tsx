@@ -192,26 +192,26 @@ export function ExamView({ courseId, courseTitle, questions: pool }: ExamViewPro
 
   return (
     <>
-      <div className="fixed top-16 w-full px-4 z-20">
-        <div className="max-w-3xl mx-auto flex justify-between items-center">
+      <div className="fixed top-14 sm:top-16 w-full px-3 sm:px-4 z-20">
+        <div className="max-w-3xl mx-auto flex justify-between items-center gap-2">
           <div
-            className={`flex items-center space-x-2 px-4 py-2 rounded-full border shadow-lg transition-colors ${
+            className={`flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border shadow-lg transition-colors ${
               parseInt(minutes) < 5
                 ? "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/50 dark:text-red-200 dark:border-red-800"
                 : "bg-white/70 backdrop-blur-lg dark:bg-slate-900/70"
             }`}
           >
-            <Clock className="h-5 w-5" />
-            <span className="text-lg font-semibold tabular-nums">
+            <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="text-base sm:text-lg font-semibold tabular-nums">
               {minutes}:{seconds}
             </span>
           </div>
-          <div className="flex space-x-2">
+          <div className="flex gap-1.5 sm:gap-2">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <X className="h-4 w-4 mr-2" />
-                  Cancel
+                <Button variant="outline" size="sm" aria-label="Cancel exam">
+                  <X className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Cancel</span>
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -227,9 +227,9 @@ export function ExamView({ courseId, courseTitle, questions: pool }: ExamViewPro
             </AlertDialog>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Restart
+                <Button variant="destructive" size="sm" aria-label="Restart exam">
+                  <RefreshCw className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Restart</span>
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -253,7 +253,7 @@ export function ExamView({ courseId, courseTitle, questions: pool }: ExamViewPro
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3 }}
-        className="pt-32"
+        className="pt-24 sm:pt-32"
       >
         <Card className="max-w-3xl mx-auto">
           <CardHeader>

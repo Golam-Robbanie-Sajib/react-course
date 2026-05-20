@@ -113,12 +113,12 @@ export function DayPage({ course, day, theoryNode }: DayPageProps) {
 
   return (
     <motion.div
-      className="max-w-4xl mx-auto space-y-8"
+      className="max-w-4xl mx-auto space-y-6 sm:space-y-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <div className="p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
+      <div className="p-4 sm:p-6 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -144,7 +144,7 @@ export function DayPage({ course, day, theoryNode }: DayPageProps) {
               </Button>
             )}
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{day.title}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white break-words">{day.title}</h1>
           <div className="flex flex-wrap gap-2">
             {day.topics.map((topic) => (
               <Badge key={topic} variant="secondary" className="text-xs">

@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useCallback } from "react"
-import { Menu, X, Home, ChevronRight, BookOpen } from "lucide-react"
+import { Menu, X, Home, ChevronRight, BookOpen, Brain, Layout, Repeat } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { SearchDialog } from "@/components/search-dialog"
@@ -75,7 +75,7 @@ export function CourseLayout({ children, course, currentDay }: CourseLayoutProps
 
       <aside
         className={`
-        fixed top-0 left-0 z-50 h-full w-80 transform transition-transform duration-300 ease-in-out
+        fixed top-0 left-0 z-50 h-full w-[min(20rem,calc(100vw-3rem))] transform transition-transform duration-300 ease-in-out
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
       `}
       >
@@ -119,6 +119,43 @@ export function CourseLayout({ children, course, currentDay }: CourseLayoutProps
                   </Link>
                 ))}
               </div>
+
+              <div className="text-xs uppercase tracking-wide text-muted-foreground pt-2">Tools</div>
+              <div className="space-y-1">
+                <Link
+                  href="/practice"
+                  className={`flex items-center gap-2 p-2 rounded-lg text-sm transition-colors ${
+                    pathname === "/practice"
+                      ? "bg-white/60 dark:bg-white/10 font-medium"
+                      : "hover:bg-white/40 dark:hover:bg-white/5"
+                  }`}
+                >
+                  <Brain className="h-3.5 w-3.5 opacity-70" />
+                  Practice
+                </Link>
+                <Link
+                  href="/review"
+                  className={`flex items-center gap-2 p-2 rounded-lg text-sm transition-colors ${
+                    pathname === "/review"
+                      ? "bg-white/60 dark:bg-white/10 font-medium"
+                      : "hover:bg-white/40 dark:hover:bg-white/5"
+                  }`}
+                >
+                  <Repeat className="h-3.5 w-3.5 opacity-70" />
+                  Spaced review
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className={`flex items-center gap-2 p-2 rounded-lg text-sm transition-colors ${
+                    pathname === "/dashboard"
+                      ? "bg-white/60 dark:bg-white/10 font-medium"
+                      : "hover:bg-white/40 dark:hover:bg-white/5"
+                  }`}
+                >
+                  <Layout className="h-3.5 w-3.5 opacity-70" />
+                  Dashboard
+                </Link>
+              </div>
             </div>
 
             <div className="p-4 border-b border-white/20 dark:border-white/10">
@@ -149,44 +186,58 @@ export function CourseLayout({ children, course, currentDay }: CourseLayoutProps
         </div>
       </aside>
 
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         <header className="sticky top-0 z-30 bg-white/70 dark:bg-slate-950/70 backdrop-blur-lg border-b border-slate-200 dark:border-slate-800">
-          <div className="flex items-center justify-between p-4">
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" onClick={() => setSidebarOpen(true)}>
-                <Menu className="h-4 w-4" />
+          <div className="flex items-center justify-between gap-2 p-3 sm:p-4">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSidebarOpen(true)}
+                aria-label="Open course menu"
+              >
+                <Menu className="h-5 w-5" />
               </Button>
-              <nav className="flex items-center space-x-2 text-sm">
-                <Link href="/" className="flex items-center text-muted-foreground hover:text-foreground">
+              <nav className="flex items-center gap-1.5 text-sm min-w-0 overflow-hidden">
+                <Link
+                  href="/"
+                  className="flex items-center text-muted-foreground hover:text-foreground shrink-0"
+                  aria-label="Home"
+                >
                   <Home className="h-4 w-4" />
                 </Link>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 hidden sm:block" />
                 <Link
                   href={`/courses/${activeCourse.slug}`}
-                  className="font-medium text-foreground hover:underline"
+                  className="font-medium text-foreground hover:underline shrink-0 hidden sm:inline"
                 >
                   {activeCourse.title.split(" in ")[0]}
                 </Link>
-                {currentDayData && currentPhase && (
+                {currentDayData && (
                   <>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    <span
-                      className={`font-medium bg-gradient-to-r ${currentPhase.gradient} bg-clip-text text-transparent`}
-                    >
-                      {currentPhase.name}
-                    </span>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium text-foreground">
-                      Day {currentDay}: {currentDayData.title}
+                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 hidden md:block" />
+                    {currentPhase && (
+                      <span
+                        className={`font-medium bg-gradient-to-r ${currentPhase.gradient} bg-clip-text text-transparent shrink-0 hidden md:inline`}
+                      >
+                        {currentPhase.name}
+                      </span>
+                    )}
+                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 hidden sm:block" />
+                    <span className="font-medium text-foreground truncate min-w-0">
+                      <span className="sm:hidden">Day {currentDay}</span>
+                      <span className="hidden sm:inline">
+                        Day {currentDay}: {currentDayData.title}
+                      </span>
                     </span>
                   </>
                 )}
               </nav>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-2 shrink-0">
               <UserProfile />
               {currentDay && (
-                <div className="hidden sm:flex items-center space-x-2">
+                <div className="hidden sm:flex items-center gap-2">
                   {currentDay > 1 && (
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/courses/${activeCourse.slug}/day/${currentDay - 1}`}>
@@ -204,7 +255,44 @@ export function CourseLayout({ children, course, currentDay }: CourseLayoutProps
             </div>
           </div>
         </header>
-        <main className="p-6 lg:p-8">{children}</main>
+        <main className="p-3 sm:p-6 lg:p-8 pb-24 sm:pb-8">{children}</main>
+
+        {/* Mobile-only sticky prev/next dock — sits above the chat bubble. */}
+        {currentDay && (
+          <div className="fixed bottom-0 inset-x-0 z-30 sm:hidden border-t border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-950/90 backdrop-blur-lg">
+            <div className="flex items-center justify-between gap-2 p-2 pr-20" style={{ paddingBottom: "calc(0.5rem + env(safe-area-inset-bottom))" }}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                disabled={currentDay <= 1}
+                asChild={currentDay > 1}
+              >
+                {currentDay > 1 ? (
+                  <Link href={`/courses/${activeCourse.slug}/day/${currentDay - 1}`}>
+                    ← Prev
+                  </Link>
+                ) : (
+                  <span>← Prev</span>
+                )}
+              </Button>
+              <Button
+                size="sm"
+                className="flex-1"
+                disabled={currentDay >= totalDays}
+                asChild={currentDay < totalDays}
+              >
+                {currentDay < totalDays ? (
+                  <Link href={`/courses/${activeCourse.slug}/day/${currentDay + 1}`}>
+                    Next →
+                  </Link>
+                ) : (
+                  <span>Next →</span>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

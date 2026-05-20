@@ -93,9 +93,17 @@ export function LiveExercise({ exercise, storageKey, onAttempt }: LiveExercisePr
       >
         <PersistFiles storageKey={storageKey} starter={starter} />
         <SandpackLayout style={{ borderRadius: 0 }}>
-          <SandpackCodeEditor showLineNumbers showTabs style={{ height: 380 }} />
-          {wantsPreview && <SandpackPreview style={{ height: 380 }} />}
-          {wantsConsole && <SandpackConsole style={{ height: 380 }} />}
+          <SandpackCodeEditor
+            showLineNumbers
+            showTabs
+            style={{ height: "clamp(260px, 50vh, 380px)" }}
+          />
+          {wantsPreview && (
+            <SandpackPreview style={{ height: "clamp(220px, 40vh, 380px)" }} />
+          )}
+          {wantsConsole && (
+            <SandpackConsole style={{ height: "clamp(180px, 30vh, 380px)" }} />
+          )}
         </SandpackLayout>
         {exercise.tests && exercise.tests.length > 0 ? (
           <TestRunner tests={exercise.tests} storageKey={storageKey} starter={starter} onAttempt={onAttempt} />

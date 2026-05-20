@@ -241,7 +241,7 @@ function SetupPanel({
 
         <div>
           <div className="text-sm font-medium mb-2">How many questions?</div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             {[5, 10, 20, 30, 50].map((n) => (
               <Button
                 key={n}

@@ -17,26 +17,32 @@ export function HomePage() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       <main className="flex-1">
-        <section className="bg-white dark:bg-gray-900 py-16">
-          <div className="max-w-4xl mx-auto px-6 text-center">
+        <section className="bg-white dark:bg-gray-900 py-10 sm:py-16">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
             <Badge variant="outline" className="mb-6 px-4 py-2 text-sm border-gray-300 dark:border-gray-600">
               <Zap className="w-4 h-4 mr-2" />
               Two courses · live coding · save progress without signing in
             </Badge>
 
-            <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            <h1 className="text-3xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 leading-tight">
               Learn the web, one day at a time.
             </h1>
 
-            <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
+            <p className="text-base sm:text-xl text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 max-w-2xl mx-auto">
               Self-paced courses with in-browser editors, automatic test feedback, progressive hints, and
               progress that persists locally even without an account.
             </p>
 
-            <div className="flex flex-wrap gap-4 justify-center mb-12">
+            <div className="flex flex-wrap gap-3 sm:gap-4 justify-center mb-8 sm:mb-12">
               <Button size="lg" asChild>
                 <Link href="/courses/html">
                   Start with HTML
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+              <Button variant="outline" size="lg" asChild>
+                <Link href="/courses/c">
+                  Try C
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
@@ -46,12 +52,15 @@ export function HomePage() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
+              <Button variant="secondary" size="lg" asChild>
+                <Link href="/practice">Practice now</Link>
+              </Button>
             </div>
           </div>
         </section>
 
-        <section className="py-12 bg-gray-50 dark:bg-gray-800">
-          <div className="max-w-6xl mx-auto px-6">
+        <section className="py-8 sm:py-12 bg-gray-50 dark:bg-gray-800">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-10">
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Choose your course</h2>
               <p className="text-gray-600 dark:text-gray-400">
@@ -66,8 +75,8 @@ export function HomePage() {
           </div>
         </section>
 
-        <section className="py-16 bg-white dark:bg-gray-900">
-          <div className="max-w-6xl mx-auto px-6">
+        <section className="py-10 sm:py-16 bg-white dark:bg-gray-900">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <h2 className="text-3xl font-bold text-center mb-10">What makes this practical</h2>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {[
