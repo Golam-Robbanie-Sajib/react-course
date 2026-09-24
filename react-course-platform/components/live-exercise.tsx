@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import {
   SandpackProvider,
   SandpackLayout,
@@ -12,11 +12,15 @@ import {
 import { CheckCircle2, Play, RefreshCw, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Exercise, ExerciseTest, SandboxTemplate } from "@/lib/courses/types"
+import { CRunPanel } from "@/components/c-run-panel"
+import { logActivity } from "@/lib/activity"
 
 interface LiveExerciseProps {
   exercise: Exercise
   storageKey: string
   onAttempt?: () => void
+  /** Called when every auto-graded test passes. */
+  onAllPassed?: () => void
 }
 
 const TEMPLATE_MAP: Record<SandboxTemplate, "vanilla" | "static" | "react"> = {
@@ -24,8 +28,8 @@ const TEMPLATE_MAP: Record<SandboxTemplate, "vanilla" | "static" | "react"> = {
   static: "static",
   react: "react",
   "react-ts": "react",
-  // C exercises render in Sandpack as if vanilla (just for the editor chrome);
-  // the in-browser preview/console is hidden since we can't compile C client-side.
+  // C exercises use Sandpack only for the editor; code runs in our own
+  // C interpreter worker (see components/c-run-panel.tsx).
   c: "vanilla",
 }
 
@@ -48,7 +52,8 @@ function writeSavedFiles(storageKey: string, files: Record<string, string>) {
   }
 }
 
-export function LiveExercise({ exercise, storageKey, onAttempt }: LiveExerciseProps) {
+export function LiveExercise({ exercise, storageKey, onAttempt, onAllPassed }: LiveExerciseProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null)
   const isC = exercise.template === "c"
   const template = TEMPLATE_MAP[exercise.template || "vanilla"]
   const wantsPreview = !isC && (template === "react" || template === "static")
@@ -83,7 +88,7 @@ export function LiveExercise({ exercise, storageKey, onAttempt }: LiveExercisePr
     // min-w-0 + max-w-full clamps the Sandpack iframe + editor to the parent
     // card width so long code lines scroll inside the editor instead of
     // pushing the entire card past the viewport.
-    <div className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 min-w-0 max-w-full">
+    <div ref={containerRef} className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 min-w-0 max-w-full">
       <SandpackProvider
         template={template}
         files={initialFiles}
@@ -108,8 +113,23 @@ export function LiveExercise({ exercise, storageKey, onAttempt }: LiveExercisePr
             <SandpackConsole style={{ height: "clamp(180px, 30vh, 380px)" }} />
           )}
         </SandpackLayout>
-        {exercise.tests && exercise.tests.length > 0 ? (
-          <TestRunner tests={exercise.tests} storageKey={storageKey} starter={starter} onAttempt={onAttempt} />
+        {isC ? (
+          <CRunPanel
+            tests={(exercise.tests ?? []).filter((t) => t.runner === "c-io")}
+            starter={starter}
+            storageKey={storageKey}
+            containerRef={containerRef}
+            onAttempt={onAttempt}
+            onAllPassed={onAllPassed}
+          />
+        ) : exercise.tests && exercise.tests.length > 0 ? (
+          <TestRunner
+            tests={exercise.tests}
+            storageKey={storageKey}
+            starter={starter}
+            onAttempt={onAttempt}
+            onAllPassed={onAllPassed}
+          />
         ) : (
           <ToolBar storageKey={storageKey} starter={starter} onAttempt={onAttempt} />
         )}
@@ -202,14 +222,14 @@ async function runTests(
           }
           const doc = new DOMParser().parseFromString(html, "text/html")
           // eslint-disable-next-line no-new-func
-          const fn = new Function("doc", `return (function(){ ${t.assertion} })();`)
+          const fn = new Function("doc", `return (function(){ ${t.assertion ?? "return false"} })();`)
           const result = await Promise.resolve(fn(doc))
           return { description: t.description, passed: !!result }
         }
         // Default "js" runner — also supports async assertions (Promise return).
         const target = t.targetFile || jsFile
         const code = files[target]?.code || ""
-        const body = `${code}\n;return (function(){ ${t.assertion} })();`
+        const body = `${code}\n;return (function(){ ${t.assertion ?? "return false"} })();`
         // eslint-disable-next-line no-new-func
         const fn = new Function(body)
         const result = await Promise.resolve(fn())
@@ -226,11 +246,13 @@ function TestRunner({
   storageKey,
   starter,
   onAttempt,
+  onAllPassed,
 }: {
   tests: ExerciseTest[]
   storageKey: string
   starter: Record<string, string>
   onAttempt?: () => void
+  onAllPassed?: () => void
 }) {
   const { sandpack } = useSandpack()
   const [results, setResults] = useState<TestResult[] | null>(null)
@@ -242,6 +264,10 @@ function TestRunner({
     try {
       const r = await runTests(sandpack.files, sandpack.activeFile, tests)
       setResults(r)
+      if (r.length > 0 && r.every((x) => x.passed)) {
+        logActivity("tests_passed")
+        onAllPassed?.()
+      }
     } finally {
       setRunning(false)
     }

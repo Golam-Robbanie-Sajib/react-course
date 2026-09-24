@@ -5,7 +5,8 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { CheckCircle, XCircle, Lightbulb, RefreshCw } from "lucide-react"
+import { CheckCircle, XCircle, Lightbulb, RefreshCw, Sparkles } from "lucide-react"
+import { useChatContext } from "@/components/chat/chat-context"
 import type { QuizQuestion } from "@/lib/courses/types"
 import { useQuizAttempts, questionId } from "@/hooks/use-quiz-attempts"
 
@@ -17,6 +18,7 @@ interface QuizSectionProps {
 
 export function QuizSection({ questions, courseId, day }: QuizSectionProps) {
   const { record } = useQuizAttempts()
+  const { openWithPrompt } = useChatContext()
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswerIndex, setSelectedAnswerIndex] = useState<number | null>(null)
   const [showResult, setShowResult] = useState(false)
@@ -139,6 +141,20 @@ export function QuizSection({ questions, courseId, day }: QuizSectionProps) {
             >
               <h4 className="font-semibold mb-2">Explanation</h4>
               <p className="text-sm text-muted-foreground">{currentQuestion.explanation}</p>
+              {selectedAnswerIndex !== null && selectedAnswerIndex !== currentQuestion.correctAnswerIndex && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="mt-3"
+                  onClick={() =>
+                    openWithPrompt(
+                      `In the quiz I was asked: "${currentQuestion.question}". I chose "${currentQuestion.options[selectedAnswerIndex]}" but the answer is "${currentQuestion.options[currentQuestion.correctAnswerIndex]}". Explain why my answer is wrong and why the correct one is right, with a small example.`
+                    )
+                  }
+                >
+                  <Sparkles className="h-3.5 w-3.5 mr-1.5 text-purple-500" /> Explain why
+                </Button>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

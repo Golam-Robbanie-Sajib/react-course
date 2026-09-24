@@ -9,6 +9,7 @@ import { AuthGate } from "@/components/auth/auth-gate"
 import { ChatContextProvider } from "@/components/chat/chat-context"
 import { ChatBubble } from "@/components/chat/chat-bubble"
 import { Toaster } from "@/components/ui/toaster"
+import { PwaRegister } from "@/components/pwa-register"
 import "./globals.css"
 
 const inter = Inter({
@@ -21,6 +22,9 @@ export const metadata: Metadata = {
   title: "Self-Learn Hub — HTML, C, and React, in-browser",
   description:
     "Self-paced HTML, C, and React courses with live in-browser exercises, auto-graded tests, progressive hints, an AI tutor, and progress that syncs across devices.",
+  applicationName: "Self-Learn Hub",
+  appleWebApp: { capable: true, title: "Self-Learn", statusBarStyle: "default" },
+  icons: { apple: "/icons/apple-touch-icon.png" },
 }
 
 export const viewport: Viewport = {
@@ -46,6 +50,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 <ChatBubble />
               </ChatContextProvider>
               <Toaster richColors />
+              <PwaRegister />
             </Providers>
           </AuthProvider>
         </ThemeProvider>

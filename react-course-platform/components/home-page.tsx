@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowRight, BookOpen, Clock, Code, Lightbulb, Zap, GraduationCap } from "lucide-react"
+import { ArrowRight, BookOpen, Clock, Code, Lightbulb, Zap, GraduationCap, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -19,9 +19,12 @@ export function HomePage() {
       <main className="flex-1">
         <section className="bg-white dark:bg-gray-900 py-10 sm:py-16">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-            <Badge variant="outline" className="mb-6 px-4 py-2 text-sm border-gray-300 dark:border-gray-600">
-              <Zap className="w-4 h-4 mr-2" />
-              Two courses · live coding · save progress without signing in
+            <Badge
+              variant="outline"
+              className="mb-6 max-w-full whitespace-normal px-4 py-2 text-xs sm:text-sm leading-snug border-gray-300 dark:border-gray-600"
+            >
+              <Zap className="w-4 h-4 mr-2 shrink-0" />
+              HTML · C · React — run code in your browser, graded instantly
             </Badge>
 
             <h1 className="text-3xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 leading-tight">
@@ -29,8 +32,8 @@ export function HomePage() {
             </h1>
 
             <p className="text-base sm:text-xl text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 max-w-2xl mx-auto">
-              Self-paced courses with in-browser editors, automatic test feedback, progressive hints, and
-              progress that persists locally even without an account.
+              Self-paced courses with in-browser editors, automatically graded exercises, an AI tutor that
+              sees your code, and progress that syncs across your devices.
             </p>
 
             <div className="flex flex-wrap gap-3 sm:gap-4 justify-center mb-8 sm:mb-12">
@@ -67,7 +70,7 @@ export function HomePage() {
                 Each course follows the same proven structure: theory → live exercise → quiz.
               </p>
             </div>
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {courses.map((c) => (
                 <CourseCard key={c.id} course={c} />
               ))}
@@ -78,17 +81,17 @@ export function HomePage() {
         <section className="py-10 sm:py-16 bg-white dark:bg-gray-900">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <h2 className="text-3xl font-bold text-center mb-10">What makes this practical</h2>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {[
                 {
                   icon: Code,
                   title: "Live, in-browser coding",
-                  desc: "Every exercise opens a sandboxed editor + preview. No installs, no setup — type and see results.",
+                  desc: "Every exercise opens an editor right in the page — HTML and React preview live, C programs compile and run in your browser. No installs.",
                 },
                 {
                   icon: GraduationCap,
                   title: "Auto-graded with tests",
-                  desc: "Run the included tests to know if your solution actually works, instead of guessing.",
+                  desc: "Run the tests to know your solution really works. C programs are checked against real input and output, just like an exam grader.",
                 },
                 {
                   icon: Lightbulb,
@@ -96,9 +99,9 @@ export function HomePage() {
                   desc: "Stuck? Reveal hints one at a time. Solutions stay locked until you've tried.",
                 },
                 {
-                  icon: BookOpen,
-                  title: "Works without an account",
-                  desc: "Progress, notes, and confidence ratings save to your device. Sign in later to sync.",
+                  icon: Sparkles,
+                  title: "AI tutor that sees your code",
+                  desc: "Stuck? The tutor knows the lesson you're on and the code you wrote, so it can point at the exact line that's wrong.",
                 },
                 {
                   icon: Clock,
@@ -108,7 +111,7 @@ export function HomePage() {
                 {
                   icon: Zap,
                   title: "Keyboard friendly",
-                  desc: "← / → to jump between days, ⌘K to search across both courses' content.",
+                  desc: "← / → to jump between days, ⌘K to search every course, Ctrl+Enter to run code.",
                 },
               ].map((f) => (
                 <Card key={f.title} className="border border-gray-200 dark:border-gray-700">

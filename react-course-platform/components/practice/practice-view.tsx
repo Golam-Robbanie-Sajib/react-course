@@ -334,7 +334,7 @@ function McqRunner({
   setAnswer: (n: number) => void
   markSubmitted: () => void
 }) {
-  const { setContext } = useChatContext()
+  const { setContext, openWithPrompt } = useChatContext()
   useEffect(() => {
     setContext({
       pageTitle: "Practice MCQ",
@@ -390,6 +390,20 @@ function McqRunner({
               {isCorrect ? "Correct!" : "Not quite."}
             </div>
             <div className="text-muted-foreground">{item.question.explanation}</div>
+            {!isCorrect && answer !== null && answer !== undefined && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="mt-3"
+                onClick={() =>
+                  openWithPrompt(
+                    `I answered "${item.question.options[answer]}" to "${item.question.question}", but the correct answer is "${item.question.options[correct]}". Explain why, with a small example.`
+                  )
+                }
+              >
+                <Sparkles className="h-3.5 w-3.5 mr-1.5 text-purple-500" /> Explain why
+              </Button>
+            )}
           </div>
         )}
         <div className="flex justify-end">

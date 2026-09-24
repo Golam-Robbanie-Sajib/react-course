@@ -58,6 +58,9 @@ export function UserProfile() {
             <Link href="/review">Spaced review</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
+            <Link href="/playground">C Playground</Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
             <Link href="/profile">Profile settings</Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />

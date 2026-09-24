@@ -10,6 +10,8 @@ export interface ChatPageContext {
   exercisePrompt?: string
   /** A getter that reads the user's current code, called fresh on each send. */
   getUserCode?: () => string
+  /** A getter for the lesson's text content, so the tutor can explain it. */
+  getLessonText?: () => string
   starterCode?: string
   language?: string
 }
@@ -18,7 +20,7 @@ interface ChatContextValue {
   /** Replace the chat context for the current page. */
   setContext: (next: ChatPageContext) => void
   /** Build a snapshot of the current context (calls getUserCode if set). */
-  snapshot: () => Omit<ChatPageContext, "getUserCode"> & { userCode?: string }
+  snapshot: () => Omit<ChatPageContext, "getUserCode" | "getLessonText"> & { userCode?: string; lessonText?: string }
   /** Open the chat dialog programmatically (e.g. "Ask AI" buttons). */
   open: () => void
   /** Open the chat and immediately send a pre-filled user message. */
@@ -41,10 +43,11 @@ export function ChatContextProvider({ children }: { children: React.ReactNode })
   }, [])
 
   const snapshot = useCallback(() => {
-    const { getUserCode, ...rest } = ctx
+    const { getUserCode, getLessonText, ...rest } = ctx
     return {
       ...rest,
       userCode: getUserCode ? getUserCode() : undefined,
+      lessonText: getLessonText ? getLessonText().slice(0, 6000) : undefined,
     }
   }, [ctx])
 

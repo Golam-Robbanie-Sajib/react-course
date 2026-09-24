@@ -1,0 +1,124 @@
+diff --git a/lib/includes/cstdio.js b/lib/includes/cstdio.js
+index 0aecc2ad955d5129ca78c01f9abf25050174b308..d45e97d1385644bd043c36fe45f78e8580685a4b 100644
+--- a/lib/includes/cstdio.js
++++ b/lib/includes/cstdio.js
+@@ -99,7 +99,9 @@ module.exports = {
+         const _strcpy = require("./shared/cstring_strcpy");
+         const __printf = function (format, ...params) {
+             if (rt.isStringType(format.t)) {
+-                const formatStr = rt.getStringFromCharArray(format);
++                // Patched: drop C length modifiers (%lf, %ld, %lld, %hd, %Lf ...)
++                // which the underlying printf formatter doesn't understand.
++                const formatStr = rt.getStringFromCharArray(format).replace(/(%[-+ #0]*(?:[0-9]+|\*)?(?:\.(?:[0-9]+|\*))?)(?:hh|h|ll|l|L|z|j|t)([diuoxXfFeEgGaAcs])/g, "$1$2");
+                 const parsed_params = validate_format(rt, formatStr, ...params);
+                 const retval = printf(formatStr, ...parsed_params);
+                 return rt.makeCharArrayFromString(retval);
+@@ -363,6 +365,9 @@ module.exports = {
+             let ret;
+             switch (type) {
+                 case "%d":
++                case "%i":
++                case "%hd":
++                case "%lld":
+                 case "%ld":
+                 case "%llu":
+                 case "%lu":
+@@ -387,6 +392,10 @@ module.exports = {
+                     ret = _get_octal(pre, next);
+                     break;
+                 case '%f':
++                case '%lf':
++                case '%Lf':
++                case '%e':
++                case '%g':
+                     ret = _get_float(pre, next);
+                     break;
+                 default:
+@@ -394,10 +403,15 @@ module.exports = {
+             }
+             return ret;
+         };
+-        const _set_pointer_value = function (pointer, value) {
++        const _set_pointer_value = function (pointer, value, isString) {
+             try {
+                 let new_value;
+                 if (rt.isNormalPointerType(pointer)) {
++                    // Patched: %c reads a character string; store its char code.
++                    if (rt.isCharType(pointer.t.targetType) && typeof value === "string") {
++                        new_value = rt.val(pointer.t.targetType, value.length ? value.charCodeAt(0) : 0, true);
++                        return pointer.v.target.v = new_value.v;
++                    }
+                     if (rt.isNumericType(pointer.t.targetType)) {
+                         new_value = rt.val(pointer.t.targetType, value, true);
+                         return pointer.v.target.v = new_value.v;
+@@ -408,20 +422,32 @@ module.exports = {
+                     }
+                 }
+                 else if (rt.isArrayType(pointer)) {
+-                    const src_array = rt.makeCharArrayFromString(value);
+-                    if (src_array.v.target.length > pointer.v.target.length) {
+-                        return rt.raiseException("Not enough memory on pointer");
++                    // Patched: respect the element position so `&arr[i]` works,
++                    // and only treat the target as a char buffer for %s reads.
++                    const pos = pointer.v.position || 0;
++                    const eleType = pointer.t.eleType;
++                    if (isString) {
++                        const src_array = rt.makeCharArrayFromString(value);
++                        if (pos + src_array.v.target.length > pointer.v.target.length) {
++                            return rt.raiseException("Not enough memory on pointer");
++                        }
++                        for (let i = 0; i < src_array.v.target.length; i++) {
++                            pointer.v.target[pos + i] = src_array.v.target[i];
++                        }
++                        return;
++                    }
++                    const slot = pointer.v.target[pos];
++                    if (!slot) {
++                        return rt.raiseException("index out of bound " + pos + " >= " + pointer.v.target.length);
++                    }
++                    if (rt.isCharType(eleType) && typeof value === "string") {
++                        new_value = rt.val(eleType, value.charCodeAt(0), true);
+                     }
+                     else {
+-                        return __range__(0, src_array.v.target.length, true).map((i) => (() => {
+-                            try {
+-                                return pointer.v.target[i] = src_array.v.target[i];
+-                            }
+-                            catch (error) {
+-                                return rt.raiseException("Not enough memory on pointer");
+-                            }
+-                        })());
++                        new_value = rt.val(eleType, value, true);
+                     }
++                    slot.v = new_value.v;
++                    return;
+                 }
+                 else {
+                     return rt.raiseException("Invalid Pointer Type");
+@@ -434,7 +460,7 @@ module.exports = {
+         const __scanf = function (format) {
+             const re = new RegExp('[^%]*%[A-Za-z][^%]*', 'g');
+             const selectors = format.match(re);
+-            return Array.from(selectors).map((val) => _deal_type(val));
++            return Array.from(selectors || []).map((val) => ({ value: _deal_type(val), isString: /%\d*[sS]/.test(val) }));
+         };
+         const _scanf = function (rt, _this, pchar, ...args) {
+             let val;
+@@ -442,7 +468,7 @@ module.exports = {
+             const matched_values = __scanf(format);
+             for (let i = 0; i < matched_values.length; i++) {
+                 val = matched_values[i];
+-                _set_pointer_value(args[i], val);
++                _set_pointer_value(args[i], val.value, val.isString);
+             }
+             return rt.val(rt.intTypeLiteral, matched_values.length);
+         };
+@@ -456,7 +482,7 @@ module.exports = {
+             const matched_values = __scanf(format);
+             for (let i = 0; i < matched_values.length; i++) {
+                 val = matched_values[i];
+-                _set_pointer_value(args[i], val);
++                _set_pointer_value(args[i], val.value, val.isString);
+             }
+             input_stream = original_input_stream;
+             return rt.val(rt.intTypeLiteral, matched_values.length);

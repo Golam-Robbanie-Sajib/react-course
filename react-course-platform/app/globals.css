@@ -204,6 +204,20 @@
   @apply mb-4 pl-6;
 }
 
+/* Tailwind's preflight removes list markers; restore them for lesson text. */
+.prose ul {
+  list-style: disc;
+}
+.prose ol {
+  list-style: decimal;
+}
+.prose ul ul {
+  list-style: circle;
+}
+.prose li::marker {
+  color: var(--muted-foreground);
+}
+
 .prose li {
   @apply mb-2 text-muted-foreground;
 }
@@ -284,15 +298,25 @@
      no matter how long an unbreakable code line or external iframe is.
      Without this, a single long line in Sandpack pushes the parent card
      past the viewport and creates a jagged right edge. */
+  /* clip (not hidden): hidden would make <body> a scroll container, which
+     silently breaks position: sticky on the header. */
   html,
   body {
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   /* Container clamp helpers used by cards and content blocks. */
   main {
     max-width: 100vw;
   }
+}
+
+/* Grid and flex children default to min-width: auto, which lets a single long
+   code line or URL stretch a card past the viewport ("grid blowout"). Let them
+   shrink; content that genuinely needs room scrolls inside its own box. */
+.grid > *,
+.flex > * {
+  min-width: 0;
 }
 
 /* Reduced motion preferences */
@@ -336,5 +360,20 @@
      scroll horizontally INSIDE the editor instead of pushing the parent. */
   .sp-cm .cm-scroller {
     overflow-x: auto;
+  }
+}
+
+/* Print: only the page content (used by the certificate). */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  .certificate {
+    break-inside: avoid;
   }
 }

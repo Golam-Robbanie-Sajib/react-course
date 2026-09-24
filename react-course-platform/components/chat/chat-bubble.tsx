@@ -148,7 +148,7 @@ export function ChatBubble() {
           type="button"
           aria-label="Open AI tutor chat"
           onClick={() => setOpen(true)}
-          className="fixed z-40 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl transition-shadow right-3 sm:right-5"
+          className="print:hidden fixed z-40 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl transition-shadow right-3 sm:right-5"
           style={{ bottom: bubbleBottom }}
         >
           <MessageCircle className="h-6 w-6" />
@@ -157,7 +157,7 @@ export function ChatBubble() {
 
       {open && (
         <div
-          className="fixed z-40 right-0 left-0 sm:left-auto sm:right-5 mx-auto sm:mx-0 w-full sm:w-[min(380px,calc(100vw-2rem))] max-w-[100vw] flex flex-col rounded-t-xl sm:rounded-xl border-t sm:border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-2xl overflow-hidden"
+          className="print:hidden fixed z-40 right-0 left-0 sm:left-auto sm:right-5 mx-auto sm:mx-0 w-full sm:w-[min(380px,calc(100vw-2rem))] max-w-[100vw] flex flex-col rounded-t-xl sm:rounded-xl border-t sm:border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-2xl overflow-hidden"
           style={{
             bottom: 0,
             maxHeight: "min(85vh, 720px)",

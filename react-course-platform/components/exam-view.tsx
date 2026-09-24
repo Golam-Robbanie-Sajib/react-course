@@ -9,6 +9,8 @@ import { ArrowRight, CheckCircle, RefreshCw, Trophy, Clock, X } from "lucide-rea
 import { useCountdown } from "@/hooks/use-countdown"
 import { useRouter } from "next/navigation"
 import { useProgress } from "@/hooks/use-progress"
+import { logActivity } from "@/lib/activity"
+import { ExamResults } from "@/components/exam-results"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -66,7 +68,12 @@ export function ExamView({ courseId, courseTitle, questions: pool }: ExamViewPro
       if (finalAnswers[i] === savedQuestions[i].correctAnswerIndex) finalScore++
     }
     setScore(finalScore)
+    // Restore what was answered so the review works even when the exam
+    // auto-finished after the page was closed and reopened.
+    setQuestions(savedQuestions)
+    setUserAnswers(finalAnswers)
     updateExamScores({ newScore: finalScore, totalQuestions: savedQuestions.length })
+    logActivity("exam_finished")
     setExamFinished(true)
     setExamState("finished")
     clearExamState()
@@ -166,24 +173,15 @@ export function ExamView({ courseId, courseTitle, questions: pool }: ExamViewPro
   }
 
   if (examState === "finished") {
-    const percentage = questions.length > 0 ? Math.round((score / questions.length) * 100) : 0
     return (
-      <div className="flex flex-col items-center justify-center text-center p-8">
-        <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
-        <h1 className="text-3xl font-bold mb-2">Exam complete!</h1>
-        <p className="text-muted-foreground mb-6">Your score has been saved.</p>
-        <Card className="p-8">
-          <p className="text-lg">Your score</p>
-          <p className="text-5xl font-bold my-2">{percentage}%</p>
-          <p className="text-muted-foreground">
-            You answered {score} out of {questions.length} questions correctly.
-          </p>
-        </Card>
-        <Button size="lg" onClick={() => setExamState("idle")} className="mt-8">
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Back to exam page
-        </Button>
-      </div>
+      <ExamResults
+        courseId={courseId}
+        questions={questions}
+        answers={userAnswers}
+        score={score}
+        highestScore={highestScore}
+        onBack={() => setExamState("idle")}
+      />
     )
   }
 
@@ -284,23 +282,32 @@ export function ExamView({ courseId, courseTitle, questions: pool }: ExamViewPro
                 )
               })}
             </div>
-            <div className="flex justify-between items-center pt-4">
+            <div className="flex flex-wrap justify-between items-center gap-3 pt-4">
               <span className="text-sm text-muted-foreground">
                 Answered: {userAnswers.filter((a) => a !== null).length}/{questions.length}
               </span>
-              {currentQuestionIndex < questions.length - 1 ? (
-                <Button onClick={handleNextQuestion} disabled={selectedAnswer === null}>
-                  Next question <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              ) : (
+              <div className="flex gap-2 ml-auto">
                 <Button
-                  onClick={handleFinishExam}
-                  disabled={selectedAnswer === null}
-                  className="bg-green-600 hover:bg-green-700"
+                  variant="outline"
+                  onClick={() => setCurrentQuestionIndex((i) => Math.max(0, i - 1))}
+                  disabled={currentQuestionIndex === 0}
                 >
-                  Finish exam <Trophy className="h-4 w-4 ml-2" />
+                  Previous
                 </Button>
-              )}
+                {currentQuestionIndex < questions.length - 1 ? (
+                  <Button onClick={handleNextQuestion} disabled={selectedAnswer === null}>
+                    Next <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleFinishExam}
+                    disabled={selectedAnswer === null}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    Finish <Trophy className="h-4 w-4 ml-2" />
+                  </Button>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>

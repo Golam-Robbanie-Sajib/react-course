@@ -160,6 +160,14 @@ int main() {
 }
 `,
         },
+        tests: [
+          {
+            description: "Prints exactly: Hello, World!",
+            runner: "c-io",
+            stdin: "",
+            expectedOutput: "Hello, World!",
+          },
+        ],
         hints: [
           "#include <stdio.h> brings in printf.",
           "Every C program starts at main().",
@@ -217,6 +225,14 @@ int main() {
 }
 `,
         },
+        tests: [
+          {
+            description: "Prints the three required lines in order",
+            runner: "c-io",
+            stdin: "",
+            expectedOutput: "My name is Sara.\nI am learning C.\nPress any key to continue.",
+          },
+        ],
         hints: [
           "Use three printf calls.",
           "End each string with \\n to move to the next line.",
@@ -279,6 +295,14 @@ int main() {
 }
 `,
         },
+        tests: [
+          {
+            description: "Prints all four variables in the required format",
+            runner: "c-io",
+            stdin: "",
+            expectedOutput: "age = 17\ngrade = A\nheight = 5.400000\ngpa = 3.850000",
+          },
+        ],
         hints: [
           "Use %d for int, %c for char, %f for float, %lf for double.",
           "Surround char literals with single quotes: 'A'.",
@@ -356,6 +380,14 @@ int main() {
 }
 `,
         },
+        tests: [
+          {
+            description: "Prints sum, difference, product and quotient of 12 and 4",
+            runner: "c-io",
+            stdin: "",
+            expectedOutput: "number1 + number2 = 16\nnumber1 - number2 = 8\nnumber1 * number2 = 48\nnumber1 / number2 = 3",
+          },
+        ],
         hints: [
           "You can put an arithmetic expression directly inside printf as an argument.",
           "Format: printf(\"number1 + number2 = %d\\n\", number1 + number2);",
@@ -412,7 +444,7 @@ int main() {
       {
         title: "Celsius to Fahrenheit converter",
         description:
-          "Read a float from the user representing a Celsius temperature. Compute the Fahrenheit equivalent using <code>F = 1.8 * C + 32</code> and print it.",
+          "Read a float from the user representing a Celsius temperature. Compute the Fahrenheit equivalent using <code>F = 1.8 * C + 32</code> and print it, e.g. <code>Fahrenheit = 212.000000</code> for an input of 100.",
         template: "c",
         activeFile: "/main.c",
         starter: {
@@ -425,6 +457,29 @@ int main() {
 }
 `,
         },
+        tests: [
+          {
+            description: "100°C → 212°F",
+            runner: "c-io",
+            stdin: "100",
+            expectedOutput: "212",
+            match: "contains",
+          },
+          {
+            description: "0°C → 32°F",
+            runner: "c-io",
+            stdin: "0",
+            expectedOutput: "32",
+            match: "contains",
+          },
+          {
+            description: "-40°C → -40°F",
+            runner: "c-io",
+            stdin: "-40",
+            expectedOutput: "-40",
+            match: "contains",
+          },
+        ],
         hints: [
           "Use scanf(\"%f\", &celsius) to read a float.",
           "C operator precedence makes 1.8 * celsius happen before + 32, so parentheses aren't strictly needed.",
@@ -475,12 +530,12 @@ int main() {
     title: "If / else / else if",
     topics: ["Relational operators", "if", "if-else", "else if chain"],
     resources: [],
-    theory: `Sometimes we want code to run only when a condition is true. That's the job of the <code>if</code> statement.<br/><br/><strong>Relational operators</strong><br/>These compare two values and produce <strong>true</strong> (non-zero) or <strong>false</strong> (zero):<ul><li><code>==</code> equal</li><li><code>!=</code> not equal</li><li><code>&gt;</code> greater than</li><li><code>&lt;</code> less than</li><li><code>&gt;=</code> greater than or equal</li><li><code>&lt;=</code> less than or equal</li></ul><strong>Warning:</strong> <code>=</code> is <em>assignment</em>, <code>==</code> is <em>comparison</em>. Mixing them up is one of the most common C bugs.<br/><br/><strong>if</strong><br/><code>if (condition) {<br/>&nbsp;&nbsp;&nbsp;&nbsp;statement;<br/>}</code><br/><br/><strong>if / else</strong><br/><code>if (condition) {<br/>&nbsp;&nbsp;&nbsp;&nbsp;// runs if true<br/>} else {<br/>&nbsp;&nbsp;&nbsp;&nbsp;// runs if false<br/>}</code><br/><br/><strong>else if chain</strong><br/>For multiple mutually-exclusive cases:<br/><code>if (cond1) { ... }<br/>else if (cond2) { ... }<br/>else if (cond3) { ... }<br/>else { ... }</code><br/><br/>The chain is evaluated top to bottom. As soon as one condition is true, its block runs and the rest are skipped.<br/><br/><strong>Example: grade calculator (textbook Example 7)</strong><br/>Read marks. Print 'A' if marks ≥ 80, 'A' if ≥ 70, 'A-' if ≥ 60, 'B' if ≥ 50, 'C' if ≥ 40, 'D' if ≥ 33, else 'F'.`,
+    theory: `Sometimes we want code to run only when a condition is true. That's the job of the <code>if</code> statement.<br/><br/><strong>Relational operators</strong><br/>These compare two values and produce <strong>true</strong> (non-zero) or <strong>false</strong> (zero):<ul><li><code>==</code> equal</li><li><code>!=</code> not equal</li><li><code>&gt;</code> greater than</li><li><code>&lt;</code> less than</li><li><code>&gt;=</code> greater than or equal</li><li><code>&lt;=</code> less than or equal</li></ul><strong>Warning:</strong> <code>=</code> is <em>assignment</em>, <code>==</code> is <em>comparison</em>. Mixing them up is one of the most common C bugs.<br/><br/><strong>if</strong><br/><code>if (condition) {<br/>&nbsp;&nbsp;&nbsp;&nbsp;statement;<br/>}</code><br/><br/><strong>if / else</strong><br/><code>if (condition) {<br/>&nbsp;&nbsp;&nbsp;&nbsp;// runs if true<br/>} else {<br/>&nbsp;&nbsp;&nbsp;&nbsp;// runs if false<br/>}</code><br/><br/><strong>else if chain</strong><br/>For multiple mutually-exclusive cases:<br/><code>if (cond1) { ... }<br/>else if (cond2) { ... }<br/>else if (cond3) { ... }<br/>else { ... }</code><br/><br/>The chain is evaluated top to bottom. As soon as one condition is true, its block runs and the rest are skipped.<br/><br/><strong>Example: grade calculator (textbook Example 7)</strong><br/>Read marks. Print 'A+' if marks ≥ 80, 'A' if ≥ 70, 'A-' if ≥ 60, 'B' if ≥ 50, 'C' if ≥ 40, 'D' if ≥ 33, else 'F'.`,
     exercises: [
       {
         title: "Grade calculator",
         description:
-          "Read an integer <code>marks</code>. Print the grade following the rules above. Use an else-if chain.",
+          "Read an integer <code>marks</code>. Print the grade following the rules above, in the form <code>Your grade is A+</code>. Use an else-if chain.",
         template: "c",
         activeFile: "/main.c",
         starter: {
@@ -494,6 +549,38 @@ int main() {
 }
 `,
         },
+        tests: [
+          {
+            description: "85 marks → A+",
+            runner: "c-io",
+            stdin: "85",
+            expectedOutput: "Your grade is A+",
+          },
+          {
+            description: "75 marks → A",
+            runner: "c-io",
+            stdin: "75",
+            expectedOutput: "Your grade is A",
+          },
+          {
+            description: "65 marks → A-",
+            runner: "c-io",
+            stdin: "65",
+            expectedOutput: "Your grade is A-",
+          },
+          {
+            description: "33 marks → D (boundary)",
+            runner: "c-io",
+            stdin: "33",
+            expectedOutput: "Your grade is D",
+          },
+          {
+            description: "20 marks → F",
+            runner: "c-io",
+            stdin: "20",
+            expectedOutput: "Your grade is F",
+          },
+        ],
         hints: [
           "Order matters — check the highest threshold first.",
           "Use printf(\"Your grade is A+\\n\") for the top grade.",
@@ -565,7 +652,7 @@ int main() {
       {
         title: "FizzBuzz for one number",
         description:
-          "Read an int <code>n</code>. Print 'FizzBuzz' if n is divisible by both 3 and 5, 'Fizz' if only by 3, 'Buzz' if only by 5. Otherwise print nothing.",
+          "Read an int <code>n</code>. Print <code>FizzBuzz</code> if n is divisible by both 3 and 5, <code>Fizz</code> if only by 3, <code>Buzz</code> if only by 5. Otherwise print nothing.",
         template: "c",
         activeFile: "/main.c",
         starter: {
@@ -579,6 +666,32 @@ int main() {
 }
 `,
         },
+        tests: [
+          {
+            description: "15 → FizzBuzz",
+            runner: "c-io",
+            stdin: "15",
+            expectedOutput: "FizzBuzz",
+          },
+          {
+            description: "9 → Fizz",
+            runner: "c-io",
+            stdin: "9",
+            expectedOutput: "Fizz",
+          },
+          {
+            description: "10 → Buzz",
+            runner: "c-io",
+            stdin: "10",
+            expectedOutput: "Buzz",
+          },
+          {
+            description: "7 → prints nothing",
+            runner: "c-io",
+            stdin: "7",
+            expectedOutput: "",
+          },
+        ],
         hints: [
           "Check the FizzBuzz case first — it's the most specific.",
           "n is divisible by 3 if n % 3 == 0.",
@@ -653,6 +766,14 @@ int main() {
 }
 `,
         },
+        tests: [
+          {
+            description: "Prints 2, 4, 6 … 100, one per line",
+            runner: "c-io",
+            stdin: "",
+            expectedOutput: "2\n4\n6\n8\n10\n12\n14\n16\n18\n20\n22\n24\n26\n28\n30\n32\n34\n36\n38\n40\n42\n44\n46\n48\n50\n52\n54\n56\n58\n60\n62\n64\n66\n68\n70\n72\n74\n76\n78\n80\n82\n84\n86\n88\n90\n92\n94\n96\n98\n100",
+          },
+        ],
         hints: [
           "Start n at 2 and increment by 2 each iteration.",
           "Or start at 1, increment by 1, and only print when n % 2 == 0.",
@@ -718,6 +839,20 @@ int main() {
 }
 `,
         },
+        tests: [
+          {
+            description: "Table of 5",
+            runner: "c-io",
+            stdin: "5",
+            expectedOutput: "5 x 1 = 5\n5 x 2 = 10\n5 x 3 = 15\n5 x 4 = 20\n5 x 5 = 25\n5 x 6 = 30\n5 x 7 = 35\n5 x 8 = 40\n5 x 9 = 45\n5 x 10 = 50",
+          },
+          {
+            description: "Table of 12",
+            runner: "c-io",
+            stdin: "12",
+            expectedOutput: "12 x 1 = 12\n12 x 2 = 24\n12 x 3 = 36\n12 x 4 = 48\n12 x 5 = 60\n12 x 6 = 72\n12 x 7 = 84\n12 x 8 = 96\n12 x 9 = 108\n12 x 10 = 120",
+          },
+        ],
         hints: [
           "for (int i = 1; i <= 10; i = i + 1)",
           "printf has three %d slots; pass n, i, and n*i.",
@@ -774,7 +909,7 @@ int main() {
       {
         title: "Sum odd numbers 1 to 500 — using a while loop",
         description:
-          "Use a while loop to compute and print the sum of all odd numbers from 1 to 500 (inclusive).",
+          "Use a while loop to compute the sum of all odd numbers from 1 to 500 (inclusive) and print it as <code>Sum = …</code>.",
         template: "c",
         activeFile: "/main.c",
         starter: {
@@ -789,6 +924,14 @@ int main() {
 }
 `,
         },
+        tests: [
+          {
+            description: "Sum of odd numbers 1..500 is 62500",
+            runner: "c-io",
+            stdin: "",
+            expectedOutput: "Sum = 62500",
+          },
+        ],
         hints: [
           "Start n at 1 and add 2 each step (1, 3, 5, …).",
           "Or test n % 2 == 1 and add 1 each step.",
@@ -842,20 +985,42 @@ int main() {
       {
         title: "Find the maximum in an array",
         description:
-          "Declare an int array of 5 numbers (your choice), then write a for loop that finds and prints the largest value.",
+          "Read 5 integers into an int array using <code>scanf(\"%d\", &amp;ara[i])</code> in a loop, then find the largest value and print it as <code>Max = …</code>.",
         template: "c",
         activeFile: "/main.c",
         starter: {
           "/main.c": `#include <stdio.h>
 
 int main() {
-    int ara[5] = {12, 7, 35, 18, 24};
-    // TODO: find and print the maximum
+    int ara[5];
+    // TODO: read 5 numbers into ara with a loop
+    // TODO: find and print the maximum as "Max = ..."
     return 0;
 }
 `,
         },
+        tests: [
+          {
+            description: "12 7 35 18 24 → 35",
+            runner: "c-io",
+            stdin: "12 7 35 18 24",
+            expectedOutput: "Max = 35",
+          },
+          {
+            description: "All negative numbers → -1",
+            runner: "c-io",
+            stdin: "-5 -2 -9 -1 -7",
+            expectedOutput: "Max = -1",
+          },
+          {
+            description: "Maximum in the first position",
+            runner: "c-io",
+            stdin: "99 1 2 3 4",
+            expectedOutput: "Max = 99",
+          },
+        ],
         hints: [
+          "Read with scanf(\"%d\", &ara[i]) inside a for loop from i = 0 to 4.",
           "Initialize max to the first element, then iterate from index 1.",
           "If ara[i] > max, update max = ara[i].",
         ],
@@ -863,7 +1028,10 @@ int main() {
           code: `#include <stdio.h>
 
 int main() {
-    int ara[5] = {12, 7, 35, 18, 24};
+    int ara[5];
+    for (int i = 0; i < 5; i = i + 1) {
+        scanf("%d", &ara[i]);
+    }
     int max = ara[0];
     for (int i = 1; i < 5; i = i + 1) {
         if (ara[i] > max) {
@@ -931,6 +1099,20 @@ int main() {
 }
 `,
         },
+        tests: [
+          {
+            description: "Bangla has 6 characters",
+            runner: "c-io",
+            stdin: "Bangla",
+            expectedOutput: "Bangla has 6 characters.",
+          },
+          {
+            description: "A single-letter name",
+            runner: "c-io",
+            stdin: "C",
+            expectedOutput: "C has 1 characters.",
+          },
+        ],
         hints: [
           "Use a while loop with condition name[length] != '\\0'.",
           "Increment length inside the loop.",
@@ -984,7 +1166,7 @@ int main() {
       {
         title: "Write a max() function",
         description:
-          "Write a function <code>int max(int a, int b)</code> that returns the larger of two ints. In main, take two ints from the user, call max, and print the result.",
+          "Write a function <code>int max(int a, int b)</code> that returns the larger of two ints. In main, take two ints from the user, call max, and print the result as <code>max = …</code>.",
         template: "c",
         activeFile: "/main.c",
         starter: {
@@ -1002,6 +1184,26 @@ int main() {
 // TODO: implement max
 `,
         },
+        tests: [
+          {
+            description: "max(4, 9) = 9",
+            runner: "c-io",
+            stdin: "4 9",
+            expectedOutput: "max = 9",
+          },
+          {
+            description: "max(10, 3) = 10",
+            runner: "c-io",
+            stdin: "10 3",
+            expectedOutput: "max = 10",
+          },
+          {
+            description: "Equal numbers",
+            runner: "c-io",
+            stdin: "5 5",
+            expectedOutput: "max = 5",
+          },
+        ],
         hints: [
           "If a > b, return a; otherwise return b.",
           "The prototype above main lets you define the function below main.",

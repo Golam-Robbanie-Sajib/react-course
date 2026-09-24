@@ -2,45 +2,220 @@
 
 import Link from "next/link"
 import { CourseLayout } from "@/components/course-layout"
-import { useProgress } from "@/hooks/use-progress"
 import { useQuizAttempts } from "@/hooks/use-quiz-attempts"
 import { courses } from "@/lib/courses"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { CheckCircle, Flame, Star, Trophy, ArrowRight, Brain } from "lucide-react"
+import { CheckCircle, Flame, Target, FlaskConical, ArrowRight, Brain, Award, CalendarDays, Info } from "lucide-react"
+import { useLearningStats, type CourseStats } from "@/lib/learning-stats"
+import { computeAchievements, CERTIFICATE_PASS_MARK } from "@/lib/achievements"
+import { ActivityHeatmap } from "@/components/dashboard/activity-heatmap"
 
 export default function DashboardPage() {
+  const stats = useLearningStats()
+  const achievements = computeAchievements(stats)
+  const earned = achievements.filter((a) => a.earned).length
+  const accuracy = stats.quizAttempts ? Math.round((stats.quizCorrect / stats.quizAttempts) * 100) : null
+
   return (
     <CourseLayout>
-      <div className="space-y-8 max-w-5xl mx-auto">
-        <div className="flex flex-wrap justify-between items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">My Dashboard</h1>
-            <p className="text-muted-foreground text-sm">
-              Track your progress across every course on the platform.
-            </p>
+      <div className="space-y-6 max-w-5xl mx-auto">
+        <div className="flex flex-wrap justify-between items-center gap-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold">My Dashboard</h1>
+            <p className="text-muted-foreground text-sm">Your progress across every course.</p>
           </div>
           <div className="flex gap-2">
-            <Button asChild>
+            <Button asChild size="sm">
               <Link href="/practice">Practice</Link>
             </Button>
-            <Button asChild variant="outline">
-              <Link href="/profile">Profile settings</Link>
+            <Button asChild size="sm" variant="outline">
+              <Link href="/profile">Profile</Link>
             </Button>
           </div>
         </div>
 
-        <PlatformStats />
+        {stats.needsMigration && (
+          <div className="flex gap-2 rounded-lg border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20 p-3 text-sm text-amber-900 dark:text-amber-100">
+            <Info className="h-4 w-4 mt-0.5 shrink-0" />
+            <span>
+              HTML and C progress is currently saved on this device. It will sync to your account once the
+              site&apos;s database update is applied.
+            </span>
+          </div>
+        )}
+
+        {/* Headline stats */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <StatTile
+            icon={<CheckCircle className="h-4 w-4 text-emerald-500" />}
+            label="Lessons"
+            value={`${stats.completedLessons}/${stats.totalLessons}`}
+            hint={`${stats.totalLessons ? Math.round((stats.completedLessons / stats.totalLessons) * 100) : 0}% of all courses`}
+          />
+          <StatTile
+            icon={<Flame className="h-4 w-4 text-orange-500" />}
+            label="Study streak"
+            value={`${stats.streak.current} day${stats.streak.current === 1 ? "" : "s"}`}
+            hint={`Longest: ${stats.streak.longest}`}
+          />
+          <StatTile
+            icon={<FlaskConical className="h-4 w-4 text-indigo-500" />}
+            label="Exercises solved"
+            value={String(stats.solvedExercises)}
+            hint="All tests passing"
+          />
+          <StatTile
+            icon={<Target className="h-4 w-4 text-sky-500" />}
+            label="Quiz accuracy"
+            value={accuracy === null ? "—" : `${accuracy}%`}
+            hint={`${stats.quizCorrect} correct of ${stats.quizAttempts}`}
+          />
+        </div>
+
+        {/* Activity */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <CalendarDays className="h-4 w-4 text-emerald-500" /> Study activity
+            </CardTitle>
+            <CardDescription>Lessons, quiz answers, code runs and passed tests over the last 6 months.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ActivityHeatmap log={stats.activity} />
+          </CardContent>
+        </Card>
 
         <ReviewQueueCard />
 
-        <div className="space-y-6">
-          {courses.map((c) => (
-            <CourseProgressCard key={c.id} course={c} />
+        {/* Per-course */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          {stats.byCourse.map((c) => (
+            <CourseCard key={c.courseId} stats={c} />
           ))}
         </div>
+
+        {/* Achievements */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Award className="h-4 w-4 text-yellow-500" /> Achievements
+              <span className="ml-auto text-xs font-normal text-muted-foreground">
+                {earned}/{achievements.length} earned
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+              {achievements.map((a) => (
+                <li
+                  key={a.id}
+                  className={`rounded-lg border p-3 ${
+                    a.earned
+                      ? "border-yellow-300 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-950/20"
+                      : "border-gray-200 dark:border-gray-700 opacity-80"
+                  }`}
+                >
+                  <div className={`text-2xl ${a.earned ? "" : "grayscale opacity-60"}`} aria-hidden>
+                    {a.emoji}
+                  </div>
+                  <div className="mt-1 text-sm font-medium leading-tight">{a.title}</div>
+                  <div className="text-xs text-muted-foreground leading-snug">{a.description}</div>
+                  {!a.earned && (
+                    <div
+                      className="mt-2 h-1 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={a.goal}
+                      aria-valuenow={a.progress}
+                      aria-label={`${a.title} progress`}
+                    >
+                      <div className="h-full bg-yellow-400" style={{ width: `${(a.progress / a.goal) * 100}%` }} />
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
       </div>
     </CourseLayout>
+  )
+}
+
+function StatTile({ icon, label, value, hint }: { icon: React.ReactNode; label: string; value: string; hint: string }) {
+  return (
+    <Card className="gap-2 py-4">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 px-4 pb-0">
+        <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">{label}</CardTitle>
+        {icon}
+      </CardHeader>
+      <CardContent className="px-4">
+        <div className="text-xl sm:text-2xl font-bold tabular-nums">{value}</div>
+        <p className="text-[11px] sm:text-xs text-muted-foreground truncate">{hint}</p>
+      </CardContent>
+    </Card>
+  )
+}
+
+function CourseCard({ stats: c }: { stats: CourseStats }) {
+  const course = courses.find((x) => x.id === c.courseId)!
+  const done = c.completedDays.length
+  const pct = c.totalDays ? Math.round((done / c.totalDays) * 100) : 0
+  const nextDay = course.days.find((d) => !c.completedDays.includes(d.day))?.day ?? 1
+  const accuracy = c.quizAttempts ? Math.round((c.quizCorrect / c.quizAttempts) * 100) : null
+  const certified = (c.examHighest ?? 0) >= CERTIFICATE_PASS_MARK
+
+  return (
+    <Card className="overflow-hidden gap-3 pt-0">
+      <div className={`h-1.5 bg-gradient-to-r ${course.coverGradient}`} />
+      <CardHeader className="pb-0">
+        <CardTitle className="text-base">{c.title}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div>
+          <div className="flex justify-between text-xs text-muted-foreground mb-1">
+            <span>
+              {done}/{c.totalDays} lessons
+            </span>
+            <span>{pct}%</span>
+          </div>
+          <div className="h-2 bg-muted rounded-full overflow-hidden">
+            <div className={`h-full bg-gradient-to-r ${course.coverGradient}`} style={{ width: `${pct}%` }} />
+          </div>
+        </div>
+        <dl className="grid grid-cols-3 gap-2 text-center">
+          <Metric label="Solved" value={`${c.solvedExercises}/${c.totalExercises}`} />
+          <Metric label="Quiz" value={accuracy === null ? "—" : `${accuracy}%`} />
+          <Metric label="Exam best" value={c.examHighest === null ? "—" : `${c.examHighest}%`} />
+        </dl>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" asChild className="flex-1">
+            <Link href={`/courses/${c.slug}/day/${nextDay}`}>
+              {done > 0 ? "Resume" : "Start"} <ArrowRight className="ml-1.5 h-4 w-4" />
+            </Link>
+          </Button>
+          {certified ? (
+            <Button size="sm" variant="outline" asChild className="flex-1">
+              <Link href={`/courses/${c.slug}/certificate`}>📜 Certificate</Link>
+            </Button>
+          ) : (
+            <Button size="sm" variant="outline" asChild className="flex-1">
+              <Link href={`/courses/${c.slug}/exam`}>Final exam</Link>
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md bg-muted/50 px-1 py-2">
+      <dd className="text-sm font-semibold tabular-nums">{value}</dd>
+      <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</dt>
+    </div>
   )
 }
 
@@ -48,169 +223,31 @@ function ReviewQueueCard() {
   const { dueQuestionIds, store } = useQuizAttempts()
   const dueCount = dueQuestionIds().length
   const totalSeen = Object.keys(store.byQuestion).length
-  if (totalSeen === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Brain className="h-4 w-4 text-purple-500" /> Spaced review
-          </CardTitle>
-          <CardDescription>
-            Answer any quiz question on a lesson and it gets added to your review queue —
-            missed ones come back tomorrow, correct ones reappear at growing intervals.
-          </CardDescription>
-        </CardHeader>
-      </Card>
-    )
-  }
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-start gap-3 flex-wrap">
-          <div>
-            <CardTitle className="flex items-center gap-2">
+        <div className="flex justify-between items-center gap-3 flex-wrap">
+          <div className="min-w-0">
+            <CardTitle className="flex items-center gap-2 text-base">
               <Brain className="h-4 w-4 text-purple-500" /> Spaced review
             </CardTitle>
             <CardDescription>
-              {dueCount > 0
-                ? `${dueCount} question${dueCount === 1 ? "" : "s"} due for review.`
-                : `All caught up — ${totalSeen} questions tracked.`}
+              {totalSeen === 0
+                ? "Answer quiz questions in lessons — missed ones come back here on a spaced schedule."
+                : dueCount > 0
+                  ? `${dueCount} question${dueCount === 1 ? "" : "s"} due for review.`
+                  : `All caught up — ${totalSeen} questions tracked.`}
             </CardDescription>
           </div>
-          <Button asChild disabled={dueCount === 0}>
-            <Link href="/review">
-              {dueCount > 0 ? "Start review" : "Nothing due"}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+          {dueCount > 0 && (
+            <Button asChild size="sm">
+              <Link href="/review">
+                Start review <ArrowRight className="ml-1.5 h-4 w-4" />
+              </Link>
+            </Button>
+          )}
         </div>
       </CardHeader>
-    </Card>
-  )
-}
-
-function PlatformStats() {
-  const reactProg = useProgress("react")
-  const htmlProg = useProgress("html")
-  const totalDone = reactProg.completedDays.length + htmlProg.completedDays.length
-  const totalDays = courses.reduce((s, c) => s + c.days.length, 0)
-  const allConfidence = [
-    ...Object.values(reactProg.confidenceRatings),
-    ...Object.values(htmlProg.confidenceRatings),
-  ]
-  const avg = allConfidence.length
-    ? (allConfidence.reduce((a, b) => a + b, 0) / allConfidence.length).toFixed(1)
-    : "0.0"
-
-  return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Lessons Completed</CardTitle>
-          <CheckCircle className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
-            {totalDone} / {totalDays}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {Math.round((totalDone / totalDays) * 100)}% complete
-          </p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Daily Streak</CardTitle>
-          <Flame className="h-4 w-4 text-orange-500" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{reactProg.currentStreak} Days</div>
-          <p className="text-xs text-muted-foreground">Keep the fire burning</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">React Exam Best</CardTitle>
-          <Trophy className="h-4 w-4 text-yellow-500" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">
-            {reactProg.highestScore !== null ? `${reactProg.highestScore}%` : "N/A"}
-          </div>
-          <p className="text-xs text-muted-foreground">From the final exam</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Avg. Confidence</CardTitle>
-          <Star className="h-4 w-4 text-blue-500" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{avg} / 5.0</div>
-          <p className="text-xs text-muted-foreground">Across all rated lessons</p>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-function CourseProgressCard({ course }: { course: (typeof courses)[number] }) {
-  const { completedDays } = useProgress(course.id)
-  const total = course.days.length
-  const done = completedDays.length
-  const pct = total > 0 ? Math.round((done / total) * 100) : 0
-  const nextDay = course.days.find((d) => !completedDays.includes(d.day))?.day || 1
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-start gap-3 flex-wrap">
-          <div>
-            <CardTitle>{course.title}</CardTitle>
-            <CardDescription>{course.tagline}</CardDescription>
-          </div>
-          <Button size="sm" asChild>
-            <Link href={`/courses/${course.slug}/day/${nextDay}`}>
-              {done > 0 ? "Resume" : "Start"}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>{done} / {total} lessons</span>
-          <span>{pct}%</span>
-        </div>
-        <div className="h-2 bg-muted/40 rounded-full overflow-hidden">
-          <div
-            className={`h-full bg-gradient-to-r ${course.coverGradient}`}
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-        <div className="space-y-2 pt-2">
-          {course.phases.map((phase) => {
-            const phaseDays = course.days.filter((d) => d.phase === phase.name)
-            const doneInPhase = phaseDays.filter((d) => completedDays.includes(d.day)).length
-            const phasePct = phaseDays.length > 0 ? Math.round((doneInPhase / phaseDays.length) * 100) : 0
-            return (
-              <div key={phase.name}>
-                <div className="flex justify-between mb-1 text-sm">
-                  <span>{phase.name}</span>
-                  <span className="text-muted-foreground">
-                    {doneInPhase} / {phaseDays.length}
-                  </span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-1.5 dark:bg-slate-700">
-                  <div
-                    className={`h-1.5 rounded-full bg-gradient-to-r ${phase.gradient}`}
-                    style={{ width: `${phasePct}%` }}
-                  />
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </CardContent>
     </Card>
   )
 }

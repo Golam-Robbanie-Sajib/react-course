@@ -1,0 +1,2 @@
+patchedDependencies:
+  JSCPP@2.0.9: patches/JSCPP@2.0.9.patch

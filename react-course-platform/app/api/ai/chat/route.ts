@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server"
+import { createServerClient } from "@supabase/ssr"
 
 export const runtime = "edge"
 
@@ -16,6 +17,7 @@ interface ChatRequestBody {
     exerciseTitle?: string
     exercisePrompt?: string
     userCode?: string
+    lessonText?: string
     starterCode?: string
     language?: string
   }
@@ -37,6 +39,9 @@ function buildContextMessage(ctx: ChatRequestBody["context"]): string | null {
   if (ctx.dayTitle) parts.push(`Lesson: ${ctx.dayTitle}`)
   if (ctx.pageTitle && !ctx.dayTitle) parts.push(`Page: ${ctx.pageTitle}`)
   if (ctx.exerciseTitle) parts.push(`Exercise: ${ctx.exerciseTitle}`)
+  if (ctx.lessonText && ctx.lessonText.trim()) {
+    parts.push(`Lesson content the learner is reading:\n${ctx.lessonText.slice(0, 6000)}`)
+  }
   if (ctx.exercisePrompt) parts.push(`Exercise prompt:\n${ctx.exercisePrompt}`)
   if (ctx.userCode && ctx.userCode.trim().length > 0) {
     parts.push(
@@ -47,7 +52,28 @@ function buildContextMessage(ctx: ChatRequestBody["context"]): string | null {
   return `[Context for this question — the learner is on this page right now]\n\n${parts.join("\n\n")}`
 }
 
+/** Only signed-in learners may use the tutor — the middleware skips /api,
+ *  so without this anyone could spend the Groq quota. */
+async function isSignedIn(req: NextRequest): Promise<boolean> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key) return false
+  const supabase = createServerClient(url, key, {
+    cookies: {
+      getAll: () => req.cookies.getAll(),
+      // Route handlers don't need to refresh the session cookie here.
+      setAll: () => {},
+    },
+  })
+  const { data } = await supabase.auth.getUser()
+  return !!data.user
+}
+
 export async function POST(req: NextRequest) {
+  if (!(await isSignedIn(req))) {
+    return NextResponse.json({ error: "Please sign in to use the AI tutor." }, { status: 401 })
+  }
+
   const apiKey = process.env.GROQ_API_KEY
   if (!apiKey) {
     return NextResponse.json(
@@ -64,6 +90,14 @@ export async function POST(req: NextRequest) {
   }
 
   if (!Array.isArray(body.messages) || body.messages.length === 0) {
+    return NextResponse.json({ error: "messages required" }, { status: 400 })
+  }
+  // Keep only well-formed user/assistant turns and cap their length; the
+  // client can't inject its own system prompt.
+  body.messages = body.messages
+    .filter((m) => (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+    .map((m) => ({ role: m.role, content: m.content.slice(0, 8000) }))
+  if (body.messages.length === 0) {
     return NextResponse.json({ error: "messages required" }, { status: 400 })
   }
 

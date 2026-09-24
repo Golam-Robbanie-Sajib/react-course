@@ -4,6 +4,7 @@ import { CourseLayout } from "@/components/course-layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useProgress } from "@/hooks/use-progress"
+import { activityStreak, useActivity } from "@/lib/activity"
 import { useAuth } from "@/components/auth/auth-provider"
 import { Flame } from "lucide-react"
 import { ProgressExport } from "@/components/progress-export"
@@ -22,8 +23,8 @@ import { courses } from "@/lib/courses"
 
 export default function ProfilePage() {
   const { session, isLoading: isAuthLoading } = useAuth()
-  const reactProg = useProgress("react")
-  const htmlProg = useProgress("html")
+  const { resetAllProgress } = useProgress()
+  const streak = activityStreak(useActivity())
 
   if (isAuthLoading) {
     return (
@@ -34,8 +35,7 @@ export default function ProfilePage() {
   }
 
   const handleResetAll = () => {
-    reactProg.resetProgress()
-    htmlProg.resetProgress()
+    resetAllProgress(courses.map((c) => c.id))
   }
 
   return (
@@ -60,7 +60,7 @@ export default function ProfilePage() {
               <div className="flex items-center space-x-2 text-orange-500">
                 <Flame className="h-5 w-5" />
                 <span className="text-lg font-bold">
-                  {reactProg.currentStreak} {reactProg.currentStreak === 1 ? "day" : "days"}
+                  {streak.current} {streak.current === 1 ? "day" : "days"}
                 </span>
               </div>
             </div>

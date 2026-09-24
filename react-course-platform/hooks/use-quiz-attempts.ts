@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
+import { logActivity } from "@/lib/activity"
 
 const LOCAL_KEY = "slh:quiz-attempts:v1"
 
@@ -51,10 +52,12 @@ export function questionId(courseId: string, day: number, index: number) {
 }
 
 export function useQuizAttempts() {
-  const [store, setStore] = useState<QuizAttemptsStore>(() => readLocal())
+  // Hydration-safe: load from localStorage after mount.
+  const [store, setStore] = useState<QuizAttemptsStore>({ byQuestion: {} })
 
   useEffect(() => {
     const sync = () => setStore(readLocal())
+    sync()
     window.addEventListener("storage", sync)
     window.addEventListener("local-quiz-attempts-changed", sync)
     return () => {
@@ -90,6 +93,8 @@ export function useQuizAttempts() {
       }
       writeLocal(updated)
       setStore(updated)
+      logActivity("quiz_answer")
+      if (correct) logActivity("quiz_correct")
     },
     []
   )

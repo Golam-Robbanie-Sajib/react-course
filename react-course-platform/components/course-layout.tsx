@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useCallback } from "react"
-import { Menu, X, Home, ChevronRight, BookOpen, Brain, Layout, Repeat } from "lucide-react"
+import { Menu, X, Home, ChevronRight, BookOpen, Brain, Layout, Repeat, TerminalSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { SearchDialog } from "@/components/search-dialog"
@@ -132,6 +132,17 @@ export function CourseLayout({ children, course, currentDay }: CourseLayoutProps
                 >
                   <Brain className="h-3.5 w-3.5 opacity-70" />
                   Practice
+                </Link>
+                <Link
+                  href="/playground"
+                  className={`flex items-center gap-2 p-2 rounded-lg text-sm transition-colors ${
+                    pathname === "/playground"
+                      ? "bg-white/60 dark:bg-white/10 font-medium"
+                      : "hover:bg-white/40 dark:hover:bg-white/5"
+                  }`}
+                >
+                  <TerminalSquare className="h-3.5 w-3.5 opacity-70" />
+                  C Playground
                 </Link>
                 <Link
                   href="/review"

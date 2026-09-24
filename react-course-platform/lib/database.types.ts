@@ -17,6 +17,8 @@ export type Database = {
       profiles: {
         Row: {
           completed_days: number[] | null
+          /** Added by supabase/migrations/20260924000000_course_progress.sql */
+          course_progress?: Json | null
           confidence_ratings: Json | null
           current_streak: number | null
           exam_highest_score: number | null
@@ -28,6 +30,7 @@ export type Database = {
         }
         Insert: {
           completed_days?: number[] | null
+          course_progress?: Json | null
           confidence_ratings?: Json | null
           current_streak?: number | null
           exam_highest_score?: number | null
@@ -39,6 +42,7 @@ export type Database = {
         }
         Update: {
           completed_days?: number[] | null
+          course_progress?: Json | null
           confidence_ratings?: Json | null
           current_streak?: number | null
           exam_highest_score?: number | null

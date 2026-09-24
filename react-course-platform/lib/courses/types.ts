@@ -22,11 +22,24 @@ export interface ExerciseTest {
    *  - "js" (default): user code is concatenated above the assertion, so
    *    any function/variable defined in the editor is in scope.
    *  - "html": parse the active HTML file and expose `doc: Document`.
+   * Not used by the "c-io" runner.
    */
-  assertion: string
-  runner?: "js" | "html"
+  assertion?: string
+  /**
+   * - "js" / "html": see `assertion`.
+   * - "c-io": compile & run the C program with `stdin`, then compare its
+   *   output with `expectedOutput` (trailing whitespace ignored).
+   */
+  runner?: "js" | "html" | "c-io"
   /** Optional filename to feed into the runner. Defaults to the active file. */
   targetFile?: string
+  /** c-io: text piped to the program's standard input. */
+  stdin?: string
+  /** c-io: what the program must print. */
+  expectedOutput?: string
+  /** c-io: "exact" (default) compares the whole output; "contains" only
+   *  requires `expectedOutput` to appear somewhere in it. */
+  match?: "exact" | "contains"
 }
 
 export interface Exercise {

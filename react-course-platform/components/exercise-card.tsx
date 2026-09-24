@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import dynamic from "next/dynamic"
 import {
   ChevronDown,
@@ -42,6 +42,26 @@ export function ExerciseCard({ exercise, index, courseId, day }: ExerciseCardPro
 
   const { openWithPrompt } = useChatContext()
 
+  // Remember that the learner solved this exercise (all tests passed).
+  const solvedKey = `slh:solved:${courseId}:${day}:${index}`
+  const [solved, setSolved] = useState(false)
+  useEffect(() => {
+    try {
+      setSolved(window.localStorage.getItem(solvedKey) === "1")
+    } catch {
+      /* ignore */
+    }
+  }, [solvedKey])
+  const markSolved = () => {
+    setSolved(true)
+    setHasAttempted(true)
+    try {
+      window.localStorage.setItem(solvedKey, "1")
+    } catch {
+      /* ignore */
+    }
+  }
+
   const hasLive = !!exercise.starter && !!exercise.template
   const hints = exercise.hints || []
   const hasMoreHints = revealedHints < hints.length
@@ -52,21 +72,29 @@ export function ExerciseCard({ exercise, index, courseId, day }: ExerciseCardPro
   // and the live editor's contents in its context — we just open it with
   // a clear "please evaluate" question.
   const hasAutoTests = !!exercise.tests && exercise.tests.length > 0
+  const isC = exercise.template === "c"
   const checkWithAI = () => {
     setHasAttempted(true)
     openWithPrompt(
-      `Please check whether my current code correctly solves this exercise: "${exercise.title}".\n\nFirst answer with PASS or FAIL on its own line. Then give 2–3 sentences of specific feedback. If there are bugs, point at the line that's wrong.`
+      hasAutoTests
+        ? `Please review my code for the exercise "${exercise.title}". Point out bugs, edge cases my tests might not cover, and one way to make the code cleaner. Don't rewrite the whole solution.`
+        : `Please check whether my current code correctly solves this exercise: "${exercise.title}".\n\nFirst answer with PASS or FAIL on its own line. Then give 2–3 sentences of specific feedback. If there are bugs, point at the line that's wrong.`
     )
   }
 
   return (
-    <Card className="border border-gray-200 dark:border-gray-700">
+    <Card className="border border-gray-200 dark:border-gray-700 min-w-0">
       <CardHeader>
         <CardTitle className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-400 text-sm font-bold">
             {index + 1}
           </div>
-          <span className="text-lg font-semibold break-words">{exercise.title}</span>
+          <span className="text-lg font-semibold break-words min-w-0 flex-1">{exercise.title}</span>
+          {solved && (
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-green-100 dark:bg-green-900/40 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-300">
+              <CheckCircle2 className="h-3.5 w-3.5" /> Solved
+            </span>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -83,17 +111,20 @@ export function ExerciseCard({ exercise, index, courseId, day }: ExerciseCardPro
             exercise={exercise}
             storageKey={storageKey}
             onAttempt={() => setHasAttempted(true)}
+            onAllPassed={markSolved}
           />
         ) : null}
 
         {/* "Check with AI" — shown whenever the exercise can't be auto-graded
             (no tests) but does have an in-browser editor (so the AI can see
             actual code in the localStorage snapshot). */}
-        {hasLive && !hasAutoTests && (
+        {hasLive && (!hasAutoTests || isC) && (
           <div className="flex items-center justify-between gap-3 rounded-lg border border-purple-200 dark:border-purple-900/50 bg-purple-50/60 dark:bg-purple-950/20 p-3">
             <div className="text-sm text-purple-900 dark:text-purple-100 flex items-center gap-2">
               <Sparkles className="h-4 w-4 shrink-0" />
-              No automatic compiler here — ask the AI to grade your code.
+              {hasAutoTests
+                ? "Tests passing? Ask the AI tutor for a code review."
+                : "No automatic tests here — ask the AI to grade your code."}
             </div>
             <Button
               size="sm"
@@ -101,7 +132,7 @@ export function ExerciseCard({ exercise, index, courseId, day }: ExerciseCardPro
               onClick={checkWithAI}
               className="border-purple-300 dark:border-purple-700 shrink-0"
             >
-              Check my answer
+              {hasAutoTests ? "Review my code" : "Check my answer"}
             </Button>
           </div>
         )}
@@ -154,7 +185,7 @@ export function ExerciseCard({ exercise, index, courseId, day }: ExerciseCardPro
             <div className="space-y-6">
               <CodeBlock
                 code={exercise.solution.code}
-                language="javascript"
+                language={isC ? "c" : exercise.template === "static" ? "html" : "javascript"}
                 title={`Solution: ${exercise.title}`}
               />
               <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">

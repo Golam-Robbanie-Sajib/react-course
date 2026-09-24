@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { ExternalLink, BookOpen, Target, Lightbulb, CheckCircle } from "lucide-react"
+import { ExternalLink, BookOpen, Target, Lightbulb, CheckCircle, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -18,6 +18,7 @@ import { ExerciseCard } from "@/components/exercise-card"
 import { usePrefetchDay } from "@/hooks/use-prefetch-day"
 import { useIdlePrefetch } from "@/hooks/use-idle-prefetch"
 import { useChatContext } from "@/components/chat/chat-context"
+import { logActivity } from "@/lib/activity"
 
 interface DayPageProps {
   course: Course
@@ -33,7 +34,7 @@ export function DayPage({ course, day, theoryNode }: DayPageProps) {
   const dayCompleted = isCompleted(day.day)
   const totalDays = course.days.length
   const prefetchDay = usePrefetchDay(course)
-  const { setContext } = useChatContext()
+  const { setContext, openWithPrompt } = useChatContext()
 
   // Keep the Sandpack bundle warm so navigating Prev/Next never shows
   // "Loading editor…" twice.
@@ -57,6 +58,8 @@ export function DayPage({ course, day, theoryNode }: DayPageProps) {
       exerciseTitle: firstExercise?.title,
       exercisePrompt: firstExercise?.description,
       language,
+      getLessonText: () =>
+        (document.querySelector("[data-lesson-theory]") as HTMLElement | null)?.innerText ?? "",
       getUserCode: () => {
         // Aggregate any saved Sandpack files across all exercises on this day.
         if (typeof window === "undefined") return ""
@@ -78,6 +81,18 @@ export function DayPage({ course, day, theoryNode }: DayPageProps) {
       },
     })
   }, [course, day, setContext])
+
+  // Count a lesson view once per lesson per browser session.
+  useEffect(() => {
+    try {
+      const k = `slh:viewed:${course.id}:${day.day}`
+      if (window.sessionStorage.getItem(k)) return
+      window.sessionStorage.setItem(k, "1")
+    } catch {
+      /* ignore */
+    }
+    logActivity("lesson_view")
+  }, [course.id, day.day])
 
   useEffect(() => {
     setIsClient(true)
@@ -163,16 +178,40 @@ export function DayPage({ course, day, theoryNode }: DayPageProps) {
       </div>
 
       <Card className="border border-gray-200 dark:border-gray-700">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-3">
+        <CardHeader className="flex flex-row flex-wrap items-center gap-3 space-y-0">
+          <CardTitle className="flex items-center space-x-3 mr-auto">
             <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400">
               <BookOpen className="h-5 w-5" />
             </div>
             <span>Theory &amp; Concepts</span>
           </CardTitle>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                openWithPrompt(
+                  `Summarise today's lesson "${day.title}" in 5 short bullet points a beginner can remember. Then ask me one quick question to check I understood.`
+                )
+              }
+            >
+              <Sparkles className="h-3.5 w-3.5 mr-1.5 text-purple-500" /> Summarise
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                openWithPrompt(
+                  `Explain the main idea of "${day.title}" again in very simple words, with one everyday analogy and one tiny code example.`
+                )
+              }
+            >
+              <Sparkles className="h-3.5 w-3.5 mr-1.5 text-purple-500" /> Explain simpler
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="prose prose-gray dark:prose-invert max-w-none">
+          <div className="prose prose-gray dark:prose-invert max-w-none" data-lesson-theory>
             {theoryNode ??
               (typeof day.theory === "string" ? (
                 <div dangerouslySetInnerHTML={{ __html: day.theory }} />
@@ -188,7 +227,7 @@ export function DayPage({ course, day, theoryNode }: DayPageProps) {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Practice Exercises</h2>
         </div>
-        <div className="grid gap-6">
+        <div className="grid grid-cols-1 gap-6">
           {day.exercises.map((exercise, index) => (
             <ExerciseCard
               key={index}
@@ -215,7 +254,7 @@ export function DayPage({ course, day, theoryNode }: DayPageProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-3">
+            <div className="grid grid-cols-1 gap-3">
               {day.resources.map((resource, index) => (
                 <a
                   key={index}
